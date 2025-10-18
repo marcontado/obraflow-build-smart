@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Copy, Trash2 } from "lucide-react";
+import { Plus, Copy, Trash2, Mail } from "lucide-react";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 interface InvitesListProps {
   workspaceId: string;
@@ -99,7 +100,13 @@ export function InvitesList({ workspaceId }: InvitesListProps) {
         </CardHeader>
         <CardContent>
           {invites.length === 0 ? (
-            <p className="text-center text-muted-foreground">Nenhum convite pendente</p>
+            <EmptyState
+              icon={Mail}
+              title="Nenhum convite pendente"
+              description="Crie convites para adicionar novos membros ao workspace."
+              actionLabel="Novo Convite"
+              onAction={() => setShowModal(true)}
+            />
           ) : (
             <div className="space-y-4">
               {invites.map((invite: any) => (

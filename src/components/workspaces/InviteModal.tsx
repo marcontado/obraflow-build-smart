@@ -4,6 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { workspacesService } from "@/services/workspaces.service";
 import { useToast } from "@/hooks/use-toast";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { supabase } from "@/integrations/supabase/client";
+import { PLAN_NAMES } from "@/constants/plans";
 import {
   Dialog,
   DialogContent,
@@ -33,6 +36,7 @@ interface InviteModalProps {
 
 export function InviteModal({ open, onClose, onSuccess, workspaceId }: InviteModalProps) {
   const { toast } = useToast();
+  const { getWorkspaceLimits, currentWorkspace } = useWorkspace();
   const [submitting, setSubmitting] = useState(false);
 
   const form = useForm<InviteFormData>({
@@ -45,6 +49,25 @@ export function InviteModal({ open, onClose, onSuccess, workspaceId }: InviteMod
 
   const onSubmit = async (data: InviteFormData) => {
     setSubmitting(true);
+
+    // Validar limite de membros
+    const limits = getWorkspaceLimits();
+    const { data: members } = await supabase
+      .from("workspace_members")
+      .select("id")
+      .eq("workspace_id", workspaceId);
+
+    const currentCount = members?.length || 0;
+
+    if (currentCount >= limits.membersPerWorkspace) {
+      toast({
+        title: "Limite atingido",
+        description: `Você atingiu o limite de ${limits.membersPerWorkspace} membros do plano ${currentWorkspace?.subscription_plan.toUpperCase()}.`,
+        variant: "destructive",
+      });
+      setSubmitting(false);
+      return;
+    }
 
     const { error } = await workspacesService.inviteMember(workspaceId, data.email, data.role);
 

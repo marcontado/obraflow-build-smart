@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { clientSchema, type ClientFormData } from "@/schemas/client.schema";
 import { clientsService } from "@/services/clients.service";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -38,7 +39,7 @@ export function ClientFormDialog({
   clientId,
   initialData,
 }: ClientFormDialogProps) {
-  const { currentWorkspace } = useWorkspace();
+  const { currentWorkspace, getWorkspaceLimits } = useWorkspace();
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
     defaultValues: {
@@ -86,6 +87,22 @@ export function ClientFormDialog({
     }
 
     try {
+      // Validar limite de clientes apenas na criação
+      if (!clientId) {
+        const limits = getWorkspaceLimits();
+        const { data: existingClients } = await supabase
+          .from("clients")
+          .select("id")
+          .eq("workspace_id", currentWorkspace.id);
+
+        const currentCount = existingClients?.length || 0;
+
+        if (currentCount >= limits.maxClients) {
+          toast.error(`Limite atingido: você atingiu o limite de ${limits.maxClients} clientes do plano ${currentWorkspace.subscription_plan.toUpperCase()}.`);
+          return;
+        }
+      }
+
       const cleanData = {
         name: data.name,
         email: data.email || null,

@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { projectSchema, type ProjectFormData } from "@/schemas/project.schema";
 import { projectsService } from "@/services/projects.service";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -54,7 +55,7 @@ export function ProjectFormDialog({
   projectId,
   initialData,
 }: ProjectFormDialogProps) {
-  const { currentWorkspace } = useWorkspace();
+  const { currentWorkspace, getWorkspaceLimits } = useWorkspace();
   const form = useForm<ProjectFormData>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
@@ -102,6 +103,23 @@ export function ProjectFormDialog({
     }
 
     try {
+      // Validar limite de projetos ativos apenas na criação
+      if (!projectId) {
+        const limits = getWorkspaceLimits();
+        const { data: activeProjects } = await supabase
+          .from("projects")
+          .select("id")
+          .eq("workspace_id", currentWorkspace.id)
+          .in("status", ["planning", "in_progress"]);
+
+        const currentCount = activeProjects?.length || 0;
+
+        if (currentCount >= limits.activeProjects) {
+          toast.error(`Limite atingido: você atingiu o limite de ${limits.activeProjects} projetos ativos do plano ${currentWorkspace.subscription_plan.toUpperCase()}.`);
+          return;
+        }
+      }
+
       const cleanData = {
         name: data.name,
         description: data.description || null,

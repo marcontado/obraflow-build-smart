@@ -4,9 +4,12 @@ import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";
 import { MembersList } from "@/components/workspaces/MembersList";
 import { InvitesList } from "@/components/workspaces/InvitesList";
+import { WorkspaceGeneralSettings } from "@/components/workspaces/WorkspaceGeneralSettings";
+import { PLAN_NAMES, PLAN_LIMITS } from "@/constants/plans";
 
 export default function WorkspaceSettings() {
   const navigate = useNavigate();
@@ -34,12 +37,17 @@ export default function WorkspaceSettings() {
           </div>
         </div>
 
-        <Tabs defaultValue="members" className="w-full">
+        <Tabs defaultValue="general" className="w-full">
           <TabsList>
+            <TabsTrigger value="general">Geral</TabsTrigger>
             <TabsTrigger value="members">Membros</TabsTrigger>
             <TabsTrigger value="invites">Convites</TabsTrigger>
             <TabsTrigger value="plan">Plano</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="general">
+            <WorkspaceGeneralSettings workspaceId={currentWorkspace.id} />
+          </TabsContent>
 
           <TabsContent value="members">
             <MembersList workspaceId={currentWorkspace.id} />
@@ -52,18 +60,67 @@ export default function WorkspaceSettings() {
           <TabsContent value="plan">
             <Card>
               <CardHeader>
-                <CardTitle>Plano Atual</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  Plano Atual
+                  <Badge variant="default" className="text-sm">
+                    {PLAN_NAMES[currentWorkspace.subscription_plan as keyof typeof PLAN_NAMES]}
+                  </Badge>
+                </CardTitle>
                 <CardDescription>
-                  Informações sobre seu plano de assinatura
+                  Informações e limites do seu plano de assinatura
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-sm font-medium">Plano:</p>
-                    <p className="text-2xl font-bold capitalize">
-                      {currentWorkspace.subscription_plan}
-                    </p>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Workspaces</p>
+                      <p className="text-2xl font-bold">
+                        {PLAN_LIMITS[currentWorkspace.subscription_plan as keyof typeof PLAN_LIMITS].workspaces === Infinity 
+                          ? "Ilimitado" 
+                          : PLAN_LIMITS[currentWorkspace.subscription_plan as keyof typeof PLAN_LIMITS].workspaces}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Membros por Workspace</p>
+                      <p className="text-2xl font-bold">
+                        {PLAN_LIMITS[currentWorkspace.subscription_plan as keyof typeof PLAN_LIMITS].membersPerWorkspace === Infinity 
+                          ? "Ilimitado" 
+                          : PLAN_LIMITS[currentWorkspace.subscription_plan as keyof typeof PLAN_LIMITS].membersPerWorkspace}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Projetos Ativos</p>
+                      <p className="text-2xl font-bold">
+                        {PLAN_LIMITS[currentWorkspace.subscription_plan as keyof typeof PLAN_LIMITS].activeProjects === Infinity 
+                          ? "Ilimitado" 
+                          : PLAN_LIMITS[currentWorkspace.subscription_plan as keyof typeof PLAN_LIMITS].activeProjects}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Clientes</p>
+                      <p className="text-2xl font-bold">
+                        {PLAN_LIMITS[currentWorkspace.subscription_plan as keyof typeof PLAN_LIMITS].maxClients === Infinity 
+                          ? "Ilimitado" 
+                          : PLAN_LIMITS[currentWorkspace.subscription_plan as keyof typeof PLAN_LIMITS].maxClients}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t">
+                    <p className="text-sm font-medium mb-3">Recursos Disponíveis</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {Object.entries(PLAN_LIMITS[currentWorkspace.subscription_plan as keyof typeof PLAN_LIMITS].features).map(([key, enabled]) => (
+                        <div key={key} className="flex items-center gap-2">
+                          <Badge variant={enabled ? "default" : "secondary"} className="text-xs">
+                            {enabled ? "✓" : "✗"}
+                          </Badge>
+                          <span className="text-sm capitalize">
+                            {key.replace(/([A-Z])/g, ' $1').trim()}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </CardContent>
