@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
+import { WorkspaceSelector } from "@/components/workspaces/WorkspaceSelector";
 import { toast } from "sonner";
 
 interface HeaderProps {
@@ -47,6 +48,8 @@ export function Header({ title, subtitle }: HeaderProps) {
               className="w-64 pl-9"
             />
           </div>
+
+          <WorkspaceSelector />
 
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />

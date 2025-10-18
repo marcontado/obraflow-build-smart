@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { projectSchema, type ProjectFormData } from "@/schemas/project.schema";
 import { projectsService } from "@/services/projects.service";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -53,6 +54,7 @@ export function ProjectFormDialog({
   projectId,
   initialData,
 }: ProjectFormDialogProps) {
+  const { currentWorkspace } = useWorkspace();
   const form = useForm<ProjectFormData>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
@@ -94,6 +96,11 @@ export function ProjectFormDialog({
   }, [initialData, form]);
 
   const onSubmit = async (data: ProjectFormData) => {
+    if (!currentWorkspace) {
+      toast.error("Nenhum workspace selecionado");
+      return;
+    }
+
     try {
       const cleanData = {
         name: data.name,
@@ -111,7 +118,7 @@ export function ProjectFormDialog({
         if (error) throw error;
         toast.success("Projeto atualizado com sucesso!");
       } else {
-        const { error } = await projectsService.create(cleanData);
+        const { error } = await projectsService.create(cleanData, currentWorkspace.id);
         if (error) throw error;
         toast.success("Projeto criado com sucesso!");
       }

@@ -27,6 +27,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { taskSchema, type TaskFormData } from "@/schemas/task.schema";
 import { tasksService } from "@/services/tasks.service";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -63,6 +64,7 @@ export function TaskFormDialog({
   initialData,
   initialStatus = "todo",
 }: TaskFormDialogProps) {
+  const { currentWorkspace } = useWorkspace();
   const [submitting, setSubmitting] = useState(false);
   const [areas, setAreas] = useState<any[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -153,6 +155,11 @@ export function TaskFormDialog({
   };
 
   const onSubmit = async (data: TaskFormData) => {
+    if (!currentWorkspace) {
+      toast.error("Nenhum workspace selecionado");
+      return;
+    }
+
     try {
       setSubmitting(true);
 
@@ -173,7 +180,7 @@ export function TaskFormDialog({
         if (error) throw error;
         toast.success("Tarefa atualizada com sucesso!");
       } else {
-        const { error } = await tasksService.create(taskData);
+        const { error } = await tasksService.create(taskData, currentWorkspace.id);
         if (error) throw error;
         toast.success("Tarefa criada com sucesso!");
       }

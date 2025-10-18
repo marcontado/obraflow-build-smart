@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { clientSchema, type ClientFormData } from "@/schemas/client.schema";
 import { clientsService } from "@/services/clients.service";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -37,6 +38,7 @@ export function ClientFormDialog({
   clientId,
   initialData,
 }: ClientFormDialogProps) {
+  const { currentWorkspace } = useWorkspace();
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
     defaultValues: {
@@ -78,6 +80,11 @@ export function ClientFormDialog({
   }, [initialData, form]);
 
   const onSubmit = async (data: ClientFormData) => {
+    if (!currentWorkspace) {
+      toast.error("Nenhum workspace selecionado");
+      return;
+    }
+
     try {
       const cleanData = {
         name: data.name,
@@ -95,7 +102,7 @@ export function ClientFormDialog({
         if (error) throw error;
         toast.success("Cliente atualizado com sucesso!");
       } else {
-        const { error } = await clientsService.create(cleanData);
+        const { error } = await clientsService.create(cleanData, currentWorkspace.id);
         if (error) throw error;
         toast.success("Cliente criado com sucesso!");
       }

@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { projectAreaSchema, type ProjectAreaFormData } from "@/schemas/project-area.schema";
 import { projectAreasService } from "@/services/project-areas.service";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -44,6 +45,7 @@ export function ProjectAreaFormDialog({
   areaId,
   initialData,
 }: ProjectAreaFormDialogProps) {
+  const { currentWorkspace } = useWorkspace();
   const { toast } = useToast();
   const form = useForm<ProjectAreaFormData>({
     resolver: zodResolver(projectAreaSchema),
@@ -71,6 +73,15 @@ export function ProjectAreaFormDialog({
   }, [initialData, form]);
 
   const onSubmit = async (data: ProjectAreaFormData) => {
+    if (!currentWorkspace) {
+      toast({
+        title: "Erro",
+        description: "Nenhum workspace selecionado",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const areaData = {
       name: data.name,
       description: data.description || null,
@@ -80,7 +91,7 @@ export function ProjectAreaFormDialog({
 
     const { error } = areaId
       ? await projectAreasService.update(areaId, areaData)
-      : await projectAreasService.create(areaData);
+      : await projectAreasService.create(areaData, currentWorkspace.id);
 
     if (error) {
       toast({

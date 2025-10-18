@@ -30,3 +30,9 @@ export const TASK_PRIORITY = {
   HIGH: "high",
   URGENT: "urgent",
 } as const;
+
+export const WORKSPACE_ROLE = {
+  OWNER: "owner",
+  ADMIN: "admin",
+  MEMBER: "member",
+} as const;

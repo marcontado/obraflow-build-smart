@@ -25,12 +25,12 @@ export const clientsService = {
     return { data, error };
   },
 
-  async create(client: ClientInsert) {
+  async create(client: ClientInsert, workspaceId: string) {
     const { data: { user } } = await supabase.auth.getUser();
     
     const { data, error } = await supabase
       .from("clients")
-      .insert({ ...client, created_by: user?.id })
+      .insert({ ...client, created_by: user?.id, workspace_id: workspaceId })
       .select()
       .single();
 

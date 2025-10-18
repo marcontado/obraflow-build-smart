@@ -16,10 +16,10 @@ export const projectAreasService = {
     return { data, error };
   },
 
-  async create(area: ProjectAreaInsert) {
+  async create(area: ProjectAreaInsert, workspaceId: string) {
     const { data, error } = await supabase
       .from("project_areas")
-      .insert(area)
+      .insert({ ...area, workspace_id: workspaceId })
       .select()
       .single();
 
