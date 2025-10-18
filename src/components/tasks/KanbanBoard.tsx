@@ -88,6 +88,11 @@ export function KanbanBoard({ projectId }: KanbanBoardProps) {
     try {
       const { error } = await tasksService.updateStatus(taskId, newStatus);
       if (error) throw error;
+      
+      // Recalculate project progress after status change
+      const { projectsService } = await import("@/services/projects.service");
+      await projectsService.calculateProjectProgress(projectId);
+      
       toast.success("Status atualizado!");
     } catch (error: any) {
       toast.error("Erro ao atualizar status");

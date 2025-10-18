@@ -17,17 +17,8 @@ export default function Projects() {
   const [formOpen, setFormOpen] = useState(false);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-        return;
-      }
-      fetchProjects();
-    };
-
-    checkAuth();
-  }, [navigate]);
+    fetchProjects();
+  }, []);
 
   const fetchProjects = async () => {
     try {

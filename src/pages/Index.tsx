@@ -20,17 +20,8 @@ const Index = () => {
   const [recentProjects, setRecentProjects] = useState<any[]>([]);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-        return;
-      }
-      fetchDashboardData();
-    };
-
-    checkAuth();
-  }, [navigate]);
+    fetchDashboardData();
+  }, []);
 
   const fetchDashboardData = async () => {
     try {

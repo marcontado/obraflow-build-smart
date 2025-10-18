@@ -70,4 +70,33 @@ export const projectsService = {
 
     return { stats, error: null };
   },
+
+  async calculateProjectProgress(projectId: string) {
+    try {
+      // Get all tasks for the project
+      const { data: tasks, error: tasksError } = await supabase
+        .from("tasks")
+        .select("status")
+        .eq("project_id", projectId);
+
+      if (tasksError) throw tasksError;
+      if (!tasks || tasks.length === 0) return { progress: 0, error: null };
+
+      // Calculate progress based on completed tasks
+      const completedTasks = tasks.filter((t) => t.status === "done").length;
+      const progress = Math.round((completedTasks / tasks.length) * 100);
+
+      // Update project progress
+      const { error: updateError } = await supabase
+        .from("projects")
+        .update({ progress })
+        .eq("id", projectId);
+
+      if (updateError) throw updateError;
+
+      return { progress, error: null };
+    } catch (error: any) {
+      return { progress: null, error };
+    }
+  },
 };
