@@ -9,10 +9,19 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid } from "recharts";
 import { FolderKanban, Users, CheckSquare, Clock, DollarSign, TrendingUp } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function Reports() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>("all");
+  const [projects, setProjects] = useState<any[]>([]);
   const [stats, setStats] = useState({
     totalProjects: 0,
     totalClients: 0,
@@ -30,20 +39,60 @@ export default function Reports() {
       if (!session) {
         navigate("/auth");
       } else {
-        await fetchReportData();
+        await fetchProjectsList();
       }
     };
     checkAuth();
   }, [navigate]);
 
-  const fetchReportData = async () => {
+  useEffect(() => {
+    if (projects.length > 0 || selectedProjectId === "all") {
+      fetchReportData(selectedProjectId);
+    }
+  }, [selectedProjectId]);
+
+  const fetchProjectsList = async () => {
+    const { data } = await supabase
+      .from("projects")
+      .select("id, name")
+      .order("name");
+    
+    setProjects(data || []);
+    if (data && data.length > 0) {
+      fetchReportData("all");
+    } else {
+      setLoading(false);
+    }
+  };
+
+  const fetchReportData = async (projectId: string) => {
     setLoading(true);
     try {
-      // Buscar totais
+      // Buscar projetos (filtrado ou todos)
+      let projectsQuery = supabase
+        .from("projects")
+        .select("id, status, budget, spent");
+      
+      if (projectId !== "all") {
+        projectsQuery = projectsQuery.eq("id", projectId);
+      }
+
+      // Buscar tarefas (filtrado ou todas)
+      let tasksQuery = supabase.from("tasks").select("id, status, project_id");
+      
+      if (projectId !== "all") {
+        tasksQuery = tasksQuery.eq("project_id", projectId);
+      }
+
+      // Buscar clientes (sempre todos quando filtrado)
+      const clientsQuery = projectId === "all" 
+        ? supabase.from("clients").select("id")
+        : Promise.resolve({ data: [] });
+
       const [projectsRes, clientsRes, tasksRes] = await Promise.all([
-        supabase.from("projects").select("id, status, budget, spent"),
-        supabase.from("clients").select("id"),
-        supabase.from("tasks").select("id, status"),
+        projectsQuery,
+        clientsQuery,
+        tasksQuery,
       ]);
 
       // Calcular estatísticas
@@ -56,8 +105,8 @@ export default function Reports() {
       const completedTasks = tasks.filter(t => t.status === "done").length;
 
       setStats({
-        totalProjects: projects.length,
-        totalClients: clients.length,
+        totalProjects: projectId === "all" ? projects.length : 1,
+        totalClients: projectId === "all" ? clients.length : 0,
         totalTasks: tasks.length,
         completedTasks,
         totalBudget,
@@ -133,6 +182,38 @@ export default function Reports() {
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header title="Relatórios" subtitle="Análises e métricas dos seus projetos" />
         <main className="flex-1 overflow-y-auto p-6">
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-semibold">
+                {selectedProjectId === "all" 
+                  ? "Visão Geral - Todos os Projetos"
+                  : `Projeto: ${projects.find(p => p.id === selectedProjectId)?.name || ""}`
+                }
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                {selectedProjectId === "all" 
+                  ? "Análise consolidada de todos os seus projetos"
+                  : "Análise detalhada do projeto selecionado"
+                }
+              </p>
+            </div>
+            
+            <div className="w-64">
+              <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um projeto" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os Projetos</SelectItem>
+                  {projects.map((project) => (
+                    <SelectItem key={project.id} value={project.id}>
+                      {project.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           {loading ? (
             <div className="space-y-6">
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -145,16 +226,20 @@ export default function Reports() {
             <div className="space-y-6">
               {/* Cards de Estatísticas */}
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <StatsCard
-                  title="Total de Projetos"
-                  value={stats.totalProjects}
-                  icon={FolderKanban}
-                />
-                <StatsCard
-                  title="Total de Clientes"
-                  value={stats.totalClients}
-                  icon={Users}
-                />
+                {selectedProjectId === "all" && (
+                  <>
+                    <StatsCard
+                      title="Total de Projetos"
+                      value={stats.totalProjects}
+                      icon={FolderKanban}
+                    />
+                    <StatsCard
+                      title="Total de Clientes"
+                      value={stats.totalClients}
+                      icon={Users}
+                    />
+                  </>
+                )}
                 <StatsCard
                   title="Tarefas Totais"
                   value={stats.totalTasks}
@@ -167,12 +252,12 @@ export default function Reports() {
                   icon={CheckSquare}
                 />
                 <StatsCard
-                  title="Orçamento Total"
+                  title={selectedProjectId === "all" ? "Orçamento Total" : "Orçamento do Projeto"}
                   value={`R$ ${stats.totalBudget.toLocaleString("pt-BR")}`}
                   icon={DollarSign}
                 />
                 <StatsCard
-                  title="Total Gasto"
+                  title={selectedProjectId === "all" ? "Total Gasto" : "Gasto do Projeto"}
                   value={`R$ ${stats.totalSpent.toLocaleString("pt-BR")}`}
                   description={`${stats.totalBudget > 0 ? Math.round((stats.totalSpent / stats.totalBudget) * 100) : 0}% do orçamento`}
                   icon={TrendingUp}
@@ -181,38 +266,40 @@ export default function Reports() {
 
               {/* Gráficos */}
               <div className="grid gap-6 md:grid-cols-2">
-                {/* Gráfico de Projetos por Status */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Projetos por Status</CardTitle>
-                    <CardDescription>Distribuição dos projetos</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {projectsByStatus.length > 0 ? (
-                      <ChartContainer config={chartConfig} className="h-[300px]">
-                        <PieChart>
-                          <Pie
-                            data={projectsByStatus}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                            outerRadius={80}
-                            fill="hsl(var(--primary))"
-                            dataKey="value"
-                          >
-                            {projectsByStatus.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <ChartTooltip content={<ChartTooltipContent />} />
-                        </PieChart>
-                      </ChartContainer>
-                    ) : (
-                      <p className="text-center text-muted-foreground py-12">Nenhum projeto cadastrado</p>
-                    )}
-                  </CardContent>
-                </Card>
+                {/* Gráfico de Projetos por Status - só mostrar se for "todos" */}
+                {selectedProjectId === "all" && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Projetos por Status</CardTitle>
+                      <CardDescription>Distribuição dos projetos</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {projectsByStatus.length > 0 ? (
+                        <ChartContainer config={chartConfig} className="h-[300px]">
+                          <PieChart>
+                            <Pie
+                              data={projectsByStatus}
+                              cx="50%"
+                              cy="50%"
+                              labelLine={false}
+                              label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                              outerRadius={80}
+                              fill="hsl(var(--primary))"
+                              dataKey="value"
+                            >
+                              {projectsByStatus.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                              ))}
+                            </Pie>
+                            <ChartTooltip content={<ChartTooltipContent />} />
+                          </PieChart>
+                        </ChartContainer>
+                      ) : (
+                        <p className="text-center text-muted-foreground py-12">Nenhum projeto cadastrado</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Gráfico de Tarefas por Status */}
                 <Card>

@@ -14,6 +14,7 @@ import { ProjectAreaFormDialog } from "@/components/projects/ProjectAreaFormDial
 import { GanttChart } from "@/components/projects/GanttChart";
 import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
 import { KanbanBoard } from "@/components/tasks/KanbanBoard";
+import { ProjectDashboard } from "@/components/projects/ProjectDashboard";
 import { supabase } from "@/integrations/supabase/client";
 import { projectsService } from "@/services/projects.service";
 import { projectAreasService } from "@/services/project-areas.service";
@@ -182,13 +183,18 @@ export default function ProjectDetails() {
             </div>
           </div>
 
-          <Tabs defaultValue="overview" className="space-y-6">
+          <Tabs defaultValue="dashboard" className="space-y-6">
             <TabsList>
+              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
               <TabsTrigger value="overview">Visão Geral</TabsTrigger>
               <TabsTrigger value="areas">Áreas e Orçamentos</TabsTrigger>
               <TabsTrigger value="gantt">Cronograma</TabsTrigger>
               <TabsTrigger value="tasks">Tarefas</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="dashboard" className="space-y-6">
+              <ProjectDashboard projectId={id!} />
+            </TabsContent>
 
             <TabsContent value="overview" className="space-y-6">
               <Card>
