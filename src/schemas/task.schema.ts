@@ -6,8 +6,8 @@ export const taskSchema = z.object({
   status: z.enum(["todo", "in_progress", "review", "done"]),
   priority: z.enum(["low", "medium", "high", "urgent"]),
   due_date: z.string().optional(),
-  area_id: z.string().optional(),
-  assigned_to: z.string().uuid().optional(),
+  area_id: z.string().optional().or(z.literal("")),
+  assigned_to: z.string().uuid().optional().or(z.literal("")),
   project_start_date: z.string().optional(),
   project_end_date: z.string().optional(),
 }).refine((data) => {
