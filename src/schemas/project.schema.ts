@@ -11,11 +11,13 @@ export const projectSchema = z.object({
   progress: z.number().min(0).max(100).optional(),
 }).refine((data) => {
   if (data.start_date && data.end_date) {
-    return new Date(data.end_date) >= new Date(data.start_date);
+    const startDate = new Date(data.start_date);
+    const endDate = new Date(data.end_date);
+    return endDate >= startDate;
   }
   return true;
 }, {
-  message: "Data final deve ser maior que data inicial",
+  message: "Data final deve ser maior ou igual à data inicial",
   path: ["end_date"],
 });
 

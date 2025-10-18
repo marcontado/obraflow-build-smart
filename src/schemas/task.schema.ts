@@ -8,6 +8,19 @@ export const taskSchema = z.object({
   due_date: z.string().optional(),
   area_id: z.string().optional(),
   assigned_to: z.string().uuid().optional(),
+  project_start_date: z.string().optional(),
+  project_end_date: z.string().optional(),
+}).refine((data) => {
+  if (data.due_date && data.project_start_date && data.project_end_date) {
+    const dueDate = new Date(data.due_date);
+    const startDate = new Date(data.project_start_date);
+    const endDate = new Date(data.project_end_date);
+    return dueDate >= startDate && dueDate <= endDate;
+  }
+  return true;
+}, {
+  message: "Data de vencimento deve estar dentro do período do projeto",
+  path: ["due_date"],
 });
 
 export type TaskFormData = z.infer<typeof taskSchema>;
