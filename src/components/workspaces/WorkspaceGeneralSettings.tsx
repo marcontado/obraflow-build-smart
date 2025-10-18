@@ -6,12 +6,14 @@ import { useNavigate } from "react-router-dom";
 import { workspacesService } from "@/services/workspaces.service";
 import { useToast } from "@/hooks/use-toast";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Trash2 } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Trash2, Upload, ImageIcon } from "lucide-react";
 
 const workspaceSchema = z.object({
   name: z.string().min(3, "Nome deve ter no mínimo 3 caracteres").max(50),
@@ -29,6 +31,8 @@ export function WorkspaceGeneralSettings({ workspaceId }: WorkspaceGeneralSettin
   const navigate = useNavigate();
   const { currentWorkspace, refreshWorkspaces } = useWorkspace();
   const [deleting, setDeleting] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [logoUrl, setLogoUrl] = useState(currentWorkspace?.logo_url || "");
 
   const form = useForm<WorkspaceFormData>({
     resolver: zodResolver(workspaceSchema),
@@ -81,8 +85,128 @@ export function WorkspaceGeneralSettings({ workspaceId }: WorkspaceGeneralSettin
     navigate("/workspace/select");
   };
 
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo e tamanho
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Arquivo inválido",
+        description: "Por favor, selecione uma imagem.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: "Arquivo muito grande",
+        description: "O tamanho máximo é 2MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${workspaceId}/logo.${fileExt}`;
+
+      // Deletar logo anterior se existir
+      if (logoUrl) {
+        const oldPath = logoUrl.split("/workspace-logos/")[1];
+        if (oldPath) {
+          await supabase.storage.from("workspace-logos").remove([oldPath]);
+        }
+      }
+
+      // Upload novo logo
+      const { error: uploadError } = await supabase.storage
+        .from("workspace-logos")
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Obter URL pública
+      const { data: { publicUrl } } = supabase.storage
+        .from("workspace-logos")
+        .getPublicUrl(fileName);
+
+      // Atualizar workspace
+      const { error: updateError } = await workspacesService.update(workspaceId, {
+        logo_url: publicUrl,
+      });
+
+      if (updateError) throw updateError;
+
+      setLogoUrl(publicUrl);
+      toast({
+        title: "Logo atualizado!",
+        description: "O logo do workspace foi atualizado com sucesso.",
+      });
+
+      refreshWorkspaces();
+    } catch (error: any) {
+      console.error("Error uploading logo:", error);
+      toast({
+        title: "Erro ao fazer upload",
+        description: error.message || "Ocorreu um erro ao fazer upload do logo.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Logo do Workspace</CardTitle>
+          <CardDescription>
+            Adicione um logo para identificar seu workspace
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-4">
+            <Avatar className="h-20 w-20">
+              {logoUrl ? (
+                <AvatarImage src={logoUrl} alt="Logo do workspace" />
+              ) : (
+                <AvatarFallback>
+                  <ImageIcon className="h-10 w-10" />
+                </AvatarFallback>
+              )}
+            </Avatar>
+            <div className="flex flex-col gap-2">
+              <Input
+                id="logo-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleLogoUpload}
+                disabled={uploading}
+                className="hidden"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => document.getElementById("logo-upload")?.click()}
+                disabled={uploading}
+                className="gap-2"
+              >
+                <Upload className="h-4 w-4" />
+                {uploading ? "Enviando..." : "Fazer Upload"}
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                PNG, JPG, SVG ou WebP. Máximo 2MB.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Informações Gerais</CardTitle>

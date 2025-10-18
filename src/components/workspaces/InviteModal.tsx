@@ -50,46 +50,78 @@ export function InviteModal({ open, onClose, onSuccess, workspaceId }: InviteMod
   const onSubmit = async (data: InviteFormData) => {
     setSubmitting(true);
 
-    // Validar limite de membros
-    const limits = getWorkspaceLimits();
-    const { data: members } = await supabase
-      .from("workspace_members")
-      .select("id")
-      .eq("workspace_id", workspaceId);
+    try {
+      // Validar limite de membros
+      const limits = getWorkspaceLimits();
+      const { data: members } = await supabase
+        .from("workspace_members")
+        .select("id")
+        .eq("workspace_id", workspaceId);
 
-    const currentCount = members?.length || 0;
+      const currentCount = members?.length || 0;
 
-    if (currentCount >= limits.membersPerWorkspace) {
+      if (currentCount >= limits.membersPerWorkspace) {
+        toast({
+          title: "Limite atingido",
+          description: `Você atingiu o limite de ${limits.membersPerWorkspace} membros do plano ${currentWorkspace?.subscription_plan.toUpperCase()}.`,
+          variant: "destructive",
+        });
+        setSubmitting(false);
+        return;
+      }
+
+      const { data: invite, error } = await workspacesService.inviteMember(workspaceId, data.email, data.role);
+
+      if (error) {
+        toast({
+          title: "Erro ao enviar convite",
+          description: error.message,
+          variant: "destructive",
+        });
+        setSubmitting(false);
+        return;
+      }
+
+      // Enviar e-mail de convite
+      if (invite) {
+        const { data: user } = await supabase.auth.getUser();
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", user.user?.id)
+          .single();
+
+        const inviteLink = `${window.location.origin}/invite/${invite.token}`;
+
+        await supabase.functions.invoke("send-invite-email", {
+          body: {
+            email: data.email,
+            workspaceName: currentWorkspace?.name || "Workspace",
+            inviterName: profile?.full_name || user.user?.email || "Alguém",
+            role: data.role,
+            inviteLink,
+          },
+        });
+      }
+
       toast({
-        title: "Limite atingido",
-        description: `Você atingiu o limite de ${limits.membersPerWorkspace} membros do plano ${currentWorkspace?.subscription_plan.toUpperCase()}.`,
-        variant: "destructive",
+        title: "Convite enviado!",
+        description: "O convite foi criado e o e-mail foi enviado com sucesso.",
       });
+
+      form.reset();
       setSubmitting(false);
-      return;
-    }
-
-    const { error } = await workspacesService.inviteMember(workspaceId, data.email, data.role);
-
-    if (error) {
+      onSuccess();
+      onClose();
+    } catch (error) {
+      console.error("Error in onSubmit:", error);
       toast({
         title: "Erro ao enviar convite",
-        description: error.message,
+        description: "Ocorreu um erro ao processar o convite.",
         variant: "destructive",
       });
       setSubmitting(false);
-      return;
     }
-
-    toast({
-      title: "Convite enviado!",
-      description: "O convite foi criado com sucesso.",
-    });
-
-    form.reset();
-    setSubmitting(false);
-    onSuccess();
-    onClose();
   };
 
   return (

@@ -19,6 +19,7 @@ import WorkspaceSelect from "./pages/WorkspaceSelect";
 import WorkspaceNew from "./pages/WorkspaceNew";
 import WorkspaceSettings from "./pages/WorkspaceSettings";
 import InviteAccept from "./pages/InviteAccept";
+import PlanUpgrade from "./pages/PlanUpgrade";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
                 <Route path="/workspace/select" element={<ProtectedRoute><WorkspaceSelect /></ProtectedRoute>} />
                 <Route path="/workspace/new" element={<ProtectedRoute><WorkspaceNew /></ProtectedRoute>} />
                 <Route path="/workspace/:id/settings" element={<ProtectedRoute><WorkspaceSettings /></ProtectedRoute>} />
+                <Route path="/plans" element={<ProtectedRoute><PlanUpgrade /></ProtectedRoute>} />
                 <Route path="/invite/accept" element={<InviteAccept />} />
                 <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
                 <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />

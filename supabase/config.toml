@@ -1,1 +1,4 @@
 project_id = "ecbpqmlsizmfteudionw"
+
+[functions.cleanup-expired-invites]
+verify_jwt = false

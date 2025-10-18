@@ -57,18 +57,18 @@ export default function WorkspaceSettings() {
             <InvitesList workspaceId={currentWorkspace.id} />
           </TabsContent>
 
-          <TabsContent value="plan">
+          <TabsContent value="plan" className="space-y-4">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  Plano Atual
-                  <Badge variant="default" className="text-sm">
-                    {PLAN_NAMES[currentWorkspace.subscription_plan as keyof typeof PLAN_NAMES]}
-                  </Badge>
-                </CardTitle>
-                <CardDescription>
-                  Informações e limites do seu plano de assinatura
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                <div>
+                  <CardTitle>Plano Atual</CardTitle>
+                  <CardDescription>
+                    Você está no plano <strong>{PLAN_NAMES[currentWorkspace?.subscription_plan || "atelier"]}</strong>
+                  </CardDescription>
+                </div>
+                <Button onClick={() => navigate("/plans")}>
+                  Comparar Planos
+                </Button>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">

@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function InviteAccept() {
   const [searchParams] = useSearchParams();
@@ -37,7 +38,7 @@ export default function InviteAccept() {
   const acceptInvite = async () => {
     if (!token) return;
 
-    const { error: acceptError } = await workspacesService.acceptInvite(token);
+    const { data: invite, error: acceptError } = await workspacesService.acceptInvite(token);
 
     if (acceptError) {
       setError(acceptError.message);
@@ -52,6 +53,17 @@ export default function InviteAccept() {
         title: "Convite aceito!",
         description: "Você foi adicionado ao workspace.",
       });
+
+      // Enviar notificação aos admins
+      if (invite && user) {
+        await supabase.functions.invoke("send-invite-accepted-notification", {
+          body: {
+            workspaceId: invite.workspace_id,
+            acceptedUserEmail: user.email || "",
+            acceptedUserName: user.user_metadata?.full_name || user.email || "",
+          },
+        });
+      }
     }
 
     setLoading(false);
