@@ -277,14 +277,13 @@ export function TaskFormDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Área do Projeto</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value || undefined}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
+                          <SelectValue placeholder="Nenhuma área selecionada" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Nenhuma</SelectItem>
                         {areas.map((area) => (
                           <SelectItem key={area.id} value={area.id}>
                             {area.name}
