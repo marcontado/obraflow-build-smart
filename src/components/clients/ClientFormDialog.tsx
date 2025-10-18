@@ -95,6 +95,7 @@ export function ClientFormDialog({
         state: data.state || null,
         zip_code: data.zip_code || null,
         notes: data.notes || null,
+        workspace_id: currentWorkspace.id,
       };
 
       if (clientId) {

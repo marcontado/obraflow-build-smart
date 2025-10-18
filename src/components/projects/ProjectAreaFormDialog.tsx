@@ -87,6 +87,7 @@ export function ProjectAreaFormDialog({
       description: data.description || null,
       budget: data.budget ? Number(data.budget) : null,
       project_id: projectId,
+      workspace_id: currentWorkspace.id,
     };
 
     const { error } = areaId

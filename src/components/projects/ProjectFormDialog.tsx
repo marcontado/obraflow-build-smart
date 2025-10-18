@@ -111,6 +111,7 @@ export function ProjectFormDialog({
         end_date: data.end_date || null,
         budget: data.budget ? parseFloat(data.budget) : null,
         progress: data.progress || 0,
+        workspace_id: currentWorkspace.id,
       };
 
       if (projectId) {
