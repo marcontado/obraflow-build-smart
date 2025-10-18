@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Edit, Trash2 } from "lucide-react";
+import { ArrowLeft, Edit, Trash2, Plus } from "lucide-react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
@@ -9,12 +9,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { ProjectFormDialog } from "@/components/projects/ProjectFormDialog";
+import { ProjectAreaCard } from "@/components/projects/ProjectAreaCard";
+import { ProjectAreaFormDialog } from "@/components/projects/ProjectAreaFormDialog";
+import { GanttChart } from "@/components/projects/GanttChart";
 import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
 import { KanbanBoard } from "@/components/tasks/KanbanBoard";
 import { supabase } from "@/integrations/supabase/client";
 import { projectsService } from "@/services/projects.service";
+import { projectAreasService } from "@/services/project-areas.service";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import type { Database } from "@/integrations/supabase/types";
+
+type ProjectArea = Database["public"]["Tables"]["project_areas"]["Row"];
 
 const statusColors = {
   planning: "bg-blue-500/10 text-blue-600 border-blue-200",
@@ -34,10 +41,14 @@ export default function ProjectDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [project, setProject] = useState<any>(null);
+  const [projectAreas, setProjectAreas] = useState<ProjectArea[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [areaDialogOpen, setAreaDialogOpen] = useState(false);
+  const [areaToEdit, setAreaToEdit] = useState<ProjectArea | null>(null);
+  const [areaToDelete, setAreaToDelete] = useState<ProjectArea | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -47,6 +58,7 @@ export default function ProjectDetails() {
         return;
       }
       fetchProject();
+      fetchProjectAreas();
     };
     checkAuth();
   }, [id, navigate]);
@@ -68,6 +80,18 @@ export default function ProjectDetails() {
     }
   };
 
+  const fetchProjectAreas = async () => {
+    if (!id) return;
+    
+    try {
+      const { data, error } = await projectAreasService.getByProject(id);
+      if (error) throw error;
+      if (data) setProjectAreas(data);
+    } catch (error: any) {
+      console.error("Erro ao carregar áreas:", error);
+    }
+  };
+
   const confirmDelete = async () => {
     if (!id) return;
 
@@ -83,6 +107,35 @@ export default function ProjectDetails() {
     } finally {
       setDeleting(false);
     }
+  };
+
+  const handleEditArea = (area: ProjectArea) => {
+    setAreaToEdit(area);
+    setAreaDialogOpen(true);
+  };
+
+  const handleDeleteArea = (area: ProjectArea) => {
+    setAreaToDelete(area);
+  };
+
+  const confirmDeleteArea = async () => {
+    if (!areaToDelete) return;
+
+    try {
+      const { error } = await projectAreasService.delete(areaToDelete.id);
+      if (error) throw error;
+      
+      toast.success("Área excluída com sucesso!");
+      setAreaToDelete(null);
+      fetchProjectAreas();
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao excluir área");
+    }
+  };
+
+  const handleAreaDialogClose = () => {
+    setAreaDialogOpen(false);
+    setAreaToEdit(null);
   };
 
   if (loading) {
@@ -132,7 +185,8 @@ export default function ProjectDetails() {
           <Tabs defaultValue="overview" className="space-y-6">
             <TabsList>
               <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-              <TabsTrigger value="areas">Áreas do Projeto</TabsTrigger>
+              <TabsTrigger value="areas">Áreas e Orçamentos</TabsTrigger>
+              <TabsTrigger value="gantt">Cronograma</TabsTrigger>
               <TabsTrigger value="tasks">Tarefas</TabsTrigger>
             </TabsList>
 
@@ -210,17 +264,91 @@ export default function ProjectDetails() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="areas">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Áreas do Projeto</CardTitle>
-                </CardHeader>
-                <CardContent>
+            <TabsContent value="areas" className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold">Áreas do Projeto</h3>
                   <p className="text-sm text-muted-foreground">
-                    Em breve: gestão de áreas do projeto (sala, cozinha, quartos, etc.)
+                    Gerencie as diferentes áreas e seus orçamentos
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+                <Button onClick={() => setAreaDialogOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nova Área
+                </Button>
+              </div>
+
+              {projectAreas.length > 0 ? (
+                <>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {projectAreas.map((area) => (
+                      <ProjectAreaCard
+                        key={area.id}
+                        area={area}
+                        onEdit={() => handleEditArea(area)}
+                        onDelete={() => handleDeleteArea(area)}
+                      />
+                    ))}
+                  </div>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Resumo de Orçamentos por Área</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {projectAreas.map((area) => {
+                          const areaBudget = Number(area.budget || 0);
+                          const projectBudget = Number(project.budget || 0);
+                          const percentage = projectBudget > 0 ? (areaBudget / projectBudget) * 100 : 0;
+
+                          return (
+                            <div key={area.id} className="space-y-2">
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="font-medium">{area.name}</span>
+                                <span className="text-muted-foreground">
+                                  R$ {areaBudget.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                                  {projectBudget > 0 && ` (${percentage.toFixed(1)}%)`}
+                                </span>
+                              </div>
+                              {projectBudget > 0 && (
+                                <Progress value={percentage} className="h-2" />
+                              )}
+                            </div>
+                          );
+                        })}
+                        <div className="pt-3 border-t">
+                          <div className="flex items-center justify-between font-semibold">
+                            <span>Total Alocado</span>
+                            <span>
+                              R${" "}
+                              {projectAreas
+                                .reduce((sum, area) => sum + Number(area.budget || 0), 0)
+                                .toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              ) : (
+                <Card>
+                  <CardContent className="py-12">
+                    <p className="text-center text-muted-foreground">
+                      Nenhuma área cadastrada. Crie a primeira área do projeto.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            <TabsContent value="gantt">
+              <GanttChart
+                tasks={[]}
+                projectStartDate={project.start_date || undefined}
+                projectEndDate={project.end_date || undefined}
+              />
             </TabsContent>
 
             <TabsContent value="tasks">
@@ -238,6 +366,15 @@ export default function ProjectDetails() {
         initialData={project}
       />
 
+      <ProjectAreaFormDialog
+        open={areaDialogOpen}
+        onClose={handleAreaDialogClose}
+        onSuccess={fetchProjectAreas}
+        projectId={id!}
+        areaId={areaToEdit?.id}
+        initialData={areaToEdit || undefined}
+      />
+
       <DeleteConfirmDialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
@@ -245,6 +382,15 @@ export default function ProjectDetails() {
         isLoading={deleting}
         title="Excluir Projeto"
         description={`Tem certeza que deseja excluir o projeto "${project.name}"? Esta ação não pode ser desfeita e todas as tarefas e áreas associadas serão perdidas.`}
+      />
+
+      <DeleteConfirmDialog
+        open={!!areaToDelete}
+        onClose={() => setAreaToDelete(null)}
+        onConfirm={confirmDeleteArea}
+        isLoading={false}
+        title="Excluir Área"
+        description={`Tem certeza que deseja excluir a área "${areaToDelete?.name}"? Esta ação não pode ser desfeita.`}
       />
     </div>
   );
