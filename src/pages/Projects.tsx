@@ -4,14 +4,17 @@ import { Plus } from "lucide-react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { ProjectCard } from "@/components/projects/ProjectCard";
+import { ProjectFormDialog } from "@/components/projects/ProjectFormDialog";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { projectsService } from "@/services/projects.service";
 import { toast } from "sonner";
 
 export default function Projects() {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [formOpen, setFormOpen] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -28,14 +31,7 @@ export default function Projects() {
 
   const fetchProjects = async () => {
     try {
-      const { data, error } = await supabase
-        .from("projects")
-        .select(`
-          *,
-          clients (name)
-        `)
-        .order("created_at", { ascending: false });
-
+      const { data, error } = await projectsService.getAll();
       if (error) throw error;
       setProjects(data || []);
     } catch (error: any) {
@@ -62,7 +58,7 @@ export default function Projects() {
                 {projects.length} projeto(s) no total
               </p>
             </div>
-            <Button className="gap-2">
+            <Button onClick={() => setFormOpen(true)} className="gap-2">
               <Plus className="h-4 w-4" />
               Novo Projeto
             </Button>
@@ -79,7 +75,7 @@ export default function Projects() {
               <p className="text-lg text-muted-foreground mb-4">
                 Nenhum projeto encontrado
               </p>
-              <Button className="gap-2">
+              <Button onClick={() => setFormOpen(true)} className="gap-2">
                 <Plus className="h-4 w-4" />
                 Criar Primeiro Projeto
               </Button>
@@ -105,6 +101,12 @@ export default function Projects() {
           )}
         </main>
       </div>
+
+      <ProjectFormDialog
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        onSuccess={fetchProjects}
+      />
     </div>
   );
 }
