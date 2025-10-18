@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { ProjectFormDialog } from "@/components/projects/ProjectFormDialog";
 import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
+import { KanbanBoard } from "@/components/tasks/KanbanBoard";
 import { supabase } from "@/integrations/supabase/client";
 import { projectsService } from "@/services/projects.service";
 import { toast } from "sonner";
@@ -223,16 +224,7 @@ export default function ProjectDetails() {
             </TabsContent>
 
             <TabsContent value="tasks">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Tarefas</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Em breve: Board Kanban de tarefas
-                  </p>
-                </CardContent>
-              </Card>
+              <KanbanBoard projectId={id!} />
             </TabsContent>
           </Tabs>
         </main>
