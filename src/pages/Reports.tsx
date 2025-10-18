@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend } from "recharts";
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid } from "recharts";
 import { FolderKanban, Users, CheckSquare, Clock, DollarSign, TrendingUp } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -120,6 +120,13 @@ export default function Reports() {
     { name: "Gasto", value: stats.totalSpent },
   ];
 
+  const chartConfig = {
+    value: {
+      label: "Valor",
+      color: "hsl(var(--primary))",
+    },
+  };
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar />
@@ -182,7 +189,7 @@ export default function Reports() {
                   </CardHeader>
                   <CardContent>
                     {projectsByStatus.length > 0 ? (
-                      <ResponsiveContainer width="100%" height={300}>
+                      <ChartContainer config={chartConfig} className="h-[300px]">
                         <PieChart>
                           <Pie
                             data={projectsByStatus}
@@ -200,7 +207,7 @@ export default function Reports() {
                           </Pie>
                           <ChartTooltip content={<ChartTooltipContent />} />
                         </PieChart>
-                      </ResponsiveContainer>
+                      </ChartContainer>
                     ) : (
                       <p className="text-center text-muted-foreground py-12">Nenhum projeto cadastrado</p>
                     )}
@@ -215,7 +222,7 @@ export default function Reports() {
                   </CardHeader>
                   <CardContent>
                     {tasksByStatus.length > 0 ? (
-                      <ResponsiveContainer width="100%" height={300}>
+                      <ChartContainer config={chartConfig} className="h-[300px]">
                         <BarChart data={tasksByStatus}>
                           <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                           <XAxis dataKey="name" className="text-xs" />
@@ -223,7 +230,7 @@ export default function Reports() {
                           <ChartTooltip content={<ChartTooltipContent />} />
                           <Bar dataKey="value" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
                         </BarChart>
-                      </ResponsiveContainer>
+                      </ChartContainer>
                     ) : (
                       <p className="text-center text-muted-foreground py-12">Nenhuma tarefa cadastrada</p>
                     )}
@@ -237,7 +244,7 @@ export default function Reports() {
                     <CardDescription>Comparação financeira</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
+                    <ChartContainer config={chartConfig} className="h-[300px]">
                       <BarChart data={budgetData}>
                         <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                         <XAxis dataKey="name" className="text-xs" />
@@ -245,7 +252,7 @@ export default function Reports() {
                         <ChartTooltip content={<ChartTooltipContent />} />
                         <Bar dataKey="value" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
                       </BarChart>
-                    </ResponsiveContainer>
+                    </ChartContainer>
                   </CardContent>
                 </Card>
               </div>
