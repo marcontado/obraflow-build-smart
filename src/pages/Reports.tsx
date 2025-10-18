@@ -34,16 +34,8 @@ export default function Reports() {
   const [tasksByStatus, setTasksByStatus] = useState<any[]>([]);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-      } else {
-        await fetchProjectsList();
-      }
-    };
-    checkAuth();
-  }, [navigate]);
+    fetchProjectsList();
+  }, []);
 
   useEffect(() => {
     if (projects.length > 0 || selectedProjectId === "all") {

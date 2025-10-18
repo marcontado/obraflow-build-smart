@@ -66,6 +66,7 @@ export function TaskFormDialog({
   const [submitting, setSubmitting] = useState(false);
   const [areas, setAreas] = useState<any[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [projectDates, setProjectDates] = useState<{ start_date?: string; end_date?: string }>({});
 
   const form = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
@@ -77,6 +78,8 @@ export function TaskFormDialog({
       due_date: "",
       area_id: "",
       assigned_to: "",
+      project_start_date: "",
+      project_end_date: "",
     },
   });
 
@@ -91,6 +94,7 @@ export function TaskFormDialog({
   useEffect(() => {
     if (open && projectId) {
       fetchAreas();
+      fetchProjectDates();
     }
   }, [open, projectId]);
 
@@ -114,6 +118,8 @@ export function TaskFormDialog({
         due_date: "",
         area_id: "",
         assigned_to: "",
+        project_start_date: projectDates.start_date || "",
+        project_end_date: projectDates.end_date || "",
       });
     }
   }, [initialData, open, initialStatus]);
@@ -125,6 +131,25 @@ export function TaskFormDialog({
       .eq("project_id", projectId);
     
     setAreas(data || []);
+  };
+
+  const fetchProjectDates = async () => {
+    const { data } = await supabase
+      .from("projects")
+      .select("start_date, end_date")
+      .eq("id", projectId)
+      .single();
+    
+    if (data) {
+      setProjectDates({
+        start_date: data.start_date || undefined,
+        end_date: data.end_date || undefined,
+      });
+      
+      // Atualizar o form com as datas do projeto
+      form.setValue("project_start_date", data.start_date || "");
+      form.setValue("project_end_date", data.end_date || "");
+    }
   };
 
   const onSubmit = async (data: TaskFormData) => {

@@ -52,17 +52,9 @@ export default function ProjectDetails() {
   const [areaToDelete, setAreaToDelete] = useState<ProjectArea | null>(null);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-        return;
-      }
-      fetchProject();
-      fetchProjectAreas();
-    };
-    checkAuth();
-  }, [id, navigate]);
+    fetchProject();
+    fetchProjectAreas();
+  }, [id]);
 
   const fetchProject = async () => {
     if (!id) return;
