@@ -27,9 +27,11 @@ export const tasksService = {
   },
 
   async create(task: TaskInsert) {
+    const { data: { user } } = await supabase.auth.getUser();
+    
     const { data, error } = await supabase
       .from("tasks")
-      .insert(task)
+      .insert({ ...task, created_by: user?.id })
       .select()
       .single();
 

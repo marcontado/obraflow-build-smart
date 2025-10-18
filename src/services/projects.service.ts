@@ -26,9 +26,11 @@ export const projectsService = {
   },
 
   async create(project: ProjectInsert) {
+    const { data: { user } } = await supabase.auth.getUser();
+    
     const { data, error } = await supabase
       .from("projects")
-      .insert(project)
+      .insert({ ...project, created_by: user?.id })
       .select()
       .single();
 
