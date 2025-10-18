@@ -1,7 +1,7 @@
-import { Home, FolderKanban, Users, BarChart3, Settings, LogOut } from "lucide-react";
+import { Home, FolderKanban, Users, BarChart3, LogOut } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
+import { authService } from "@/services/auth.service";
 import { toast } from "sonner";
 
 const navigation = [
@@ -15,7 +15,7 @@ export function Sidebar() {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await authService.signOut();
     if (error) {
       toast.error("Erro ao fazer logout");
     } else {
@@ -27,7 +27,7 @@ export function Sidebar() {
   return (
     <div className="flex h-screen w-64 flex-col border-r bg-card">
       <div className="flex h-16 items-center border-b px-6">
-        <h1 className="text-2xl font-bold text-primary">ObraFlow</h1>
+        <h1 className="text-2xl font-bold text-primary">Archestra</h1>
       </div>
 
       <nav className="flex-1 space-y-1 px-3 py-4">

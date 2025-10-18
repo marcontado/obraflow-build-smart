@@ -1,0 +1,16 @@
+node_modules
+dist
+build
+.env
+.env.local
+*.log
+coverage
+.vscode
+.idea
+*.min.js
+*.min.css
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+bun.lockb
+supabase/migrations

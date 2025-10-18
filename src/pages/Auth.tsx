@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { authService } from "@/services/auth.service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,14 +18,14 @@ export default function Auth() {
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { session } = await authService.getCurrentSession();
       if (session) {
         navigate("/");
       }
     };
     checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = authService.onAuthStateChange((_event, session) => {
       if (session) {
         navigate("/");
       }
@@ -38,16 +38,7 @@ export default function Auth() {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-        },
-        emailRedirectTo: `${window.location.origin}/`,
-      },
-    });
+    const { error } = await authService.signUp(email, password);
 
     setLoading(false);
 
@@ -62,10 +53,7 @@ export default function Auth() {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { error } = await authService.signIn(email, password);
 
     setLoading(false);
 
@@ -86,8 +74,8 @@ export default function Auth() {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-primary/60 flex items-center justify-center p-12">
           <div className="text-white">
-            <h1 className="text-5xl font-bold mb-4">ObraFlow</h1>
-            <p className="text-xl mb-6">Gestão profissional de projetos de interiores</p>
+            <h1 className="text-5xl font-bold mb-4">Archestra</h1>
+            <p className="text-xl mb-6">Gestão profissional de obras para designers de interiores</p>
             <ul className="space-y-3 text-lg">
               <li>✓ Organize todos os seus projetos em um só lugar</li>
               <li>✓ Acompanhe orçamentos e prazos em tempo real</li>
