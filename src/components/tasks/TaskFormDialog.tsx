@@ -67,7 +67,6 @@ export function TaskFormDialog({
   const { currentWorkspace } = useWorkspace();
   const [submitting, setSubmitting] = useState(false);
   const [areas, setAreas] = useState<any[]>([]);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [projectDates, setProjectDates] = useState<{ start_date?: string; end_date?: string }>({});
 
   const form = useForm<TaskFormData>({
@@ -84,14 +83,6 @@ export function TaskFormDialog({
       project_end_date: "",
     },
   });
-
-  useEffect(() => {
-    const getCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setCurrentUserId(user?.id || null);
-    };
-    getCurrentUser();
-  }, []);
 
   useEffect(() => {
     if (open && projectId) {
@@ -163,13 +154,21 @@ export function TaskFormDialog({
     try {
       setSubmitting(true);
 
+      // Obter user_id diretamente aqui para evitar race condition
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user?.id) {
+        toast.error("Usuário não autenticado. Por favor, faça login novamente.");
+        return;
+      }
+
       const taskData: any = {
         title: data.title,
         description: data.description || null,
         status: data.status,
         priority: data.priority,
         project_id: projectId,
-        created_by: currentUserId,
+        created_by: user.id,
         area_id: data.area_id || null,
         assigned_to: data.assigned_to || null,
         due_date: data.due_date || null,
