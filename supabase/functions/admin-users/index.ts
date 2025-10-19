@@ -38,10 +38,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    const url = new URL(req.url);
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const limit = parseInt(url.searchParams.get('limit') || '20');
-    const search = url.searchParams.get('search');
+    const body = await req.json();
+    const page = parseInt(body.page || '1');
+    const limit = parseInt(body.limit || '20');
+    const search = body.search;
 
     const from = (page - 1) * limit;
     const to = from + limit - 1;

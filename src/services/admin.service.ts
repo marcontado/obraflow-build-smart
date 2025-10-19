@@ -10,15 +10,13 @@ export const adminService = {
 
   // Organizações
   async getOrganizations(params?: { page?: number; limit?: number; plan?: string; search?: string }) {
-    const queryParams = new URLSearchParams();
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-    if (params?.plan) queryParams.append('plan', params.plan);
-    if (params?.search) queryParams.append('search', params.search);
-
     const { data, error } = await supabase.functions.invoke('admin-organizations', {
-      body: {},
-      method: 'GET',
+      body: {
+        page: params?.page,
+        limit: params?.limit,
+        plan: params?.plan,
+        search: params?.search,
+      },
     });
     
     if (error) throw error;
@@ -27,14 +25,12 @@ export const adminService = {
 
   // Usuários
   async getUsers(params?: { page?: number; limit?: number; search?: string }) {
-    const queryParams = new URLSearchParams();
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-    if (params?.search) queryParams.append('search', params.search);
-
     const { data, error } = await supabase.functions.invoke('admin-users', {
-      body: {},
-      method: 'GET',
+      body: {
+        page: params?.page,
+        limit: params?.limit,
+        search: params?.search,
+      },
     });
     
     if (error) throw error;
