@@ -2,11 +2,15 @@ export const APP_NAME = "Archestra";
 export const APP_DESCRIPTION = "Plataforma SaaS de Gestão de Obras para Designers de Interiores";
 
 export const ROUTES = {
-  HOME: "/",
+  LANDING: "/",
+  PLANS: "/plans",
   AUTH: "/auth",
-  PROJECTS: "/projects",
-  CLIENTS: "/clients",
-  REPORTS: "/reports",
+  TERMS: "/terms",
+  PRIVACY: "/privacy",
+  APP: "/app",
+  PROJECTS: "/app/projects",
+  CLIENTS: "/app/clients",
+  REPORTS: "/app/reports",
 } as const;
 
 export const PROJECT_STATUS = {

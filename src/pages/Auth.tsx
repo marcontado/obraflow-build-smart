@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { authService } from "@/services/auth.service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,10 +11,14 @@ import heroImage from "@/assets/hero-workspace.jpg";
 
 export default function Auth() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  
+  const defaultTab = searchParams.get("tab") || "signin";
+  const selectedPlan = searchParams.get("plan");
 
   useEffect(() => {
     const checkSession = async () => {
@@ -66,6 +70,9 @@ export default function Auth() {
 
   return (
     <div className="flex min-h-screen">
+      <Link to="/" className="absolute top-4 left-4 z-10 text-sm text-muted-foreground hover:text-primary flex items-center gap-1">
+        ← Voltar para home
+      </Link>
       <div className="hidden lg:block lg:w-1/2 relative">
         <img
           src={heroImage}
@@ -95,7 +102,12 @@ export default function Auth() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="signin" className="w-full">
+            {selectedPlan && (
+              <div className="mb-4 p-3 bg-accent/10 rounded-md text-sm text-center">
+                Você selecionou o plano <strong>{selectedPlan}</strong>
+              </div>
+            )}
+            <Tabs defaultValue={defaultTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-4">
                 <TabsTrigger value="signin">Entrar</TabsTrigger>
                 <TabsTrigger value="signup">Criar Conta</TabsTrigger>

@@ -8,6 +8,10 @@ import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 import { ErrorBoundary } from "@/components/errors/ErrorBoundary";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/auth/AdminRoute";
+import Landing from "./pages/Landing";
+import Plans from "./pages/Plans";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
 import Index from "./pages/Index";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminOrganizations from "./pages/admin/Organizations";
@@ -40,20 +44,31 @@ const App = () => (
           <AuthProvider>
             <WorkspaceProvider>
               <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<Landing />} />
+                <Route path="/plans" element={<Plans />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Privacy />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/invite/accept" element={<InviteAccept />} />
+                
+                {/* Protected Routes - Workspace */}
                 <Route path="/workspace/select" element={<ProtectedRoute><WorkspaceSelect /></ProtectedRoute>} />
                 <Route path="/workspace/new" element={<ProtectedRoute><WorkspaceNew /></ProtectedRoute>} />
                 <Route path="/workspace/:id/settings" element={<ProtectedRoute><WorkspaceSettings /></ProtectedRoute>} />
-                <Route path="/plans" element={<ProtectedRoute><PlanUpgrade /></ProtectedRoute>} />
+                
+                {/* Protected Routes - App */}
+                <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+                <Route path="/app/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+                <Route path="/app/projects/:id" element={<ProtectedRoute><ProjectDetails /></ProtectedRoute>} />
+                <Route path="/app/clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
+                <Route path="/app/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+                <Route path="/app/plan-upgrade" element={<ProtectedRoute><PlanUpgrade /></ProtectedRoute>} />
+                
+                {/* Protected Routes - Subscription */}
                 <Route path="/subscription/success" element={<ProtectedRoute><SubscriptionSuccess /></ProtectedRoute>} />
                 <Route path="/subscription/cancel" element={<ProtectedRoute><SubscriptionCancel /></ProtectedRoute>} />
-                <Route path="/invite/accept" element={<InviteAccept />} />
-                <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-                <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
-                <Route path="/projects/:id" element={<ProtectedRoute><ProjectDetails /></ProtectedRoute>} />
-                <Route path="/clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
-                <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
                 
                 {/* Admin Routes */}
                 <Route path="/admin" element={<ProtectedRoute><AdminRoute><AdminDashboard /></AdminRoute></ProtectedRoute>} />
