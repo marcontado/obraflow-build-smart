@@ -1,7 +1,8 @@
-import { Bell, Search, LogOut, User } from "lucide-react";
+import { Bell, Search, LogOut, User, Shield } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,8 +12,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdmin } from "@/hooks/useAdmin";
 import { WorkspaceSelector } from "@/components/workspaces/WorkspaceSelector";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 interface HeaderProps {
   title: string;
@@ -21,6 +24,7 @@ interface HeaderProps {
 
 export function Header({ title, subtitle }: HeaderProps) {
   const { user, signOut } = useAuth();
+  const { isAdmin } = useAdmin();
 
   const handleSignOut = async () => {
     try {
@@ -50,6 +54,16 @@ export function Header({ title, subtitle }: HeaderProps) {
           </div>
 
           <WorkspaceSelector />
+
+          {isAdmin && (
+            <Link to="/admin">
+              <Button variant="outline" size="sm">
+                <Shield className="mr-2 h-4 w-4" />
+                Admin
+                <Badge variant="secondary" className="ml-2">PRO</Badge>
+              </Button>
+            </Link>
+          )}
 
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />

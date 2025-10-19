@@ -77,6 +77,30 @@ export type Database = {
           },
         ]
       }
+      platform_admins: {
+        Row: {
+          granted_at: string
+          granted_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["platform_role"]
+          user_id: string
+        }
+        Insert: {
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["platform_role"]
+          user_id: string
+        }
+        Update: {
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["platform_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -498,6 +522,10 @@ export type Database = {
         Args: { workspace_name: string }
         Returns: string
       }
+      get_platform_admin_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["platform_role"]
+      }
       has_workspace_role: {
         Args: {
           _role: Database["public"]["Enums"]["workspace_role"]
@@ -506,12 +534,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_platform_admin: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       is_workspace_member: {
         Args: { _user_id: string; _workspace_id: string }
         Returns: boolean
       }
     }
     Enums: {
+      platform_role: "super_admin" | "support" | "analyst"
       project_status:
         | "planning"
         | "in_progress"
@@ -650,6 +683,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      platform_role: ["super_admin", "support", "analyst"],
       project_status: [
         "planning",
         "in_progress",

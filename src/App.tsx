@@ -7,7 +7,12 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 import { ErrorBoundary } from "@/components/errors/ErrorBoundary";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { AdminRoute } from "@/components/auth/AdminRoute";
 import Index from "./pages/Index";
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminOrganizations from "./pages/admin/Organizations";
+import AdminUsers from "./pages/admin/Users";
+import AdminSubscriptions from "./pages/admin/Subscriptions";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Projects from "./pages/Projects";
@@ -49,6 +54,13 @@ const App = () => (
                 <Route path="/projects/:id" element={<ProtectedRoute><ProjectDetails /></ProtectedRoute>} />
                 <Route path="/clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
                 <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+                
+                {/* Admin Routes */}
+                <Route path="/admin" element={<ProtectedRoute><AdminRoute><AdminDashboard /></AdminRoute></ProtectedRoute>} />
+                <Route path="/admin/organizations" element={<ProtectedRoute><AdminRoute><AdminOrganizations /></AdminRoute></ProtectedRoute>} />
+                <Route path="/admin/users" element={<ProtectedRoute><AdminRoute><AdminUsers /></AdminRoute></ProtectedRoute>} />
+                <Route path="/admin/subscriptions" element={<ProtectedRoute><AdminRoute><AdminSubscriptions /></AdminRoute></ProtectedRoute>} />
+                
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
