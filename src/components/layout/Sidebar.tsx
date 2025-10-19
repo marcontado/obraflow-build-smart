@@ -1,8 +1,10 @@
-import { Home, FolderKanban, Users, BarChart3, LogOut } from "lucide-react";
+import { Home, FolderKanban, Users, BarChart3, LogOut, Lock } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { authService } from "@/services/auth.service";
 import { toast } from "sonner";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: Home },
@@ -13,6 +15,7 @@ const navigation = [
 
 export function Sidebar() {
   const navigate = useNavigate();
+  const { hasFeature } = useFeatureAccess();
 
   const handleLogout = async () => {
     const { error } = await authService.signOut();
@@ -31,24 +34,53 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 space-y-1 px-3 py-4">
-        {navigation.map((item) => (
-          <NavLink
-            key={item.name}
-            to={item.href}
-            end={item.href === "/"}
-            className={({ isActive }) =>
-              cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              )
+        <TooltipProvider>
+          {navigation.map((item) => {
+            const isReportsPage = item.href === "/reports";
+            const isLocked = isReportsPage && !hasFeature('reports');
+
+            if (isLocked) {
+              return (
+                <Tooltip key={item.name}>
+                  <TooltipTrigger asChild>
+                    <div
+                      className={cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors cursor-not-allowed",
+                        "text-muted-foreground/50"
+                      )}
+                    >
+                      <item.icon className="h-5 w-5" />
+                      {item.name}
+                      <Lock className="h-3 w-3 ml-auto" />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Disponível no plano Studio</p>
+                  </TooltipContent>
+                </Tooltip>
+              );
             }
-          >
-            <item.icon className="h-5 w-5" />
-            {item.name}
-          </NavLink>
-        ))}
+
+            return (
+              <NavLink
+                key={item.name}
+                to={item.href}
+                end={item.href === "/"}
+                className={({ isActive }) =>
+                  cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )
+                }
+              >
+                <item.icon className="h-5 w-5" />
+                {item.name}
+              </NavLink>
+            );
+          })}
+        </TooltipProvider>
       </nav>
 
       <div className="border-t p-3">

@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Edit, Trash2, Plus } from "lucide-react";
+import { ArrowLeft, Edit, Trash2, Plus, Calendar } from "lucide-react";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { FeatureUpgradeCard } from "@/components/plans/FeatureUpgradeCard";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
@@ -41,6 +43,7 @@ const statusLabels = {
 export default function ProjectDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { hasFeature, getRequiredPlan } = useFeatureAccess();
   const [project, setProject] = useState<any>(null);
   const [projectAreas, setProjectAreas] = useState<ProjectArea[]>([]);
   const [loading, setLoading] = useState(true);
@@ -342,11 +345,20 @@ export default function ProjectDetails() {
             </TabsContent>
 
             <TabsContent value="gantt">
-              <GanttChart
-                tasks={[]}
-                projectStartDate={project.start_date || undefined}
-                projectEndDate={project.end_date || undefined}
-              />
+              {hasFeature('gantt') ? (
+                <GanttChart
+                  tasks={[]}
+                  projectStartDate={project.start_date || undefined}
+                  projectEndDate={project.end_date || undefined}
+                />
+              ) : (
+                <FeatureUpgradeCard
+                  title="Cronograma (Gantt)"
+                  description="Visualize o cronograma do seu projeto com um gráfico Gantt interativo"
+                  requiredPlan={getRequiredPlan('gantt')}
+                  icon={<Calendar className="h-6 w-6" />}
+                />
+              )}
             </TabsContent>
 
             <TabsContent value="tasks">

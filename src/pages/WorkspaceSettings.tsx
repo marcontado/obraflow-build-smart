@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ export default function WorkspaceSettings() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { currentWorkspace } = useWorkspace();
+  const { hasFeature } = useFeatureAccess();
 
   if (!currentWorkspace || currentWorkspace.id !== id) {
     return (
@@ -42,7 +44,7 @@ export default function WorkspaceSettings() {
           <TabsList>
             <TabsTrigger value="general">Geral</TabsTrigger>
             <TabsTrigger value="members">Membros</TabsTrigger>
-            <TabsTrigger value="invites">Convites</TabsTrigger>
+            {hasFeature('invites') && <TabsTrigger value="invites">Convites</TabsTrigger>}
             <TabsTrigger value="plan">Plano</TabsTrigger>
             <TabsTrigger value="subscription">Assinatura</TabsTrigger>
           </TabsList>
@@ -55,9 +57,11 @@ export default function WorkspaceSettings() {
             <MembersList workspaceId={currentWorkspace.id} />
           </TabsContent>
 
-          <TabsContent value="invites">
-            <InvitesList workspaceId={currentWorkspace.id} />
-          </TabsContent>
+          {hasFeature('invites') && (
+            <TabsContent value="invites">
+              <InvitesList workspaceId={currentWorkspace.id} />
+            </TabsContent>
+          )}
 
           <TabsContent value="plan" className="space-y-4">
             <Card>

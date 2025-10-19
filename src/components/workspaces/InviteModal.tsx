@@ -5,6 +5,7 @@ import * as z from "zod";
 import { workspacesService } from "@/services/workspaces.service";
 import { useToast } from "@/hooks/use-toast";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { supabase } from "@/integrations/supabase/client";
 import { PLAN_NAMES } from "@/constants/plans";
 import {
@@ -37,6 +38,7 @@ interface InviteModalProps {
 export function InviteModal({ open, onClose, onSuccess, workspaceId }: InviteModalProps) {
   const { toast } = useToast();
   const { getWorkspaceLimits, currentWorkspace } = useWorkspace();
+  const { hasFeature } = useFeatureAccess();
   const [submitting, setSubmitting] = useState(false);
 
   const form = useForm<InviteFormData>({
@@ -51,6 +53,17 @@ export function InviteModal({ open, onClose, onSuccess, workspaceId }: InviteMod
     setSubmitting(true);
 
     try {
+      // Verificar se tem acesso à feature de convites
+      if (!hasFeature('invites')) {
+        toast({
+          title: "Recurso bloqueado",
+          description: "O sistema de convites está disponível a partir do plano Studio.",
+          variant: "destructive",
+        });
+        setSubmitting(false);
+        return;
+      }
+
       // Validar limite de membros
       const limits = getWorkspaceLimits();
       const { data: members } = await supabase
