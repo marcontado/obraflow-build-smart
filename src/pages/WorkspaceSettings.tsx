@@ -9,6 +9,7 @@ import { ArrowLeft } from "lucide-react";
 import { MembersList } from "@/components/workspaces/MembersList";
 import { InvitesList } from "@/components/workspaces/InvitesList";
 import { WorkspaceGeneralSettings } from "@/components/workspaces/WorkspaceGeneralSettings";
+import { SubscriptionManager } from "@/components/subscriptions/SubscriptionManager";
 import { PLAN_NAMES, PLAN_LIMITS } from "@/constants/plans";
 
 export default function WorkspaceSettings() {
@@ -43,6 +44,7 @@ export default function WorkspaceSettings() {
             <TabsTrigger value="members">Membros</TabsTrigger>
             <TabsTrigger value="invites">Convites</TabsTrigger>
             <TabsTrigger value="plan">Plano</TabsTrigger>
+            <TabsTrigger value="subscription">Assinatura</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general">
@@ -125,6 +127,10 @@ export default function WorkspaceSettings() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="subscription">
+            <SubscriptionManager workspaceId={currentWorkspace.id} />
           </TabsContent>
         </Tabs>
       </div>

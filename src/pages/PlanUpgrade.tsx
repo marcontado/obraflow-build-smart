@@ -6,8 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlanCard } from "@/components/plans/PlanCard";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
-import { SUBSCRIPTION_PLANS } from "@/constants/plans";
+import { SUBSCRIPTION_PLANS, STRIPE_PRICE_IDS } from "@/constants/plans";
 import { useToast } from "@/hooks/use-toast";
+import { subscriptionsService } from "@/services/subscriptions.service";
+import type { SubscriptionPlan } from "@/constants/plans";
 
 export default function PlanUpgrade() {
   const navigate = useNavigate();
@@ -15,11 +17,45 @@ export default function PlanUpgrade() {
   const { currentWorkspace } = useWorkspace();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
 
-  const handleSelectPlan = (plan: string) => {
-    toast({
-      title: "Em desenvolvimento",
-      description: "A integração com pagamentos será implementada em breve.",
-    });
+  const handleSelectPlan = async (plan: SubscriptionPlan) => {
+    if (plan === SUBSCRIPTION_PLANS.ATELIER) {
+      toast({
+        title: "Plano Gratuito",
+        description: "Você já está no plano gratuito!",
+      });
+      return;
+    }
+
+    if (!currentWorkspace) {
+      toast({
+        title: "Erro",
+        description: "Nenhum workspace selecionado",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const priceId = STRIPE_PRICE_IDS[plan as Exclude<SubscriptionPlan, 'atelier'>][billingCycle];
+      
+      toast({
+        title: "Redirecionando...",
+        description: "Você será redirecionado para o checkout do Stripe",
+      });
+
+      const { url } = await subscriptionsService.createCheckout(currentWorkspace.id, priceId);
+      
+      if (url) {
+        window.location.href = url;
+      }
+    } catch (error: any) {
+      console.error('Error creating checkout:', error);
+      toast({
+        title: "Erro ao processar",
+        description: error.message || "Tente novamente mais tarde",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

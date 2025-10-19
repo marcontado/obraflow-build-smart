@@ -81,3 +81,14 @@ export const PLAN_PRICES: Record<SubscriptionPlan, { monthly: number; yearly: nu
   studio: { monthly: 149, yearly: 1490 },
   dommus: { monthly: 399, yearly: 3990 },
 };
+
+export const STRIPE_PRICE_IDS: Record<Exclude<SubscriptionPlan, 'atelier'>, { monthly: string; yearly: string }> = {
+  studio: {
+    monthly: "price_1SJo9VR2sSXsKMlD3JF3b9ti",
+    yearly: "price_1SJoJpR2sSXsKMlDgwa3VuZ9",
+  },
+  dommus: {
+    monthly: "price_1SJo9VR2sSXsKMlDMXxkrEAE",
+    yearly: "price_1SJoKdR2sSXsKMlDb1Vu6m6F",
+  },
+};
