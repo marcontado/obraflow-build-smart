@@ -29,7 +29,7 @@ export default function AdminOrganizations() {
   const [organizations, setOrganizations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [planFilter, setPlanFilter] = useState<string>("");
+  const [planFilter, setPlanFilter] = useState<string>("all");
 
   useEffect(() => {
     loadOrganizations();
@@ -39,7 +39,7 @@ export default function AdminOrganizations() {
     setLoading(true);
     try {
       const data = await adminService.getOrganizations({
-        plan: planFilter || undefined,
+        plan: planFilter && planFilter !== 'all' ? planFilter : undefined,
         search: search || undefined,
       });
       setOrganizations(data.organizations || []);
@@ -103,7 +103,7 @@ export default function AdminOrganizations() {
               <SelectValue placeholder="Todos os planos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os planos</SelectItem>
+              <SelectItem value="all">Todos os planos</SelectItem>
               <SelectItem value="atelier">Atelier</SelectItem>
               <SelectItem value="studio">Studio</SelectItem>
               <SelectItem value="dommus">Dommus</SelectItem>
