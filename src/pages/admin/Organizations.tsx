@@ -63,12 +63,12 @@ export default function AdminOrganizations() {
     const variants: Record<string, any> = {
       atelier: "secondary",
       studio: "default",
-      dommus: "default",
+      domus: "default",
     };
     
     return (
       <Badge variant={variants[plan] || "outline"}>
-        {plan === 'atelier' ? 'Atelier' : plan === 'studio' ? 'Studio' : 'Dommus'}
+        {plan === 'atelier' ? 'Atelier' : plan === 'studio' ? 'Studio' : 'Domus'}
       </Badge>
     );
   };
@@ -106,7 +106,7 @@ export default function AdminOrganizations() {
               <SelectItem value="all">Todos os planos</SelectItem>
               <SelectItem value="atelier">Atelier</SelectItem>
               <SelectItem value="studio">Studio</SelectItem>
-              <SelectItem value="dommus">Dommus</SelectItem>
+              <SelectItem value="domus">Domus</SelectItem>
             </SelectContent>
           </Select>
           <Button onClick={handleSearch}>Buscar</Button>

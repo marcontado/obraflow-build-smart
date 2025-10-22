@@ -17,13 +17,13 @@ export function useFeatureAccess() {
     return true;
   };
 
-  const getRequiredPlan = (feature: keyof PlanLimits['features']): 'studio' | 'dommus' => {
+  const getRequiredPlan = (feature: keyof PlanLimits['features']): 'studio' | 'domus' => {
     // Gantt, Reports, Invites → Studio
     if (['gantt', 'reports', 'invites'].includes(feature)) {
       return 'studio';
     }
-    // AI Assist, Client Portal, Customization → Dommus
-    return 'dommus';
+    // AI Assist, Client Portal, Customization → Domus
+    return 'domus';
   };
   
   return { 

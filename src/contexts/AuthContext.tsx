@@ -28,6 +28,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (event === 'SIGNED_OUT') {
           navigate('/auth');
         }
+        
+        // Check for pending plan selection after signup
+        if (event === 'SIGNED_IN' && session) {
+          const pendingPlan = localStorage.getItem('pending_plan_selection');
+          if (pendingPlan) {
+            localStorage.removeItem('pending_plan_selection');
+            // Small delay to ensure workspace context is loaded
+            setTimeout(() => {
+              navigate(`/app/plan-upgrade?selected=${pendingPlan}`, { replace: true });
+            }, 500);
+          }
+        }
       }
     );
 

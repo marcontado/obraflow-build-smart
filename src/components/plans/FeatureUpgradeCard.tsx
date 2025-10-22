@@ -7,7 +7,7 @@ import { Crown, Sparkles, Lock } from "lucide-react";
 interface FeatureUpgradeCardProps {
   title: string;
   description: string;
-  requiredPlan: 'studio' | 'dommus';
+  requiredPlan: 'studio' | 'domus';
   icon?: React.ReactNode;
 }
 
@@ -26,8 +26,8 @@ export function FeatureUpgradeCard({
       badgeColor: "bg-gradient-to-r from-blue-500 to-cyan-500",
       icon: <Crown className="h-5 w-5" />,
     },
-    dommus: {
-      name: "Dommus",
+    domus: {
+      name: "Domus",
       badge: "BUSINESS",
       badgeColor: "bg-gradient-to-r from-purple-500 to-pink-500",
       icon: <Sparkles className="h-5 w-5" />,

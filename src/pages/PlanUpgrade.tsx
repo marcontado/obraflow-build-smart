@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +16,15 @@ export default function PlanUpgrade() {
   const { toast } = useToast();
   const { currentWorkspace } = useWorkspace();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
+  const [searchParams] = useSearchParams();
+  const selectedPlan = searchParams.get("selected");
+
+  // Auto-trigger checkout if selected plan is in URL
+  useEffect(() => {
+    if (selectedPlan && selectedPlan !== SUBSCRIPTION_PLANS.ATELIER && currentWorkspace) {
+      handleSelectPlan(selectedPlan as SubscriptionPlan);
+    }
+  }, [selectedPlan, currentWorkspace]);
 
   const handleSelectPlan = async (plan: SubscriptionPlan) => {
     if (plan === SUBSCRIPTION_PLANS.ATELIER) {
@@ -89,20 +98,20 @@ export default function PlanUpgrade() {
       <div className="grid gap-6 md:grid-cols-3">
         <PlanCard
           plan={SUBSCRIPTION_PLANS.ATELIER}
-          currentPlan={currentWorkspace?.subscription_plan}
+          currentPlan={currentWorkspace?.subscription_plan as SubscriptionPlan}
           onSelect={() => handleSelectPlan(SUBSCRIPTION_PLANS.ATELIER)}
           billingCycle={billingCycle}
         />
         <PlanCard
           plan={SUBSCRIPTION_PLANS.STUDIO}
-          currentPlan={currentWorkspace?.subscription_plan}
+          currentPlan={currentWorkspace?.subscription_plan as SubscriptionPlan}
           onSelect={() => handleSelectPlan(SUBSCRIPTION_PLANS.STUDIO)}
           billingCycle={billingCycle}
         />
         <PlanCard
-          plan={SUBSCRIPTION_PLANS.DOMMUS}
-          currentPlan={currentWorkspace?.subscription_plan}
-          onSelect={() => handleSelectPlan(SUBSCRIPTION_PLANS.DOMMUS)}
+          plan={SUBSCRIPTION_PLANS.DOMUS}
+          currentPlan={currentWorkspace?.subscription_plan as SubscriptionPlan}
+          onSelect={() => handleSelectPlan(SUBSCRIPTION_PLANS.DOMUS)}
           billingCycle={billingCycle}
         />
       </div>

@@ -194,9 +194,9 @@ export default function Auth() {
                   </Button>
                 </form>
               </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+          </Tabs>
+        </CardContent>
+      </Card>
       </div>
     </div>
   );

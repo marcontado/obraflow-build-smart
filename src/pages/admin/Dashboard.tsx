@@ -63,7 +63,7 @@ export default function AdminDashboard() {
           <MetricCard
             title="Total de Organizações"
             value={stats?.totalWorkspaces || 0}
-            description={`Atelier: ${stats?.workspacesByPlan?.atelier || 0} | Studio: ${stats?.workspacesByPlan?.studio || 0} | Dommus: ${stats?.workspacesByPlan?.dommus || 0}`}
+            description={`Atelier: ${stats?.workspacesByPlan?.atelier || 0} | Studio: ${stats?.workspacesByPlan?.studio || 0} | Domus: ${stats?.workspacesByPlan?.domus || 0}`}
             icon={Building2}
           />
 
@@ -109,8 +109,8 @@ export default function AdminDashboard() {
           />
 
           <MetricCard
-            title="Plano Dommus"
-            value={stats?.workspacesByPlan?.dommus || 0}
+            title="Plano Domus"
+            value={stats?.workspacesByPlan?.domus || 0}
             description="R$ 399/mês"
             icon={TrendingUp}
             className="border-l-4 border-l-secondary"

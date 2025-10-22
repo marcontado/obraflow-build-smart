@@ -1,7 +1,7 @@
 export const SUBSCRIPTION_PLANS = {
   ATELIER: "atelier",
   STUDIO: "studio",
-  DOMMUS: "dommus",
+  DOMUS: "domus",
 } as const;
 
 export type SubscriptionPlan = typeof SUBSCRIPTION_PLANS[keyof typeof SUBSCRIPTION_PLANS];
@@ -53,7 +53,7 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, PlanLimits> = {
       customization: false,
     },
   },
-  dommus: {
+  domus: {
     workspaces: Infinity,
     membersPerWorkspace: Infinity,
     activeProjects: Infinity,
@@ -73,13 +73,13 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, PlanLimits> = {
 export const PLAN_NAMES: Record<SubscriptionPlan, string> = {
   atelier: "Atelier",
   studio: "Studio",
-  dommus: "Dommus",
+  domus: "Domus",
 };
 
 export const PLAN_PRICES: Record<SubscriptionPlan, { monthly: number; yearly: number }> = {
   atelier: { monthly: 0, yearly: 0 },
-  studio: { monthly: 149, yearly: 1490 },
-  dommus: { monthly: 399, yearly: 3990 },
+  studio: { monthly: 149, yearly: 1610 },
+  domus: { monthly: 399, yearly: 4310 },
 };
 
 export const STRIPE_PRICE_IDS: Record<Exclude<SubscriptionPlan, 'atelier'>, { monthly: string; yearly: string }> = {
@@ -87,7 +87,7 @@ export const STRIPE_PRICE_IDS: Record<Exclude<SubscriptionPlan, 'atelier'>, { mo
     monthly: "price_1SJo9VR2sSXsKMlD3JF3b9ti",
     yearly: "price_1SJoJpR2sSXsKMlDgwa3VuZ9",
   },
-  dommus: {
+  domus: {
     monthly: "price_1SJo9VR2sSXsKMlDMXxkrEAE",
     yearly: "price_1SJoKdR2sSXsKMlDb1Vu6m6F",
   },
