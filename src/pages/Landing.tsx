@@ -81,7 +81,7 @@ export default function Landing() {
     },
     {
       name: "Studio",
-      price: billingCycle === "monthly" ? 149 : 134,
+      price: 149,
       description: "Para designers e pequenos escritórios",
       planId: "studio",
       features: [
@@ -95,7 +95,7 @@ export default function Landing() {
     },
     {
       name: "Domus",
-      price: billingCycle === "monthly" ? 399 : 359,
+      price: 399,
       description: "Para escritórios estabelecidos",
       planId: "domus",
       features: [
