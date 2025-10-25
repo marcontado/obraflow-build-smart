@@ -17,10 +17,12 @@ export default function Plans() {
       description: "Para começar sua jornada",
       features: [
         "1 workspace",
+        "Até 3 membros",
         "2 projetos ativos",
+        "Até 5 clientes",
         "Kanban básico",
         "Relatórios simples",
-        "Armazenamento 500MB",
+        "Uploads até 2 GB",
         "Suporte por email",
       ],
     },
@@ -92,12 +94,12 @@ export default function Plans() {
     {
       question: "Há desconto para pagamento anual?",
       answer:
-        "Sim! Ao optar pelo pagamento anual, você economiza 20% em comparação ao pagamento mensal. São 10 meses pelo preço de 12!",
+        "Sim! Ao optar pelo pagamento anual, você economiza 10% em comparação ao pagamento mensal.",
     },
     {
       question: "Precisam de ajuda personalizada?",
       answer:
-        "Nosso time de suporte está sempre disponível. Planos Studio têm suporte prioritário por email, e planos Dommus têm suporte 24/7 incluindo WhatsApp.",
+        "Nosso time de suporte está sempre disponível. Planos Studio têm suporte prioritário por email, e planos Domus têm suporte 24/7 incluindo WhatsApp.",
     },
   ];
 
@@ -128,7 +130,7 @@ export default function Plans() {
               >
                 Anual
                 <span className="ml-2 text-xs bg-accent text-accent-foreground px-2 py-0.5 rounded-full">
-                  -20%
+                  -10%
                 </span>
               </Button>
             </div>

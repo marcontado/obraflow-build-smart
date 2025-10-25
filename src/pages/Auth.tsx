@@ -24,14 +24,20 @@ export default function Auth() {
     const checkSession = async () => {
       const { session } = await authService.getCurrentSession();
       if (session) {
-        navigate("/");
+        navigate("/app");
       }
     };
     checkSession();
 
     const { data: { subscription } } = authService.onAuthStateChange((_event, session) => {
       if (session) {
-        navigate("/");
+        const pendingPlan = localStorage.getItem("pending_plan_selection");
+        if (pendingPlan) {
+          localStorage.removeItem("pending_plan_selection");
+          navigate(`/app/plan-upgrade?selected=${pendingPlan}`);
+        } else {
+          navigate("/app");
+        }
       }
     });
 
@@ -41,6 +47,11 @@ export default function Auth() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    // Save selected plan if present in URL
+    if (selectedPlan) {
+      localStorage.setItem("pending_plan_selection", selectedPlan);
+    }
 
     const { error } = await authService.signUp(email, password);
 
@@ -65,6 +76,7 @@ export default function Auth() {
       toast.error(error.message);
     } else {
       toast.success("Login realizado com sucesso!");
+      navigate("/app");
     }
   };
 

@@ -83,13 +83,13 @@ export default function PlanUpgrade() {
       <Card className="mb-8">
         <CardHeader>
           <CardTitle>Ciclo de cobrança</CardTitle>
-          <CardDescription>Economize até 17% com o plano anual</CardDescription>
+          <CardDescription>Economize 10% com o plano anual</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs value={billingCycle} onValueChange={(v) => setBillingCycle(v as "monthly" | "yearly")}>
             <TabsList className="grid w-full max-w-md grid-cols-2">
               <TabsTrigger value="monthly">Mensal</TabsTrigger>
-              <TabsTrigger value="yearly">Anual (economize 17%)</TabsTrigger>
+              <TabsTrigger value="yearly">Anual (economize 10%)</TabsTrigger>
             </TabsList>
           </Tabs>
         </CardContent>

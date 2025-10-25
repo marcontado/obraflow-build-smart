@@ -74,9 +74,11 @@ export default function Landing() {
       description: "Para começar sua jornada",
       features: [
         "1 workspace",
+        "Até 3 membros e 5 clientes",
         "2 projetos ativos",
         "Kanban básico",
         "Relatórios simples",
+        "Uploads até 2 GB",
       ],
     },
     {
