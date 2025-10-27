@@ -29,15 +29,10 @@ export default function Auth() {
     };
     checkSession();
 
-    const { data: { subscription } } = authService.onAuthStateChange((_event, session) => {
-      if (session) {
-        const pendingPlan = localStorage.getItem("pending_plan_selection");
-        if (pendingPlan) {
-          localStorage.removeItem("pending_plan_selection");
-          navigate(`/app/plan-upgrade?selected=${pendingPlan}`);
-        } else {
-          navigate("/app");
-        }
+    const { data: { subscription } } = authService.onAuthStateChange((event, session) => {
+      if (session && event === 'SIGNED_IN') {
+        // For sign in, go to /app (ProtectedRoute will handle workspace check)
+        navigate("/app");
       }
     });
 
@@ -60,7 +55,9 @@ export default function Auth() {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Conta criada com sucesso! Você já pode fazer login.");
+      toast.success("Conta criada com sucesso! Redirecionando...");
+      // Redirect to onboarding for new users
+      setTimeout(() => navigate("/onboarding"), 1000);
     }
   };
 

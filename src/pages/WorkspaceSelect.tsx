@@ -1,4 +1,3 @@
-import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { Button } from "@/components/ui/button";
@@ -9,19 +8,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function WorkspaceSelect() {
   const navigate = useNavigate();
   const { workspaces, loading, switchWorkspace, canCreateWorkspace } = useWorkspace();
-  const hasNavigated = useRef(false);
-
-  useEffect(() => {
-    // Se só tem um workspace, selecionar automaticamente (apenas uma vez)
-    if (!loading && workspaces.length === 1 && !hasNavigated.current) {
-      hasNavigated.current = true;
-      switchWorkspace(workspaces[0].id).then(() => navigate("/app"));
-    }
-  }, [loading, workspaces, switchWorkspace, navigate]);
 
   const handleSelectWorkspace = async (workspaceId: string) => {
     await switchWorkspace(workspaceId);
-    navigate("/app");
+    navigate(`/workspace/${workspaceId}/settings`);
   };
 
   if (loading) {
@@ -42,9 +32,9 @@ export default function WorkspaceSelect() {
     <div className="flex min-h-screen items-center justify-center bg-background p-6">
       <div className="w-full max-w-2xl space-y-6">
         <div className="text-center">
-          <h1 className="text-3xl font-bold">Selecione um Workspace</h1>
+          <h1 className="text-3xl font-bold">Seus Workspaces</h1>
           <p className="mt-2 text-muted-foreground">
-            Escolha o workspace que deseja acessar
+            Selecione um workspace para gerenciar suas configurações
           </p>
         </div>
 

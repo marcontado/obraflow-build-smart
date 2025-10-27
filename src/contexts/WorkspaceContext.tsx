@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
 import { workspacesService } from "@/services/workspaces.service";
 import { useAuth } from "./AuthContext";
 import { PLAN_LIMITS, type SubscriptionPlan } from "@/constants/plans";
@@ -16,14 +15,13 @@ interface WorkspaceContextType {
   refreshWorkspaces: () => Promise<void>;
   canCreateWorkspace: () => boolean;
   getWorkspaceLimits: () => typeof PLAN_LIMITS[SubscriptionPlan];
+  hasWorkspaces: () => boolean;
 }
 
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
   const [currentWorkspace, setCurrentWorkspace] = useState<Workspace | null>(null);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,18 +44,15 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       setWorkspaces(data || []);
 
       // Se não há workspace atual, tentar carregar do localStorage ou pegar o primeiro
-      if (!currentWorkspace) {
+      if (!currentWorkspace && data && data.length > 0) {
         const savedWorkspaceId = localStorage.getItem("currentWorkspaceId");
         const workspaceToSet = savedWorkspaceId
-          ? data?.find((w) => w.id === savedWorkspaceId)
-          : data?.[0];
+          ? data.find((w) => w.id === savedWorkspaceId)
+          : data[0];
 
         if (workspaceToSet) {
           setCurrentWorkspace(workspaceToSet);
           localStorage.setItem("currentWorkspaceId", workspaceToSet.id);
-        } else if (data && data.length === 0 && location.pathname !== "/workspace/select") {
-          // Nenhum workspace encontrado - redirecionar para criar (apenas se não estiver já na rota)
-          navigate("/workspace/select");
         }
       }
     } catch (error) {
@@ -68,7 +63,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         variant: "destructive",
       });
     }
-  }, [user, currentWorkspace, navigate, location.pathname]);
+  }, [user, currentWorkspace]);
 
   const switchWorkspace = async (workspaceId: string) => {
     const workspace = workspaces.find((w) => w.id === workspaceId);
@@ -87,6 +82,10 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const getWorkspaceLimits = () => {
     if (!currentWorkspace) return PLAN_LIMITS.atelier;
     return PLAN_LIMITS[currentWorkspace.subscription_plan as SubscriptionPlan];
+  };
+
+  const hasWorkspaces = () => {
+    return workspaces.length > 0;
   };
 
   useEffect(() => {
@@ -109,6 +108,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         refreshWorkspaces,
         canCreateWorkspace,
         getWorkspaceLimits,
+        hasWorkspaces,
       }}
     >
       {children}

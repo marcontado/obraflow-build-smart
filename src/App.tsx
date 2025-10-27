@@ -27,6 +27,7 @@ import NotFound from "./pages/NotFound";
 import WorkspaceSelect from "./pages/WorkspaceSelect";
 import WorkspaceNew from "./pages/WorkspaceNew";
 import WorkspaceSettings from "./pages/WorkspaceSettings";
+import Onboarding from "./pages/Onboarding";
 import InviteAccept from "./pages/InviteAccept";
 import PlanUpgrade from "./pages/PlanUpgrade";
 import SubscriptionSuccess from "./pages/SubscriptionSuccess";
@@ -57,6 +58,9 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/invite/accept" element={<InviteAccept />} />
+                
+                {/* Protected Routes - Onboarding */}
+                <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
                 
                 {/* Protected Routes - Workspace */}
                 <Route path="/workspace/select" element={<ProtectedRoute><WorkspaceSelect /></ProtectedRoute>} />

@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 const workspaceSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório").max(100, "Nome muito longo"),
@@ -18,10 +18,10 @@ const workspaceSchema = z.object({
 
 type WorkspaceFormData = z.infer<typeof workspaceSchema>;
 
-export default function WorkspaceNew() {
+export default function Onboarding() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { refreshWorkspaces, canCreateWorkspace } = useWorkspace();
+  const { refreshWorkspaces } = useWorkspace();
   const [submitting, setSubmitting] = useState(false);
 
   const form = useForm<WorkspaceFormData>({
@@ -32,15 +32,6 @@ export default function WorkspaceNew() {
   });
 
   const onSubmit = async (data: WorkspaceFormData) => {
-    if (!canCreateWorkspace()) {
-      toast({
-        title: "Limite atingido",
-        description: "Você atingiu o limite de workspaces do seu plano atual.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setSubmitting(true);
 
     const { data: workspace, error } = await workspacesService.create(data.name);
@@ -56,66 +47,62 @@ export default function WorkspaceNew() {
     }
 
     toast({
-      title: "Workspace criado!",
+      title: "Bem-vindo ao Archestra!",
       description: "Seu workspace foi criado com sucesso.",
     });
 
     await refreshWorkspaces();
-    
-    // Redirect to workspace settings
-    if (workspace) {
-      navigate(`/workspace/${workspace.id}/settings`);
-    }
+    navigate("/app");
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-6">
-      <Card className="w-full max-w-lg">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div>
-              <CardTitle>Criar Novo Workspace</CardTitle>
-              <CardDescription>
-                Configure seu workspace para começar a gerenciar projetos
-              </CardDescription>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-6">
+      <Card className="w-full max-w-lg shadow-lg">
+        <CardHeader className="text-center space-y-4">
+          <div className="flex justify-center">
+            <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+              <Sparkles className="h-8 w-8 text-primary" />
             </div>
+          </div>
+          <div>
+            <CardTitle className="text-3xl">Bem-vindo ao Archestra!</CardTitle>
+            <CardDescription className="text-base mt-2">
+              Vamos criar seu primeiro workspace para começar a gerenciar seus projetos
+            </CardDescription>
           </div>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nome do Workspace</FormLabel>
+                    <FormLabel>Nome do seu Workspace</FormLabel>
                     <FormControl>
-                      <Input placeholder="Meu Escritório" {...field} />
+                      <Input 
+                        placeholder="Ex: Meu Escritório, Studio Design, etc." 
+                        {...field}
+                        className="text-base"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate(-1)}
-                  className="flex-1"
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit" disabled={submitting} className="flex-1">
-                  {submitting ? "Criando..." : "Criar Workspace"}
-                </Button>
-              </div>
+              <Button type="submit" disabled={submitting} className="w-full h-11">
+                {submitting ? "Criando seu workspace..." : "Criar Workspace e Começar"}
+              </Button>
             </form>
           </Form>
+
+          <div className="mt-6 p-4 bg-accent/50 rounded-lg">
+            <p className="text-sm text-muted-foreground text-center">
+              Você está no <strong>Plano Gratuito</strong>. Pode fazer upgrade a qualquer momento!
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>
