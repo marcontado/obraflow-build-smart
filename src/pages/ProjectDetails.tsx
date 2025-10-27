@@ -70,7 +70,7 @@ export default function ProjectDetails() {
     } catch (error: any) {
       toast.error("Erro ao carregar projeto");
       console.error(error);
-      navigate("/projects");
+      navigate("/app/projects");
     } finally {
       setLoading(false);
     }
@@ -97,7 +97,7 @@ export default function ProjectDetails() {
       if (error) throw error;
 
       toast.success("Projeto excluído com sucesso!");
-      navigate("/projects");
+      navigate("/app/projects");
     } catch (error: any) {
       toast.error(error.message || "Erro ao excluir projeto");
     } finally {
@@ -162,7 +162,7 @@ export default function ProjectDetails() {
         
         <main className="flex-1 overflow-y-auto p-6">
           <div className="mb-6 flex items-center justify-between">
-            <Button variant="ghost" onClick={() => navigate("/projects")} className="gap-2">
+            <Button variant="ghost" onClick={() => navigate("/app/projects")} className="gap-2">
               <ArrowLeft className="h-4 w-4" />
               Voltar
             </Button>

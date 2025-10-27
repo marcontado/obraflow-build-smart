@@ -90,7 +90,7 @@ const Index = () => {
           <div className="mb-6 flex items-center justify-between">
             <h3 className="text-lg font-semibold">Projetos Recentes</h3>
             <button
-              onClick={() => navigate("/projects")}
+              onClick={() => navigate("/app/projects")}
               className="text-sm text-primary hover:underline"
             >
               Ver todos
@@ -111,7 +111,7 @@ const Index = () => {
                 Comece criando seu primeiro projeto
               </p>
               <button
-                onClick={() => navigate("/projects")}
+                onClick={() => navigate("/app/projects")}
                 className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
               >
                 Criar Projeto
@@ -131,7 +131,7 @@ const Index = () => {
                   spent={project.spent}
                   startDate={project.start_date}
                   endDate={project.end_date}
-                  onClick={() => navigate(`/projects/${project.id}`)}
+                  onClick={() => navigate(`/app/projects/${project.id}`)}
                 />
               ))}
             </div>
