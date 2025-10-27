@@ -1,9 +1,10 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { workspacesService } from "@/services/workspaces.service";
 import { useAuth } from "./AuthContext";
 import { PLAN_LIMITS, type SubscriptionPlan } from "@/constants/plans";
 import type { Database } from "@/integrations/supabase/types";
+import { toast } from "@/hooks/use-toast";
 
 type Workspace = Database["public"]["Tables"]["workspaces"]["Row"];
 
@@ -22,37 +23,52 @@ const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefin
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [currentWorkspace, setCurrentWorkspace] = useState<Workspace | null>(null);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const refreshWorkspaces = async () => {
+  const refreshWorkspaces = useCallback(async () => {
     if (!user) return;
 
-    const { data, error } = await workspacesService.getAll();
-    if (error) {
-      console.error("Error fetching workspaces:", error);
-      return;
-    }
-
-    setWorkspaces(data || []);
-
-    // Se não há workspace atual, tentar carregar do localStorage ou pegar o primeiro
-    if (!currentWorkspace) {
-      const savedWorkspaceId = localStorage.getItem("currentWorkspaceId");
-      const workspaceToSet = savedWorkspaceId
-        ? data?.find((w) => w.id === savedWorkspaceId)
-        : data?.[0];
-
-      if (workspaceToSet) {
-        setCurrentWorkspace(workspaceToSet);
-        localStorage.setItem("currentWorkspaceId", workspaceToSet.id);
-      } else if (data && data.length === 0) {
-        // Nenhum workspace encontrado - redirecionar para criar
-        navigate("/workspace/select");
+    try {
+      const { data, error } = await workspacesService.getAll();
+      if (error) {
+        console.error("Error fetching workspaces:", error);
+        toast({
+          title: "Erro ao carregar workspaces",
+          description: "Não foi possível carregar seus workspaces. Tente novamente.",
+          variant: "destructive",
+        });
+        return;
       }
+
+      setWorkspaces(data || []);
+
+      // Se não há workspace atual, tentar carregar do localStorage ou pegar o primeiro
+      if (!currentWorkspace) {
+        const savedWorkspaceId = localStorage.getItem("currentWorkspaceId");
+        const workspaceToSet = savedWorkspaceId
+          ? data?.find((w) => w.id === savedWorkspaceId)
+          : data?.[0];
+
+        if (workspaceToSet) {
+          setCurrentWorkspace(workspaceToSet);
+          localStorage.setItem("currentWorkspaceId", workspaceToSet.id);
+        } else if (data && data.length === 0 && location.pathname !== "/workspace/select") {
+          // Nenhum workspace encontrado - redirecionar para criar (apenas se não estiver já na rota)
+          navigate("/workspace/select");
+        }
+      }
+    } catch (error) {
+      console.error("Unexpected error fetching workspaces:", error);
+      toast({
+        title: "Erro inesperado",
+        description: "Ocorreu um erro ao carregar os workspaces.",
+        variant: "destructive",
+      });
     }
-  };
+  }, [user, currentWorkspace, navigate, location.pathname]);
 
   const switchWorkspace = async (workspaceId: string) => {
     const workspace = workspaces.find((w) => w.id === workspaceId);
@@ -81,7 +97,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       setCurrentWorkspace(null);
       setWorkspaces([]);
     }
-  }, [user]);
+  }, [user, refreshWorkspaces]);
 
   return (
     <WorkspaceContext.Provider

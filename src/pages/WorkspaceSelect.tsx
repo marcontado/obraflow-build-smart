@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { Button } from "@/components/ui/button";
@@ -9,13 +9,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function WorkspaceSelect() {
   const navigate = useNavigate();
   const { workspaces, loading, switchWorkspace, canCreateWorkspace } = useWorkspace();
+  const hasNavigated = useRef(false);
 
   useEffect(() => {
-    // Se só tem um workspace, selecionar automaticamente
-    if (!loading && workspaces.length === 1) {
+    // Se só tem um workspace, selecionar automaticamente (apenas uma vez)
+    if (!loading && workspaces.length === 1 && !hasNavigated.current) {
+      hasNavigated.current = true;
       switchWorkspace(workspaces[0].id).then(() => navigate("/"));
     }
-  }, [loading, workspaces]);
+  }, [loading, workspaces, switchWorkspace, navigate]);
 
   const handleSelectWorkspace = async (workspaceId: string) => {
     await switchWorkspace(workspaceId);
