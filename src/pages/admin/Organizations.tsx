@@ -20,9 +20,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, RefreshCw } from "lucide-react";
+import { Search, RefreshCw, Settings } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { ChangePlanDialog } from "@/components/admin/ChangePlanDialog";
 
 export default function AdminOrganizations() {
   const { toast } = useToast();
@@ -30,6 +31,17 @@ export default function AdminOrganizations() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [planFilter, setPlanFilter] = useState<string>("all");
+  const [changePlanDialog, setChangePlanDialog] = useState<{
+    open: boolean;
+    workspaceId: string;
+    workspaceName: string;
+    currentPlan: string;
+  }>({
+    open: false,
+    workspaceId: "",
+    workspaceName: "",
+    currentPlan: "",
+  });
 
   useEffect(() => {
     loadOrganizations();
@@ -124,6 +136,7 @@ export default function AdminOrganizations() {
                 <TableHead>Projetos</TableHead>
                 <TableHead>Criado em</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -135,7 +148,7 @@ export default function AdminOrganizations() {
                 </TableRow>
               ) : organizations.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                     Nenhuma organização encontrada
                   </TableCell>
                 </TableRow>
@@ -155,12 +168,45 @@ export default function AdminOrganizations() {
                         {org.subscription?.status === 'active' ? 'Ativo' : 'Inativo'}
                       </Badge>
                     </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() =>
+                          setChangePlanDialog({
+                            open: true,
+                            workspaceId: org.id,
+                            workspaceName: org.name,
+                            currentPlan: org.subscription_plan,
+                          })
+                        }
+                        title="Alterar plano"
+                      >
+                        <Settings className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))
               )}
             </TableBody>
           </Table>
         </div>
+
+        <ChangePlanDialog
+          open={changePlanDialog.open}
+          onClose={() =>
+            setChangePlanDialog({
+              open: false,
+              workspaceId: "",
+              workspaceName: "",
+              currentPlan: "",
+            })
+          }
+          onSuccess={loadOrganizations}
+          workspaceId={changePlanDialog.workspaceId}
+          workspaceName={changePlanDialog.workspaceName}
+          currentPlan={changePlanDialog.currentPlan}
+        />
       </div>
     </AdminLayout>
   );
