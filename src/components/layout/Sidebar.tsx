@@ -7,10 +7,10 @@ import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const navigation = [
-  { name: "Dashboard", href: "/", icon: Home },
-  { name: "Projetos", href: "/projects", icon: FolderKanban },
-  { name: "Clientes", href: "/clients", icon: Users },
-  { name: "Relatórios", href: "/reports", icon: BarChart3 },
+  { name: "Dashboard", href: "/app", icon: Home },
+  { name: "Projetos", href: "/app/projects", icon: FolderKanban },
+  { name: "Clientes", href: "/app/clients", icon: Users },
+  { name: "Relatórios", href: "/app/reports", icon: BarChart3 },
 ];
 
 export function Sidebar() {
@@ -36,7 +36,7 @@ export function Sidebar() {
       <nav className="flex-1 space-y-1 px-3 py-4">
         <TooltipProvider>
           {navigation.map((item) => {
-            const isReportsPage = item.href === "/reports";
+            const isReportsPage = item.href === "/app/reports";
             const isLocked = isReportsPage && !hasFeature('reports');
 
             if (isLocked) {
@@ -65,7 +65,7 @@ export function Sidebar() {
               <NavLink
                 key={item.name}
                 to={item.href}
-                end={item.href === "/"}
+                end={item.href === "/app"}
                 className={({ isActive }) =>
                   cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
