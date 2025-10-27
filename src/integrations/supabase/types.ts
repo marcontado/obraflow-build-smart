@@ -506,10 +506,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      count_user_workspaces: {
-        Args: { _user_id: string }
-        Returns: number
-      }
+      count_user_workspaces: { Args: { _user_id: string }; Returns: number }
       count_workspace_members: {
         Args: { _workspace_id: string }
         Returns: number
@@ -534,10 +531,7 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_platform_admin: {
-        Args: { _user_id: string }
-        Returns: boolean
-      }
+      is_platform_admin: { Args: { _user_id: string }; Returns: boolean }
       is_workspace_member: {
         Args: { _user_id: string; _workspace_id: string }
         Returns: boolean
@@ -551,7 +545,7 @@ export type Database = {
         | "review"
         | "completed"
         | "on_hold"
-      subscription_plan: "atelier" | "studio" | "dommus"
+      subscription_plan: "atelier" | "studio" | "domus"
       task_priority: "low" | "medium" | "high" | "urgent"
       task_status: "backlog" | "todo" | "in_progress" | "review" | "done"
       user_role: "admin" | "designer" | "client" | "supplier"
@@ -691,7 +685,7 @@ export const Constants = {
         "completed",
         "on_hold",
       ],
-      subscription_plan: ["atelier", "studio", "dommus"],
+      subscription_plan: ["atelier", "studio", "domus"],
       task_priority: ["low", "medium", "high", "urgent"],
       task_status: ["backlog", "todo", "in_progress", "review", "done"],
       user_role: ["admin", "designer", "client", "supplier"],
