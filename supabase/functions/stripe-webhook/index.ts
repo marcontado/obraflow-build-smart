@@ -179,9 +179,9 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    console.error('Webhook error:', error);
+    console.error('Webhook error details:', error);
     return new Response(
-      JSON.stringify({ error: (error as Error).message }),
+      JSON.stringify({ error: 'Webhook processing failed. Please contact support.' }),
       {
         headers: { 'Content-Type': 'application/json' },
         status: 400,

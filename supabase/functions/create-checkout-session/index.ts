@@ -109,7 +109,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error creating checkout session:', error);
     return new Response(
-      JSON.stringify({ error: (error as Error).message }),
+      JSON.stringify({ error: 'Payment processing failed. Please try again or contact support.' }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,

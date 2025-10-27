@@ -38,6 +38,17 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Get admin role for authorization
+    const { data: adminRole } = await supabase.rpc('get_platform_admin_role', { _user_id: user.id });
+    
+    // All admin roles can view aggregated statistics
+    if (!adminRole) {
+      return new Response(JSON.stringify({ error: 'Admin role not found' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Buscar estatísticas
     const [workspaces, users, projects, subscriptions] = await Promise.all([
       supabase.from('workspaces').select('subscription_plan', { count: 'exact', head: false }),

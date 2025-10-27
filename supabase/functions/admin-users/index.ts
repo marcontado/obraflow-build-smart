@@ -38,6 +38,18 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Get admin role for authorization
+    const { data: adminRole } = await supabase.rpc('get_platform_admin_role', { _user_id: user.id });
+    
+    // Only support and super_admin can view user details
+    if (adminRole !== 'support' && adminRole !== 'super_admin') {
+      console.warn(`Access denied for role: ${adminRole}`);
+      return new Response(JSON.stringify({ error: 'Insufficient permissions - Support or Super Admin role required' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const body = await req.json();
     const page = parseInt(body.page || '1');
     const limit = parseInt(body.limit || '20');
