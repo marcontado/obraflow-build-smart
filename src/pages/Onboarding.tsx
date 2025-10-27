@@ -21,8 +21,14 @@ type WorkspaceFormData = z.infer<typeof workspaceSchema>;
 export default function Onboarding() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { refreshWorkspaces } = useWorkspace();
+  const { refreshWorkspaces, hasWorkspaces } = useWorkspace();
   const [submitting, setSubmitting] = useState(false);
+
+  // Guard: Se já tem workspace, redirecionar para /app
+  if (hasWorkspaces()) {
+    navigate("/app", { replace: true });
+    return null;
+  }
 
   const form = useForm<WorkspaceFormData>({
     resolver: zodResolver(workspaceSchema),

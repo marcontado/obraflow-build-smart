@@ -37,39 +37,17 @@ export const workspacesService = {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { data: null, error: new Error("Not authenticated") };
 
-    // Gerar slug usando a função do banco
-    const { data: slugData, error: slugError } = await supabase.rpc(
-      "generate_workspace_slug",
-      { workspace_name: name }
-    );
-
-    if (slugError) return { data: null, error: slugError };
-
-    const { data, error } = await supabase
-      .from("workspaces")
-      .insert({
-        name,
-        slug: slugData,
-        subscription_plan: subscription_plan as any,
-        created_by: user.id,
-      })
-      .select()
-      .single();
+    // Usar função segura que cria workspace e adiciona owner (resolve RLS)
+    const { data, error } = await supabase.rpc("create_workspace", {
+      workspace_name: name,
+      plan: subscription_plan as any,
+    });
 
     if (error) return { data: null, error };
 
-    // Adicionar criador como owner
-    const { error: memberError } = await supabase
-      .from("workspace_members")
-      .insert({
-        workspace_id: data.id,
-        user_id: user.id,
-        role: "owner",
-      });
-
-    if (memberError) return { data: null, error: memberError };
-
-    return { data, error: null };
+    // A função retorna um array com um único workspace
+    const workspace = Array.isArray(data) ? data[0] : data;
+    return { data: workspace, error: null };
   },
 
   async update(id: string, updates: WorkspaceUpdate) {
@@ -135,41 +113,16 @@ export const workspacesService = {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { data: null, error: new Error("Not authenticated") };
 
-    // Buscar convite
-    const { data: invite, error: inviteError } = await supabase
-      .from("workspace_invites")
-      .select("*")
-      .eq("token", token)
-      .is("accepted_at", null)
-      .single();
+    // Usar função segura que aceita convite e adiciona membro (resolve RLS)
+    const { data, error } = await supabase.rpc("accept_workspace_invite", {
+      invite_token: token,
+    });
 
-    if (inviteError) return { data: null, error: inviteError };
+    if (error) return { data: null, error };
 
-    // Verificar expiração
-    if (new Date(invite.expires_at) < new Date()) {
-      return { data: null, error: new Error("Convite expirado") };
-    }
-
-    // Adicionar usuário ao workspace
-    const { error: memberError } = await supabase
-      .from("workspace_members")
-      .insert({
-        workspace_id: invite.workspace_id,
-        user_id: user.id,
-        role: invite.role,
-      });
-
-    if (memberError) return { data: null, error: memberError };
-
-    // Marcar convite como aceito
-    const { error: updateError } = await supabase
-      .from("workspace_invites")
-      .update({ accepted_at: new Date().toISOString() })
-      .eq("id", invite.id);
-
-    if (updateError) return { data: null, error: updateError };
-
-    return { data: invite, error: null };
+    // A função retorna informações do workspace aceito
+    const result = Array.isArray(data) ? data[0] : data;
+    return { data: result, error: null };
   },
 
   async cancelInvite(inviteId: string) {

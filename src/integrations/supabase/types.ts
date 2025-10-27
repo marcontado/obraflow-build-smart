@@ -506,6 +506,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_workspace_invite: {
+        Args: { invite_token: string }
+        Returns: {
+          user_role: Database["public"]["Enums"]["workspace_role"]
+          workspace_id: string
+          workspace_name: string
+        }[]
+      }
       count_user_workspaces: { Args: { _user_id: string }; Returns: number }
       count_workspace_members: {
         Args: { _workspace_id: string }
@@ -514,6 +522,22 @@ export type Database = {
       count_workspace_projects: {
         Args: { _workspace_id: string }
         Returns: number
+      }
+      create_workspace: {
+        Args: {
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          workspace_name: string
+        }
+        Returns: {
+          created_at: string
+          created_by: string
+          id: string
+          logo_url: string
+          name: string
+          slug: string
+          subscription_plan: Database["public"]["Enums"]["subscription_plan"]
+          updated_at: string
+        }[]
       }
       generate_workspace_slug: {
         Args: { workspace_name: string }
