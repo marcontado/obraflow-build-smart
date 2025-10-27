@@ -17,7 +17,14 @@ export function WorkspaceSelector() {
   const navigate = useNavigate();
   const { currentWorkspace, workspaces, switchWorkspace, canCreateWorkspace } = useWorkspace();
 
-  if (!currentWorkspace) return null;
+  if (!currentWorkspace) {
+    return (
+      <Button variant="outline" className="gap-2" disabled>
+        <Building2 className="h-4 w-4" />
+        <span className="text-muted-foreground">Carregando...</span>
+      </Button>
+    );
+  }
 
   const handleSwitchWorkspace = async (workspaceId: string) => {
     await switchWorkspace(workspaceId);

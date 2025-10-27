@@ -57,8 +57,15 @@ export default function Onboarding() {
       description: "Seu workspace foi criado com sucesso.",
     });
 
+    // Aguardar refresh completar para garantir que workspace está setado
     await refreshWorkspaces();
-    navigate("/app");
+    
+    // Redirecionar para settings do novo workspace ou /app
+    if (workspace) {
+      navigate(`/workspace/${workspace.id}/settings`);
+    } else {
+      navigate("/app");
+    }
   };
 
   return (

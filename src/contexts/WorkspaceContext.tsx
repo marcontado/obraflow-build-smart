@@ -43,17 +43,26 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
       setWorkspaces(data || []);
 
-      // Se não há workspace atual, tentar carregar do localStorage ou pegar o primeiro
-      if (!currentWorkspace && data && data.length > 0) {
+      // Sempre validar e setar o currentWorkspace
+      if (data && data.length > 0) {
         const savedWorkspaceId = localStorage.getItem("currentWorkspaceId");
-        const workspaceToSet = savedWorkspaceId
+        
+        // Tentar encontrar o workspace salvo
+        let workspaceToSet = savedWorkspaceId
           ? data.find((w) => w.id === savedWorkspaceId)
-          : data[0];
-
-        if (workspaceToSet) {
-          setCurrentWorkspace(workspaceToSet);
-          localStorage.setItem("currentWorkspaceId", workspaceToSet.id);
+          : null;
+        
+        // Se não encontrou o workspace salvo, usar o primeiro disponível
+        if (!workspaceToSet) {
+          workspaceToSet = data[0];
         }
+
+        setCurrentWorkspace(workspaceToSet);
+        localStorage.setItem("currentWorkspaceId", workspaceToSet.id);
+      } else {
+        // Se não há workspaces, limpar o estado
+        setCurrentWorkspace(null);
+        localStorage.removeItem("currentWorkspaceId");
       }
     } catch (error) {
       console.error("Unexpected error fetching workspaces:", error);
@@ -63,7 +72,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         variant: "destructive",
       });
     }
-  }, [user, currentWorkspace]);
+  }, [user]);
 
   const switchWorkspace = async (workspaceId: string) => {
     const workspace = workspaces.find((w) => w.id === workspaceId);
