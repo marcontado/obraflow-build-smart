@@ -21,7 +21,7 @@ export function WorkspaceSelector() {
 
   const handleSwitchWorkspace = async (workspaceId: string) => {
     await switchWorkspace(workspaceId);
-    navigate("/");
+    navigate("/app");
   };
 
   return (

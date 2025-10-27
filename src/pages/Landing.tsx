@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { FeatureCard } from "@/components/landing/FeatureCard";
 import { TestimonialCard } from "@/components/landing/TestimonialCard";
@@ -7,8 +7,13 @@ import { PlanCardPublic } from "@/components/landing/PlanCardPublic";
 import { Button } from "@/components/ui/button";
 import { Columns3, DollarSign, BarChart3, Sparkles, Users, Calendar, ArrowRight } from "lucide-react";
 import heroImage from "@/assets/hero-workspace.jpg";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Landing() {
+  const { user } = useAuth();
+  
+  // Redirect authenticated users to the app
+  if (user) return <Navigate to="/app" replace />;
   const features = [
     {
       icon: Columns3,

@@ -15,13 +15,13 @@ export default function WorkspaceSelect() {
     // Se só tem um workspace, selecionar automaticamente (apenas uma vez)
     if (!loading && workspaces.length === 1 && !hasNavigated.current) {
       hasNavigated.current = true;
-      switchWorkspace(workspaces[0].id).then(() => navigate("/"));
+      switchWorkspace(workspaces[0].id).then(() => navigate("/app"));
     }
   }, [loading, workspaces, switchWorkspace, navigate]);
 
   const handleSelectWorkspace = async (workspaceId: string) => {
     await switchWorkspace(workspaceId);
-    navigate("/");
+    navigate("/app");
   };
 
   if (loading) {
