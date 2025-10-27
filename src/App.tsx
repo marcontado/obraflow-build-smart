@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 import { ErrorBoundary } from "@/components/errors/ErrorBoundary";
@@ -33,6 +33,11 @@ import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import SubscriptionCancel from "./pages/SubscriptionCancel";
 
 const queryClient = new QueryClient();
+
+const LegacyProjectRedirect = () => {
+  const { id } = useParams();
+  return <Navigate to={`/app/projects/${id}`} replace />;
+};
 
 const App = () => (
   <ErrorBoundary>
@@ -75,6 +80,12 @@ const App = () => (
                 <Route path="/admin/organizations" element={<ProtectedRoute><AdminRoute><AdminOrganizations /></AdminRoute></ProtectedRoute>} />
                 <Route path="/admin/users" element={<ProtectedRoute><AdminRoute><AdminUsers /></AdminRoute></ProtectedRoute>} />
                 <Route path="/admin/subscriptions" element={<ProtectedRoute><AdminRoute><AdminSubscriptions /></AdminRoute></ProtectedRoute>} />
+                
+                {/* Legacy Route Redirects */}
+                <Route path="/projects" element={<Navigate to="/app/projects" replace />} />
+                <Route path="/projects/:id" element={<LegacyProjectRedirect />} />
+                <Route path="/clients" element={<Navigate to="/app/clients" replace />} />
+                <Route path="/reports" element={<Navigate to="/app/reports" replace />} />
                 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

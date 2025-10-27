@@ -85,7 +85,7 @@ export default function Projects() {
                   spent={project.spent}
                   startDate={project.start_date}
                   endDate={project.end_date}
-                  onClick={() => navigate(`/projects/${project.id}`)}
+                  onClick={() => navigate(`/app/projects/${project.id}`)}
                 />
               ))}
             </div>
