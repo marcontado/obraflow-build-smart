@@ -21,6 +21,12 @@ Deno.serve(async (req) => {
       }
     );
 
+    // Cliente com service role para operações administrativas (bypassa RLS)
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
     // Verificar se é admin
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -52,7 +58,8 @@ Deno.serve(async (req) => {
           });
         }
 
-        const { error: updateError } = await supabase
+        // Usar supabaseAdmin (service role) para bypass do RLS de forma segura
+        const { error: updateError } = await supabaseAdmin
           .from('workspaces')
           .update({ subscription_plan: newPlan })
           .eq('id', workspaceId);
