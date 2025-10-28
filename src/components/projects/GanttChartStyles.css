@@ -1,0 +1,76 @@
+/* Custom Gantt Chart Styles to match Archestra Design System */
+
+.gantt-container {
+  --gantt-background: hsl(var(--background));
+  --gantt-foreground: hsl(var(--foreground));
+  --gantt-muted: hsl(var(--muted));
+  --gantt-muted-foreground: hsl(var(--muted-foreground));
+  --gantt-border: hsl(var(--border));
+  --gantt-primary: hsl(var(--primary));
+}
+
+.gantt-container .gantt-header {
+  background-color: var(--gantt-muted);
+  color: var(--gantt-foreground);
+  font-family: inherit;
+}
+
+.gantt-container .gantt-table {
+  background-color: var(--gantt-background);
+  color: var(--gantt-foreground);
+  border-color: var(--gantt-border);
+}
+
+.gantt-container .gantt-table-row {
+  border-bottom: 1px solid var(--gantt-border);
+}
+
+.gantt-container .gantt-table-row:hover {
+  background-color: var(--gantt-muted);
+}
+
+.gantt-container .gantt-vertical-line {
+  stroke: var(--gantt-border);
+}
+
+.gantt-container .gantt-horizontal-line {
+  stroke: var(--gantt-border);
+}
+
+.gantt-container ._3lLzX {
+  fill: var(--gantt-foreground);
+  font-family: inherit;
+  font-size: 0.875rem;
+}
+
+.gantt-container ._1b4cn {
+  fill: var(--gantt-muted-foreground);
+  font-family: inherit;
+  font-size: 0.75rem;
+}
+
+/* Task bar styles */
+.gantt-container ._3jYYh {
+  rx: 6;
+  ry: 6;
+}
+
+/* Scrollbar styles */
+.gantt-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.gantt-container::-webkit-scrollbar-track {
+  background: var(--gantt-muted);
+  border-radius: 4px;
+}
+
+.gantt-container::-webkit-scrollbar-thumb {
+  background: var(--gantt-muted-foreground);
+  border-radius: 4px;
+}
+
+.gantt-container::-webkit-scrollbar-thumb:hover {
+  background: var(--gantt-foreground);
+}

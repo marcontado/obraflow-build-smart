@@ -14,12 +14,15 @@ import { ProjectFormDialog } from "@/components/projects/ProjectFormDialog";
 import { ProjectAreaCard } from "@/components/projects/ProjectAreaCard";
 import { ProjectAreaFormDialog } from "@/components/projects/ProjectAreaFormDialog";
 import { GanttChart } from "@/components/projects/GanttChart";
+import { InteractiveGanttChart } from "@/components/projects/InteractiveGanttChart";
 import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
 import { KanbanBoard } from "@/components/tasks/KanbanBoard";
 import { ProjectDashboard } from "@/components/projects/ProjectDashboard";
+import "@/components/projects/GanttChartStyles.css";
 import { supabase } from "@/integrations/supabase/client";
 import { projectsService } from "@/services/projects.service";
 import { projectAreasService } from "@/services/project-areas.service";
+import { tasksService } from "@/services/tasks.service";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { Database } from "@/integrations/supabase/types";
@@ -46,6 +49,7 @@ export default function ProjectDetails() {
   const { hasFeature, getRequiredPlan } = useFeatureAccess();
   const [project, setProject] = useState<any>(null);
   const [projectAreas, setProjectAreas] = useState<ProjectArea[]>([]);
+  const [projectTasks, setProjectTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -57,6 +61,7 @@ export default function ProjectDetails() {
   useEffect(() => {
     fetchProject();
     fetchProjectAreas();
+    fetchProjectTasks();
   }, [id]);
 
   const fetchProject = async () => {
@@ -85,6 +90,18 @@ export default function ProjectDetails() {
       if (data) setProjectAreas(data);
     } catch (error: any) {
       console.error("Erro ao carregar áreas:", error);
+    }
+  };
+
+  const fetchProjectTasks = async () => {
+    if (!id) return;
+    
+    try {
+      const { data, error } = await tasksService.getByProject(id);
+      if (error) throw error;
+      if (data) setProjectTasks(data);
+    } catch (error: any) {
+      console.error("Erro ao carregar tarefas:", error);
     }
   };
 
@@ -346,10 +363,12 @@ export default function ProjectDetails() {
 
             <TabsContent value="gantt">
               {hasFeature('gantt') ? (
-                <GanttChart
-                  tasks={[]}
+                <InteractiveGanttChart
+                  tasks={projectTasks}
+                  projectId={id!}
                   projectStartDate={project.start_date || undefined}
                   projectEndDate={project.end_date || undefined}
+                  onTasksChange={fetchProjectTasks}
                 />
               ) : (
                 <FeatureUpgradeCard
