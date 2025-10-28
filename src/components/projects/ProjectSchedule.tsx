@@ -14,6 +14,7 @@ import { projectActivitiesService } from "@/services/project-activities.service"
 import { ActivityFormDialog } from "./ActivityFormDialog";
 import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 
 type Activity = Database["public"]["Tables"]["project_activities"]["Row"];
 
@@ -44,6 +45,7 @@ export function ProjectSchedule({
   const [activityToDelete, setActivityToDelete] = useState<Activity | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { currentWorkspace } = useWorkspace();
 
   useEffect(() => {
     fetchActivities();
@@ -165,8 +167,17 @@ export function ProjectSchedule({
   };
 
   const handleAddActivity = () => {
+    console.log("🔵 handleAddActivity called");
+    console.log("🔵 currentWorkspace:", currentWorkspace);
+    
+    if (!currentWorkspace) {
+      toast.error("Nenhum workspace selecionado. Por favor, selecione um workspace.");
+      return;
+    }
+    
     setSelectedActivity(null);
     setFormOpen(true);
+    console.log("🔵 formOpen set to true");
   };
 
   const handleFormClose = () => {

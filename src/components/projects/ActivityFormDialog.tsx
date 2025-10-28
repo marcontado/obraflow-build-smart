@@ -69,6 +69,7 @@ export function ActivityFormDialog({
   activityId,
   initialData,
 }: ActivityFormDialogProps) {
+  console.log("🟢 ActivityFormDialog render - open:", open, "activityId:", activityId);
   const { currentWorkspace } = useWorkspace();
   const [submitting, setSubmitting] = useState(false);
 
@@ -107,6 +108,8 @@ export function ActivityFormDialog({
   }, [initialData, open]);
 
   const onSubmit = async (data: ActivityFormData) => {
+    console.log("🟡 Form submit started", { activityId, data, currentWorkspace });
+    
     if (!currentWorkspace) {
       toast.error("Nenhum workspace selecionado");
       return;
@@ -139,14 +142,19 @@ export function ActivityFormDialog({
       onClose();
       form.reset();
     } catch (error: any) {
-      toast.error(error.message || "Erro ao salvar atividade");
+      console.error("🔴 Error saving activity:", error);
+      const errorMessage = error?.message || "Erro desconhecido";
+      toast.error(`Erro ao salvar atividade: ${errorMessage}`);
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      console.log("🟣 Dialog onOpenChange:", isOpen);
+      if (!isOpen) onClose();
+    }}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{activityId ? "Editar" : "Nova"} Atividade</DialogTitle>
