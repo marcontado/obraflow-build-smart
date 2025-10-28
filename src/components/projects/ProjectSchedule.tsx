@@ -207,7 +207,20 @@ export function ProjectSchedule({
   }
 
   const totalDays = differenceInDays(dateRange.end, dateRange.start);
-  const columnWidthPerDay = viewMode === ViewMode.Month ? 10 : viewMode === ViewMode.Week ? 28 : 56;
+  
+  const columnWidthPerDay = useMemo(() => {
+    switch (viewMode) {
+      case ViewMode.Day:
+        return 80;
+      case ViewMode.Week:
+        return 160;
+      case ViewMode.Month:
+        return 320;
+      default:
+        return 80;
+    }
+  }, [viewMode]);
+  
   const ganttHeight = Math.max(ganttTasks.length * 50 + 120, 600);
   const totalWidth = Math.max(totalDays * columnWidthPerDay, 1200);
 
@@ -328,13 +341,14 @@ export function ProjectSchedule({
         style={{
           '--gantt-total-width': `${totalWidth}px`,
           '--row-h': '50px',
+          minWidth: `${totalWidth}px`,
         } as React.CSSProperties}
       >
         <div className={styles.ganttViewport}>
           <Gantt
             tasks={ganttTasks}
             viewMode={viewMode}
-            viewDate={dateRange.start}
+            viewDate={addDays(dateRange.start, Math.floor(totalDays / 2))}
             onDateChange={handleTaskChange}
             onDelete={handleTaskDelete}
             onClick={handleTaskClick}

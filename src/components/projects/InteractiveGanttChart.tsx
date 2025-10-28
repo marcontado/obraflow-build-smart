@@ -168,6 +168,7 @@ export function InteractiveGanttChart({ projectId, tasks, onTasksChange }: Inter
         className="gantt-container bg-background/50 border border-border rounded-lg overflow-auto"
         style={{
           height: isFullScreen ? "calc(100vh - 150px)" : "600px",
+          minWidth: `${totalWidth}px`,
         }}
       >
         <Gantt

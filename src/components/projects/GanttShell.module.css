@@ -8,6 +8,7 @@
   background: hsl(var(--background));
   border-radius: 0.5rem;
   border: 1px solid hsl(var(--border));
+  transition: all 0.25s ease-in-out;
 }
 
 .archestraGantt.fullscreen {
@@ -19,6 +20,7 @@
   inset: 0;
   overflow: auto;
   overscroll-behavior: contain;
+  min-width: var(--gantt-total-width, 1200px);
 }
 
 /* Force explicit sizing for Gantt elements */
