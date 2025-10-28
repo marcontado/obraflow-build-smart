@@ -105,6 +105,26 @@ export function ProjectSchedule({
     }));
   }, [activities]);
 
+  const columnWidthPerDay = useMemo(() => {
+    switch (viewMode) {
+      case ViewMode.Day:
+        return 80;
+      case ViewMode.Week:
+        return 160;
+      case ViewMode.Month:
+        return 320;
+      default:
+        return 80;
+    }
+  }, [viewMode]);
+
+  const ganttMetrics = useMemo(() => {
+    const totalDays = differenceInDays(dateRange.end, dateRange.start);
+    const totalWidth = Math.max(totalDays * columnWidthPerDay, 1200);
+    const ganttHeight = Math.max(ganttTasks.length * 50 + 120, 600);
+    return { totalDays, totalWidth, ganttHeight };
+  }, [dateRange, columnWidthPerDay, ganttTasks]);
+
   const handleTaskChange = useCallback(
     async (task: GanttTask) => {
       try {
@@ -206,23 +226,7 @@ export function ProjectSchedule({
     );
   }
 
-  const totalDays = differenceInDays(dateRange.end, dateRange.start);
-  
-  const columnWidthPerDay = useMemo(() => {
-    switch (viewMode) {
-      case ViewMode.Day:
-        return 80;
-      case ViewMode.Week:
-        return 160;
-      case ViewMode.Month:
-        return 320;
-      default:
-        return 80;
-    }
-  }, [viewMode]);
-  
-  const ganttHeight = Math.max(ganttTasks.length * 50 + 120, 600);
-  const totalWidth = Math.max(totalDays * columnWidthPerDay, 1200);
+  const { totalDays, totalWidth, ganttHeight } = ganttMetrics;
 
   // Short date labels for pt-BR
   const getShortMonthLabel = (date: Date) => {
