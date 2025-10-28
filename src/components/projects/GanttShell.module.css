@@ -1,0 +1,157 @@
+/* Scoped Gantt styles for Archestra - isolated from global resets */
+.archestraGantt {
+  position: relative;
+  min-height: 560px;
+  height: calc(100vh - 340px);
+  overflow: hidden;
+  isolation: isolate;
+  background: hsl(var(--background));
+  border-radius: 0.5rem;
+  border: 1px solid hsl(var(--border));
+}
+
+.archestraGantt.fullscreen {
+  height: calc(100vh - 200px);
+}
+
+.ganttViewport {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+/* Force explicit sizing for Gantt elements */
+.archestraGantt :global(.gantt-container) {
+  min-width: 100%;
+  width: var(--gantt-total-width, 2000px);
+  height: 100%;
+  font-family: inherit;
+}
+
+/* Row heights */
+.archestraGantt :global([class*="ganttTable"]) {
+  --row-h: 50px;
+}
+
+.archestraGantt :global([class*="ganttVerticalContainer"]) {
+  overflow: visible !important;
+}
+
+/* Task list column */
+.archestraGantt :global([class*="ganttTable-"]) td,
+.archestraGantt :global([class*="ganttTable-"]) th {
+  height: var(--row-h, 50px);
+  padding: 8px 12px;
+  vertical-align: middle;
+  border-bottom: 1px solid hsl(var(--border) / 0.3);
+}
+
+/* Task bars */
+.archestraGantt :global([class*="barWrapper"]) {
+  height: var(--row-h, 50px) !important;
+  display: flex;
+  align-items: center;
+}
+
+.archestraGantt :global([class*="bar"]) {
+  height: 18px !important;
+  border-radius: 999px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.archestraGantt :global([class*="bar"]:hover) {
+  filter: brightness(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Progress bar inside task bar */
+.archestraGantt :global([class*="barProgress"]) {
+  height: 100% !important;
+  border-radius: 999px !important;
+}
+
+/* Calendar header */
+.archestraGantt :global([class*="calendar"]) {
+  background: hsl(var(--muted) / 0.3);
+  border-bottom: 2px solid hsl(var(--border));
+}
+
+.archestraGantt :global([class*="calendarTopTick"]),
+.archestraGantt :global([class*="calendarBottomTick"]) {
+  fill: hsl(var(--foreground));
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.archestraGantt :global([class*="calendarTopTick"]) {
+  font-weight: 600;
+}
+
+/* Grid */
+.archestraGantt :global([class*="gridRow"]) {
+  fill: transparent;
+  stroke: hsl(var(--border) / 0.2);
+}
+
+.archestraGantt :global([class*="gridRow"]:nth-child(even)) {
+  fill: hsl(var(--muted) / 0.1);
+}
+
+.archestraGantt :global([class*="gridTick"]) {
+  stroke: hsl(var(--border) / 0.3);
+}
+
+/* Today line */
+.archestraGantt :global([class*="today"]) {
+  fill: hsl(var(--primary) / 0.08) !important;
+}
+
+/* Arrows */
+.archestraGantt :global([class*="arrow"]) {
+  stroke: hsl(var(--muted-foreground));
+  stroke-width: 1.5;
+}
+
+/* Tooltips */
+.archestraGantt :global([class*="tooltip"]) {
+  background: hsl(var(--popover));
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 0.5rem;
+  padding: 12px;
+  z-index: 1000;
+}
+
+/* Scrollbar styling */
+.ganttViewport::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.ganttViewport::-webkit-scrollbar-track {
+  background: hsl(var(--muted) / 0.2);
+  border-radius: 6px;
+}
+
+.ganttViewport::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 6px;
+  border: 2px solid hsl(var(--background));
+}
+
+.ganttViewport::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Handle selector */
+.archestraGantt :global([class*="handleSelector"]) {
+  visibility: visible !important;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.archestraGantt :global([class*="barWrapper"]:hover [class*="handleSelector"]) {
+  opacity: 1;
+}

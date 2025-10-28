@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Gantt, Task as GanttTask, ViewMode } from "gantt-task-react";
 import "gantt-task-react/dist/index.css";
-import "./GanttChartStyles.css";
+import styles from "./GanttShell.module.css";
 import { format, addDays, startOfDay, differenceInDays, addMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Maximize2, Minimize2, ZoomIn, ZoomOut, Plus, Calendar } from "lucide-react";
@@ -207,8 +207,18 @@ export function ProjectSchedule({
   }
 
   const totalDays = differenceInDays(dateRange.end, dateRange.start);
-  const columnWidthPerDay = viewMode === ViewMode.Month ? 10 : viewMode === ViewMode.Week ? 35 : 60;
-  const ganttHeight = Math.max(ganttTasks.length * 56 + 120, 600);
+  const columnWidthPerDay = viewMode === ViewMode.Month ? 10 : viewMode === ViewMode.Week ? 28 : 56;
+  const ganttHeight = Math.max(ganttTasks.length * 50 + 120, 600);
+  const totalWidth = Math.max(totalDays * columnWidthPerDay, 1200);
+
+  // Short date labels for pt-BR
+  const getShortMonthLabel = (date: Date) => {
+    return new Intl.DateTimeFormat('pt-BR', { month: 'short' }).format(date);
+  };
+
+  const getShortWeekdayLabel = (date: Date) => {
+    return new Intl.DateTimeFormat('pt-BR', { weekday: 'short' }).format(date);
+  };
 
   // Render empty state or gantt content
   const scheduleBody = ganttTasks.length === 0 ? (
@@ -314,25 +324,29 @@ export function ProjectSchedule({
       </div>
 
       <div 
-        className="gantt-container bg-background border rounded-lg overflow-auto shadow-sm" 
-        style={{ height: isFullScreen ? "calc(100vh - 250px)" : "650px" }}
+        className={`${styles.archestraGantt} ${isFullScreen ? styles.fullscreen : ''}`}
+        style={{
+          '--gantt-total-width': `${totalWidth}px`,
+          '--row-h': '50px',
+        } as React.CSSProperties}
       >
-        <Gantt
-          tasks={ganttTasks}
-          viewMode={viewMode}
-          viewDate={dateRange.start}
-          onDateChange={handleTaskChange}
-          onDelete={handleTaskDelete}
-          onClick={handleTaskClick}
-          locale="pt-BR"
-          listCellWidth={isFullScreen ? "240px" : "200px"}
-          columnWidth={columnWidthPerDay}
-          ganttHeight={ganttHeight}
-          barCornerRadius={24}
-          todayColor="rgba(107, 125, 79, 0.08)"
-          barProgressColor="rgba(255, 255, 255, 0.3)"
-          barProgressSelectedColor="rgba(255, 255, 255, 0.5)"
-          TooltipContent={({ task }) => {
+        <div className={styles.ganttViewport}>
+          <Gantt
+            tasks={ganttTasks}
+            viewMode={viewMode}
+            viewDate={dateRange.start}
+            onDateChange={handleTaskChange}
+            onDelete={handleTaskDelete}
+            onClick={handleTaskClick}
+            locale="pt-BR"
+            listCellWidth={isFullScreen ? "240px" : "200px"}
+            columnWidth={columnWidthPerDay}
+            ganttHeight={ganttHeight}
+            barCornerRadius={999}
+            todayColor="rgba(107, 125, 79, 0.08)"
+            barProgressColor="rgba(255, 255, 255, 0.3)"
+            barProgressSelectedColor="rgba(255, 255, 255, 0.5)"
+            TooltipContent={({ task }) => {
             const activity = activities.find(a => a.id === task.id);
             if (!activity) return <div />;
             
@@ -380,7 +394,8 @@ export function ProjectSchedule({
               </div>
             );
           }}
-        />
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
