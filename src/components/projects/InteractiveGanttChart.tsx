@@ -4,14 +4,21 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Gantt, Task as GanttTask, ViewMode } from "gantt-task-react";
 import "gantt-task-react/dist/index.css";
+import "./GanttChartStyles.css";
 import { format, addDays, startOfDay, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Maximize2, ZoomIn, ZoomOut, Plus, Pencil, Trash2 } from "lucide-react";
+import { Maximize2, Minimize2, ZoomIn, ZoomOut, Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 import { tasksService } from "@/services/tasks.service";
 import { TaskFormDialog } from "@/components/tasks/TaskFormDialog";
 import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type Task = Database["public"]["Tables"]["tasks"]["Row"];
 
@@ -24,10 +31,10 @@ interface InteractiveGanttChartProps {
 }
 
 const priorityColors: Record<string, string> = {
-  urgent: "#ef4444",
-  high: "#f97316",
-  medium: "#eab308",
-  low: "#22c55e",
+  urgent: "#DC2626", // red-600
+  high: "#EA580C", // orange-600
+  medium: "#CA8A04", // yellow-600
+  low: "#16A34A", // green-600
 };
 
 const statusLabels: Record<string, string> = {
@@ -185,70 +192,106 @@ export function InteractiveGanttChart({
 
   const content = (
     <div className="space-y-4">
-      {/* Controls */}
+      {/* Enhanced Controls */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setViewMode(ViewMode.Day)}
-            className={viewMode === ViewMode.Day ? "bg-accent" : ""}
-          >
-            Dia
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setViewMode(ViewMode.Week)}
-            className={viewMode === ViewMode.Week ? "bg-accent" : ""}
-          >
-            Semana
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setViewMode(ViewMode.Month)}
-            className={viewMode === ViewMode.Month ? "bg-accent" : ""}
-          >
-            Mês
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setViewMode(ViewMode.Day)}
+                  className={viewMode === ViewMode.Day ? "bg-primary/10 border-primary" : ""}
+                >
+                  <ZoomIn className="h-4 w-4 mr-1" />
+                  Dia
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Visualização detalhada por dia</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setViewMode(ViewMode.Week)}
+                  className={viewMode === ViewMode.Week ? "bg-primary/10 border-primary" : ""}
+                >
+                  Semana
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Visualização semanal</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setViewMode(ViewMode.Month)}
+                  className={viewMode === ViewMode.Month ? "bg-primary/10 border-primary" : ""}
+                >
+                  <ZoomOut className="h-4 w-4 mr-1" />
+                  Mês
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Visualização mensal</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={handleAddTask}>
+          <Button size="sm" onClick={handleAddTask} className="shadow-sm">
             <Plus className="h-4 w-4 mr-2" />
             Nova Tarefa
           </Button>
-          <Button variant="outline" size="sm" onClick={toggleFullScreen}>
-            <Maximize2 className="h-4 w-4 mr-2" />
-            {isFullScreen ? "Sair do Modo Completo" : "Visualização Completa"}
+          <Button variant="outline" size="sm" onClick={toggleFullScreen} className="shadow-sm">
+            {isFullScreen ? (
+              <>
+                <Minimize2 className="h-4 w-4 mr-2" />
+                Sair
+              </>
+            ) : (
+              <>
+                <Maximize2 className="h-4 w-4 mr-2" />
+                Visualização Completa
+              </>
+            )}
           </Button>
         </div>
       </div>
 
-      {/* Legend */}
-      <div className="flex items-center gap-4 flex-wrap text-sm">
-        <span className="text-muted-foreground">Prioridade:</span>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: priorityColors.urgent }} />
-          <span>Urgente</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: priorityColors.high }} />
-          <span>Alta</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: priorityColors.medium }} />
-          <span>Média</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: priorityColors.low }} />
-          <span>Baixa</span>
+      {/* Enhanced Legend */}
+      <div className="flex items-center gap-6 flex-wrap p-3 bg-muted/30 rounded-lg border">
+        <span className="font-semibold text-sm">Legenda de Prioridade:</span>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 rounded-full shadow-sm" style={{ backgroundColor: priorityColors.urgent }} />
+            <span className="text-sm">Urgente</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 rounded-full shadow-sm" style={{ backgroundColor: priorityColors.high }} />
+            <span className="text-sm">Alta</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 rounded-full shadow-sm" style={{ backgroundColor: priorityColors.medium }} />
+            <span className="text-sm">Média</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 rounded-full shadow-sm" style={{ backgroundColor: priorityColors.low }} />
+            <span className="text-sm">Baixa</span>
+          </div>
         </div>
       </div>
 
-      {/* Gantt Chart */}
-      <div className="gantt-container bg-background border rounded-lg overflow-auto" style={{ height: isFullScreen ? "calc(100vh - 200px)" : "600px" }}>
+      {/* Gantt Chart with Enhanced Styling */}
+      <div className="gantt-container bg-background border rounded-lg overflow-auto shadow-sm" style={{ height: isFullScreen ? "calc(100vh - 200px)" : "600px" }}>
         <Gantt
           tasks={ganttTasks}
           viewMode={viewMode}
@@ -256,24 +299,64 @@ export function InteractiveGanttChart({
           onDelete={handleTaskDelete}
           onClick={handleTaskClick}
           locale="pt-BR"
-          listCellWidth={isFullScreen ? "200px" : "155px"}
-          columnWidth={viewMode === ViewMode.Month ? 65 : viewMode === ViewMode.Week ? 250 : 60}
-          todayColor="rgba(139, 92, 246, 0.1)"
-          barBackgroundColor="#cbd5e1"
-          barBackgroundSelectedColor="#94a3b8"
+          listCellWidth={isFullScreen ? "220px" : "180px"}
+          columnWidth={viewMode === ViewMode.Month ? 300 : viewMode === ViewMode.Week ? 250 : 60}
+          ganttHeight={Math.max(ganttTasks.length * 56 + 120, 400)}
+          barCornerRadius={24}
+          todayColor="rgba(59, 130, 246, 0.08)"
+          barProgressColor="rgba(255, 255, 255, 0.3)"
+          barProgressSelectedColor="rgba(255, 255, 255, 0.4)"
+          TooltipContent={({ task }) => {
+            const taskData = tasks.find(t => t.id === task.id);
+            if (!taskData) return <div />;
+            
+            return (
+              <div className="bg-popover text-popover-foreground p-3 rounded-lg shadow-lg border max-w-xs">
+                <div className="font-semibold text-sm mb-2">{task.name}</div>
+                <div className="space-y-1.5 text-xs">
+                  <div className="flex justify-between gap-4">
+                    <span className="text-muted-foreground">Início:</span>
+                    <span className="font-medium">{format(task.start, "dd/MM/yyyy", { locale: ptBR })}</span>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span className="text-muted-foreground">Fim:</span>
+                    <span className="font-medium">{format(task.end, "dd/MM/yyyy", { locale: ptBR })}</span>
+                  </div>
+                  <div className="flex justify-between gap-4 items-center">
+                    <span className="text-muted-foreground">Prioridade:</span>
+                    <Badge 
+                      variant={taskData.priority === 'urgent' ? 'destructive' : 'secondary'} 
+                      className="text-xs capitalize"
+                    >
+                      {taskData.priority}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between gap-4 items-center">
+                    <span className="text-muted-foreground">Status:</span>
+                    <Badge variant="outline" className="text-xs">
+                      {statusLabels[taskData.status as keyof typeof statusLabels]}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            );
+          }}
         />
       </div>
 
-      {/* Task Stats */}
+      {/* Enhanced Task Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {Object.entries(statusLabels).map(([status, label]) => {
           const count = tasks.filter((t) => t.status === status).length;
           return (
-            <Card key={status}>
+            <Card key={status} className="hover:shadow-md transition-shadow">
               <CardContent className="pt-6">
-                <div className="text-center">
-                  <p className="text-2xl font-bold">{count}</p>
+                <div className="text-center space-y-1">
+                  <p className="text-3xl font-bold text-primary">{count}</p>
                   <p className="text-sm text-muted-foreground">{label}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {count === 1 ? 'tarefa' : 'tarefas'}
+                  </p>
                 </div>
               </CardContent>
             </Card>
