@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback, useState, useEffect } from "react";
 import { Gantt, ViewMode, Task as GanttTask } from "gantt-task-react";
 import "gantt-task-react/dist/index.css";
 import { addDays, addMonths, differenceInDays, startOfDay, format } from "date-fns";
@@ -107,10 +107,16 @@ export function InteractiveGanttChart({ projectId, tasks, onTasksChange }: Inter
     viewMode === ViewMode.Month ? 280 : 60;
 
   const totalDays = differenceInDays(dateRange.end, dateRange.start);
+  const totalWidth = totalDays * columnWidth;
   const ganttHeight = Math.max(ganttTasks.length * 56 + 120, 600);
   
   // ViewDate centralizado no range para evitar compressão visual
   const centerViewDate = addDays(dateRange.start, Math.floor(totalDays / 2));
+
+  // Definir variável CSS para largura total do Gantt
+  useEffect(() => {
+    document.documentElement.style.setProperty('--gantt-total-width', `${totalWidth}px`);
+  }, [totalWidth]);
 
   return (
     <div

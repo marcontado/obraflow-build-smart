@@ -215,6 +215,12 @@
 .gantt-container {
   width: 100%;
   overflow: auto;
+  transition: all 0.25s ease-in-out;
+}
+
+/* Garantir que o chart respeite o range total */
+.gantt-container .gantt-chart {
+  min-width: max(100%, var(--gantt-total-width, 1200px));
 }
 
 .gantt-container .task-bar {
