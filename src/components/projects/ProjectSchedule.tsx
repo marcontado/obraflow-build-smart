@@ -206,34 +206,23 @@ export function ProjectSchedule({
     );
   }
 
-  if (ganttTasks.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Cronograma do Projeto</CardTitle>
-          <CardDescription>Planeje as atividades do projeto ao longo do tempo</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-12 space-y-4">
-            <Calendar className="h-16 w-16 text-muted-foreground" />
-            <p className="text-center text-muted-foreground">
-              Nenhuma atividade cadastrada no cronograma
-            </p>
-            <Button onClick={handleAddActivity}>
-              <Plus className="h-4 w-4 mr-2" />
-              Criar Primeira Atividade
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   const totalDays = differenceInDays(dateRange.end, dateRange.start);
   const columnWidthPerDay = viewMode === ViewMode.Month ? 10 : viewMode === ViewMode.Week ? 35 : 60;
   const ganttHeight = Math.max(ganttTasks.length * 56 + 120, 600);
 
-  const content = (
+  // Render empty state or gantt content
+  const scheduleBody = ganttTasks.length === 0 ? (
+    <div className="flex flex-col items-center justify-center py-12 space-y-4">
+      <Calendar className="h-16 w-16 text-muted-foreground" />
+      <p className="text-center text-muted-foreground">
+        Nenhuma atividade cadastrada no cronograma
+      </p>
+      <Button onClick={handleAddActivity}>
+        <Plus className="h-4 w-4 mr-2" />
+        Criar Primeira Atividade
+      </Button>
+    </div>
+  ) : (
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-2">
@@ -454,7 +443,7 @@ export function ProjectSchedule({
                 : "Planejamento de atividades ao longo do tempo"}
             </p>
           </div>
-          {content}
+          {scheduleBody}
         </div>
       ) : (
         <Card>
@@ -466,7 +455,7 @@ export function ProjectSchedule({
                 : "Planeje as atividades do projeto ao longo do tempo"}
             </CardDescription>
           </CardHeader>
-          <CardContent>{content}</CardContent>
+          <CardContent>{scheduleBody}</CardContent>
         </Card>
       )}
 
