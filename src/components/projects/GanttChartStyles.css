@@ -210,3 +210,30 @@
   color: var(--gantt-muted-foreground);
   font-size: 1rem;
 }
+
+/* Additional styles for better layout */
+.gantt-container {
+  width: 100%;
+  overflow: auto;
+}
+
+.gantt-container .task-bar {
+  border-radius: 24px !important;
+  height: 36px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.gantt-container .task-bar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Milestones (tarefas de checklist) */
+.gantt-container [data-task-type="milestone"] {
+  rx: 50%;
+  ry: 50%;
+  width: 20px !important;
+  height: 20px !important;
+  transform: rotate(45deg);
+}

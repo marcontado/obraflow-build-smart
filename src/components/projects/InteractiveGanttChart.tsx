@@ -1,416 +1,179 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Gantt, Task as GanttTask, ViewMode } from "gantt-task-react";
+import { useMemo, useCallback, useState } from "react";
+import { Gantt, ViewMode, Task as GanttTask } from "gantt-task-react";
 import "gantt-task-react/dist/index.css";
-import "./GanttChartStyles.css";
-import { format, addDays, startOfDay, differenceInDays } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { Maximize2, Minimize2, ZoomIn, ZoomOut, Plus, Pencil, Trash2 } from "lucide-react";
+import { addDays, addMonths, differenceInDays, startOfDay, format } from "date-fns";
 import { toast } from "sonner";
-import type { Database } from "@/integrations/supabase/types";
+import { Button } from "@/components/ui/button";
+import { ZoomIn, ZoomOut, Maximize2, Minimize2 } from "lucide-react";
 import { tasksService } from "@/services/tasks.service";
-import { TaskFormDialog } from "@/components/tasks/TaskFormDialog";
-import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import "./GanttChartStyles.css";
 
-type Task = Database["public"]["Tables"]["tasks"]["Row"];
+interface Task {
+  id: string;
+  title: string;
+  due_date?: string | null;
+  status?: string;
+  priority?: "low" | "medium" | "high" | "urgent";
+  area_id?: string | null;
+}
 
 interface InteractiveGanttChartProps {
-  tasks: Task[];
   projectId: string;
-  projectStartDate?: string;
-  projectEndDate?: string;
+  tasks: Task[];
   onTasksChange?: () => void;
 }
 
 const priorityColors: Record<string, string> = {
-  urgent: "#DC2626", // red-600
-  high: "#EA580C", // orange-600
-  medium: "#CA8A04", // yellow-600
-  low: "#16A34A", // green-600
+  urgent: "#DC2626",
+  high: "#EA580C",
+  medium: "#CA8A04",
+  low: "#6B7D4F",
 };
 
-const statusLabels: Record<string, string> = {
-  todo: "A Fazer",
-  in_progress: "Em Progresso",
-  review: "Revisão",
-  done: "Concluído",
-};
-
-export function InteractiveGanttChart({
-  tasks,
-  projectId,
-  projectStartDate,
-  projectEndDate,
-  onTasksChange,
-}: InteractiveGanttChartProps) {
+export function InteractiveGanttChart({ projectId, tasks, onTasksChange }: InteractiveGanttChartProps) {
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Month);
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [formOpen, setFormOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
 
+  // -------- Transformação das tarefas --------
   const ganttTasks: GanttTask[] = useMemo(() => {
-    const tasksWithDates = tasks.filter((task) => task.due_date);
+    return tasks
+      .filter((task) => task.due_date)
+      .map((task) => {
+        // Use due_date as end date and calculate start as 1 day before for visualization
+        const endDate = startOfDay(new Date(task.due_date!));
+        const startDate = addDays(endDate, -1);
 
-    return tasksWithDates.map((task) => {
-      // Use due_date as end, and calculate start as 1 day before for visualization
-      const endDate = new Date(task.due_date!);
-      const startDate = addDays(endDate, -1);
-
-      return {
-        id: task.id,
-        name: task.title,
-        start: startOfDay(startDate),
-        end: startOfDay(endDate),
-        progress: task.status === "done" ? 100 : task.status === "in_progress" ? 50 : 0,
-        type: "task" as const,
-        styles: {
-          backgroundColor: priorityColors[task.priority || "medium"],
-          backgroundSelectedColor: priorityColors[task.priority || "medium"],
-          progressColor: priorityColors[task.priority || "medium"],
-          progressSelectedColor: priorityColors[task.priority || "medium"],
-        },
-        project: task.area_id || undefined,
-      };
-    });
+        return {
+          id: task.id,
+          name: task.title,
+          start: startDate,
+          end: endDate,
+          type: "task" as const,
+          progress: task.status === "done" ? 100 : task.status === "in_progress" ? 50 : 0,
+          styles: {
+            backgroundColor: priorityColors[task.priority || "medium"],
+            backgroundSelectedColor: priorityColors[task.priority || "medium"],
+            progressColor: "rgba(255,255,255,0.4)",
+            progressSelectedColor: "rgba(255,255,255,0.6)",
+          },
+        };
+      });
   }, [tasks]);
 
+  // -------- Range de datas ajustável --------
+  const dateRange = useMemo(() => {
+    if (ganttTasks.length === 0) {
+      const today = new Date();
+      return { start: addMonths(today, -3), end: addMonths(today, 3) };
+    }
+    const dates = ganttTasks.flatMap((t) => [t.start, t.end]);
+    const minDate = new Date(Math.min(...dates.map((d) => d.getTime())));
+    const maxDate = new Date(Math.max(...dates.map((d) => d.getTime())));
+    return { start: addMonths(minDate, -1), end: addMonths(maxDate, 1) };
+  }, [ganttTasks]);
+
+  // -------- Manipuladores --------
   const handleTaskChange = useCallback(
     async (task: GanttTask) => {
       try {
-        const originalTask = tasks.find((t) => t.id === task.id);
-        if (!originalTask) return;
+        const original = tasks.find((t) => t.id === task.id);
+        if (!original) return;
 
-        // Calculate new due_date from the end date
-        const newDueDate = format(task.end, "yyyy-MM-dd");
-
+        // Update due_date based on the end date
         await tasksService.update(task.id, {
-          due_date: newDueDate,
+          due_date: format(task.end, "yyyy-MM-dd"),
         });
 
         toast.success("Tarefa atualizada com sucesso!");
-
         onTasksChange?.();
-      } catch (error) {
-        console.error("Error updating task:", error);
+      } catch (err) {
+        console.error(err);
         toast.error("Erro ao atualizar tarefa");
       }
     },
     [tasks, onTasksChange]
   );
 
-  const handleTaskDelete = useCallback(
-    (task: GanttTask) => {
-      const originalTask = tasks.find((t) => t.id === task.id);
-      if (originalTask) {
-        setTaskToDelete(originalTask);
-        setDeleteDialogOpen(true);
-      }
-    },
-    [tasks]
-  );
+  const toggleFullScreen = () => setIsFullScreen(!isFullScreen);
 
-  const confirmDelete = async () => {
-    if (!taskToDelete) return;
+  // -------- Layout Responsivo --------
+  const columnWidth =
+    viewMode === ViewMode.Month
+      ? Math.max(window.innerWidth / 30, 10)
+      : viewMode === ViewMode.Week
+      ? Math.max(window.innerWidth / 14, 35)
+      : 60;
 
-    setIsDeleting(true);
-    const { error } = await tasksService.delete(taskToDelete.id);
+  const totalDays = differenceInDays(dateRange.end, dateRange.start);
+  const totalWidth = totalDays * columnWidth;
+  const ganttHeight = Math.max(ganttTasks.length * 56 + 120, 600);
 
-    if (error) {
-      toast.error(error.message || "Erro ao excluir tarefa");
-    } else {
-      toast.success("Tarefa excluída com sucesso!");
-      onTasksChange?.();
-    }
-
-    setIsDeleting(false);
-    setDeleteDialogOpen(false);
-    setTaskToDelete(null);
-  };
-
-  const handleTaskClick = useCallback(
-    (task: GanttTask) => {
-      const originalTask = tasks.find((t) => t.id === task.id);
-      if (originalTask) {
-        setSelectedTask(originalTask);
-        setFormOpen(true);
-      }
-    },
-    [tasks]
-  );
-
-  const handleAddTask = () => {
-    setSelectedTask(null);
-    setFormOpen(true);
-  };
-
-  const handleFormClose = () => {
-    setFormOpen(false);
-    setSelectedTask(null);
-  };
-
-  const handleFormSuccess = () => {
-    onTasksChange?.();
-    handleFormClose();
-  };
-
-  const toggleFullScreen = () => {
-    setIsFullScreen(!isFullScreen);
-  };
-
-  if (ganttTasks.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Cronograma (Gantt)</CardTitle>
-          <CardDescription>Visualize e gerencie as tarefas ao longo do tempo</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-12 space-y-4">
-            <p className="text-center text-muted-foreground">
-              Nenhuma tarefa com data de vencimento cadastrada
-            </p>
-            <Button onClick={handleAddTask}>
-              <Plus className="h-4 w-4 mr-2" />
-              Criar Primeira Tarefa
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const content = (
-    <div className="space-y-4">
-      {/* Enhanced Controls */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setViewMode(ViewMode.Day)}
-                  className={viewMode === ViewMode.Day ? "bg-primary/10 border-primary" : ""}
-                >
-                  <ZoomIn className="h-4 w-4 mr-1" />
-                  Dia
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Visualização detalhada por dia</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setViewMode(ViewMode.Week)}
-                  className={viewMode === ViewMode.Week ? "bg-primary/10 border-primary" : ""}
-                >
-                  Semana
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Visualização semanal</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setViewMode(ViewMode.Month)}
-                  className={viewMode === ViewMode.Month ? "bg-primary/10 border-primary" : ""}
-                >
-                  <ZoomOut className="h-4 w-4 mr-1" />
-                  Mês
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Visualização mensal</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button size="sm" onClick={handleAddTask} className="shadow-sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Nova Tarefa
+  return (
+    <div
+      className={`gantt-wrapper ${isFullScreen ? "fixed inset-0 z-50 bg-background" : ""}`}
+      style={{ padding: isFullScreen ? "2rem" : "0" }}
+    >
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setViewMode(ViewMode.Day)}
+            className={viewMode === ViewMode.Day ? "bg-primary/10 border-primary" : ""}
+          >
+            <ZoomIn className="h-4 w-4 mr-1" /> Dia
           </Button>
-          <Button variant="outline" size="sm" onClick={toggleFullScreen} className="shadow-sm">
-            {isFullScreen ? (
-              <>
-                <Minimize2 className="h-4 w-4 mr-2" />
-                Sair
-              </>
-            ) : (
-              <>
-                <Maximize2 className="h-4 w-4 mr-2" />
-                Visualização Completa
-              </>
-            )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setViewMode(ViewMode.Week)}
+            className={viewMode === ViewMode.Week ? "bg-primary/10 border-primary" : ""}
+          >
+            Semana
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setViewMode(ViewMode.Month)}
+            className={viewMode === ViewMode.Month ? "bg-primary/10 border-primary" : ""}
+          >
+            <ZoomOut className="h-4 w-4 mr-1" /> Mês
           </Button>
         </div>
+
+        <Button variant="outline" size="sm" onClick={toggleFullScreen}>
+          {isFullScreen ? (
+            <>
+              <Minimize2 className="h-4 w-4 mr-1" /> Sair
+            </>
+          ) : (
+            <>
+              <Maximize2 className="h-4 w-4 mr-1" /> Tela Cheia
+            </>
+          )}
+        </Button>
       </div>
 
-      {/* Enhanced Legend */}
-      <div className="flex items-center gap-6 flex-wrap p-3 bg-muted/30 rounded-lg border">
-        <span className="font-semibold text-sm">Legenda de Prioridade:</span>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-full shadow-sm" style={{ backgroundColor: priorityColors.urgent }} />
-            <span className="text-sm">Urgente</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-full shadow-sm" style={{ backgroundColor: priorityColors.high }} />
-            <span className="text-sm">Alta</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-full shadow-sm" style={{ backgroundColor: priorityColors.medium }} />
-            <span className="text-sm">Média</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-full shadow-sm" style={{ backgroundColor: priorityColors.low }} />
-            <span className="text-sm">Baixa</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Gantt Chart with Enhanced Styling */}
-      <div className="gantt-container bg-background border rounded-lg overflow-auto shadow-sm" style={{ height: isFullScreen ? "calc(100vh - 200px)" : "600px" }}>
+      <div
+        className="gantt-container bg-background/50 border border-border rounded-lg overflow-auto"
+        style={{
+          height: isFullScreen ? "calc(100vh - 150px)" : "600px",
+          minWidth: `${totalWidth}px`,
+        }}
+      >
         <Gantt
           tasks={ganttTasks}
           viewMode={viewMode}
+          viewDate={dateRange.start}
           onDateChange={handleTaskChange}
-          onDelete={handleTaskDelete}
-          onClick={handleTaskClick}
-          locale="pt-BR"
-          listCellWidth={isFullScreen ? "220px" : "180px"}
-          columnWidth={viewMode === ViewMode.Month ? 300 : viewMode === ViewMode.Week ? 250 : 60}
-          ganttHeight={Math.max(ganttTasks.length * 56 + 120, 400)}
+          columnWidth={columnWidth}
+          ganttHeight={ganttHeight}
+          listCellWidth="220px"
           barCornerRadius={24}
-          todayColor="rgba(59, 130, 246, 0.08)"
-          barProgressColor="rgba(255, 255, 255, 0.3)"
-          barProgressSelectedColor="rgba(255, 255, 255, 0.4)"
-          TooltipContent={({ task }) => {
-            const taskData = tasks.find(t => t.id === task.id);
-            if (!taskData) return <div />;
-            
-            return (
-              <div className="bg-popover text-popover-foreground p-3 rounded-lg shadow-lg border max-w-xs">
-                <div className="font-semibold text-sm mb-2">{task.name}</div>
-                <div className="space-y-1.5 text-xs">
-                  <div className="flex justify-between gap-4">
-                    <span className="text-muted-foreground">Início:</span>
-                    <span className="font-medium">{format(task.start, "dd/MM/yyyy", { locale: ptBR })}</span>
-                  </div>
-                  <div className="flex justify-between gap-4">
-                    <span className="text-muted-foreground">Fim:</span>
-                    <span className="font-medium">{format(task.end, "dd/MM/yyyy", { locale: ptBR })}</span>
-                  </div>
-                  <div className="flex justify-between gap-4 items-center">
-                    <span className="text-muted-foreground">Prioridade:</span>
-                    <Badge 
-                      variant={taskData.priority === 'urgent' ? 'destructive' : 'secondary'} 
-                      className="text-xs capitalize"
-                    >
-                      {taskData.priority}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between gap-4 items-center">
-                    <span className="text-muted-foreground">Status:</span>
-                    <Badge variant="outline" className="text-xs">
-                      {statusLabels[taskData.status as keyof typeof statusLabels]}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-            );
-          }}
+          todayColor="rgba(107,125,79,0.15)"
+          locale="pt-BR"
         />
       </div>
-
-      {/* Enhanced Task Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {Object.entries(statusLabels).map(([status, label]) => {
-          const count = tasks.filter((t) => t.status === status).length;
-          return (
-            <Card key={status} className="hover:shadow-md transition-shadow">
-              <CardContent className="pt-6">
-                <div className="text-center space-y-1">
-                  <p className="text-3xl font-bold text-primary">{count}</p>
-                  <p className="text-sm text-muted-foreground">{label}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {count === 1 ? 'tarefa' : 'tarefas'}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
     </div>
-  );
-
-  return (
-    <>
-      {isFullScreen ? (
-        <div className="fixed inset-0 z-50 bg-background p-6 overflow-auto">
-          <div className="mb-4">
-            <h2 className="text-2xl font-bold">Cronograma do Projeto</h2>
-            <p className="text-sm text-muted-foreground">
-              {projectStartDate && projectEndDate
-                ? `${format(new Date(projectStartDate), "dd/MM/yyyy", { locale: ptBR })} - ${format(new Date(projectEndDate), "dd/MM/yyyy", { locale: ptBR })}`
-                : "Visualização completa do cronograma"}
-            </p>
-          </div>
-          {content}
-        </div>
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle>Cronograma (Gantt)</CardTitle>
-            <CardDescription>
-              {projectStartDate && projectEndDate
-                ? `${format(new Date(projectStartDate), "dd/MM/yyyy", { locale: ptBR })} - ${format(new Date(projectEndDate), "dd/MM/yyyy", { locale: ptBR })}`
-                : "Visualize e gerencie as tarefas do projeto ao longo do tempo"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>{content}</CardContent>
-        </Card>
-      )}
-
-      <TaskFormDialog
-        open={formOpen}
-        onClose={handleFormClose}
-        onSuccess={handleFormSuccess}
-        projectId={projectId}
-        taskId={selectedTask?.id}
-        initialData={selectedTask || undefined}
-      />
-
-      <DeleteConfirmDialog
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen(false)}
-        onConfirm={confirmDelete}
-        title="Excluir Tarefa"
-        description="Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser desfeita."
-        isLoading={isDeleting}
-      />
-    </>
   );
 }
