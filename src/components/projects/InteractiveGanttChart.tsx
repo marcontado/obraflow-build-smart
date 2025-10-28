@@ -96,17 +96,21 @@ export function InteractiveGanttChart({ projectId, tasks, onTasksChange }: Inter
 
   const toggleFullScreen = () => setIsFullScreen(!isFullScreen);
 
-  // -------- Layout Responsivo --------
+  // -------- Layout e escala corrigidos --------
+  // columnWidth representa a largura de cada UNIDADE da visualização atual
+  // Dia: cada coluna = 1 dia
+  // Semana: cada coluna = 1 semana
+  // Mês: cada coluna = 1 mês
   const columnWidth =
-    viewMode === ViewMode.Month
-      ? Math.max(window.innerWidth / 30, 10)
-      : viewMode === ViewMode.Week
-      ? Math.max(window.innerWidth / 14, 35)
-      : 60;
+    viewMode === ViewMode.Day ? 60 :
+    viewMode === ViewMode.Week ? 140 :
+    viewMode === ViewMode.Month ? 280 : 60;
 
   const totalDays = differenceInDays(dateRange.end, dateRange.start);
-  const totalWidth = totalDays * columnWidth;
   const ganttHeight = Math.max(ganttTasks.length * 56 + 120, 600);
+  
+  // ViewDate centralizado no range para evitar compressão visual
+  const centerViewDate = addDays(dateRange.start, Math.floor(totalDays / 2));
 
   return (
     <div
@@ -158,13 +162,12 @@ export function InteractiveGanttChart({ projectId, tasks, onTasksChange }: Inter
         className="gantt-container bg-background/50 border border-border rounded-lg overflow-auto"
         style={{
           height: isFullScreen ? "calc(100vh - 150px)" : "600px",
-          minWidth: `${totalWidth}px`,
         }}
       >
         <Gantt
           tasks={ganttTasks}
           viewMode={viewMode}
-          viewDate={dateRange.start}
+          viewDate={centerViewDate}
           onDateChange={handleTaskChange}
           columnWidth={columnWidth}
           ganttHeight={ganttHeight}
