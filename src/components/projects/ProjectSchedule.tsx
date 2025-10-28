@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Gantt, Task as GanttTask, ViewMode } from "gantt-task-react";
 import "gantt-task-react/dist/index.css";
 import styles from "./GanttShell.module.css";
-import { format, addDays, startOfDay, differenceInDays, addMonths } from "date-fns";
+import { format, addDays, startOfDay, differenceInDays, addMonths, startOfWeek, endOfWeek, startOfMonth, endOfMonth, endOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Maximize2, Minimize2, ZoomIn, ZoomOut, Plus, Calendar } from "lucide-react";
 import { toast } from "sonner";
@@ -65,28 +65,55 @@ export function ProjectSchedule({
     }
   };
 
-  const dateRange = useMemo(() => {
-    let minDate: Date;
-    let maxDate: Date;
-
-    if (projectStartDate && projectEndDate) {
-      minDate = new Date(projectStartDate);
-      maxDate = new Date(projectEndDate);
-    } else if (activities.length > 0) {
-      const dates = activities.flatMap(a => [new Date(a.start_date), new Date(a.end_date)]);
-      minDate = new Date(Math.min(...dates.map(d => d.getTime())));
-      maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
-    } else {
-      const today = new Date();
-      minDate = addMonths(today, -6);
-      maxDate = addMonths(today, 6);
-    }
-
+  const systemCalendar = useMemo(() => {
+    const now = new Date();
+    const weekStart = startOfWeek(now, { weekStartsOn: 0 }); // Domingo
+    const weekEnd = endOfWeek(now, { weekStartsOn: 0 });
+    const monthStart = startOfMonth(now);
+    const monthEnd = endOfMonth(now);
+    
     return {
-      start: addMonths(minDate, -3),
-      end: addMonths(maxDate, 3)
+      today: startOfDay(now),
+      startOfWeek: weekStart,
+      endOfWeek: weekEnd,
+      startOfMonth: monthStart,
+      endOfMonth: monthEnd,
     };
-  }, [activities, projectStartDate, projectEndDate]);
+  }, []);
+
+  const dateRange = useMemo(() => {
+    // Se houver datas do projeto definidas, usá-las como base
+    if (projectStartDate && projectEndDate) {
+      const projectStart = new Date(projectStartDate);
+      const projectEnd = new Date(projectEndDate);
+      
+      // Expandir um pouco para contexto
+      return {
+        start: addMonths(projectStart, -1),
+        end: addMonths(projectEnd, 1)
+      };
+    }
+    
+    // Caso contrário, usar o calendário do sistema baseado no viewMode
+    switch (viewMode) {
+      case ViewMode.Day:
+        return { 
+          start: systemCalendar.today, 
+          end: endOfDay(systemCalendar.today) 
+        };
+      case ViewMode.Week:
+        return { 
+          start: systemCalendar.startOfWeek, 
+          end: systemCalendar.endOfWeek 
+        };
+      case ViewMode.Month:
+      default:
+        return { 
+          start: systemCalendar.startOfMonth, 
+          end: systemCalendar.endOfMonth 
+        };
+    }
+  }, [projectStartDate, projectEndDate, viewMode, systemCalendar]);
 
   const ganttTasks: GanttTask[] = useMemo(() => {
     return activities.map((activity) => ({
@@ -343,76 +370,90 @@ export function ProjectSchedule({
       <div 
         className={`${styles.archestraGantt} ${isFullScreen ? styles.fullscreen : ''}`}
         style={{
-          '--gantt-total-width': `${totalWidth}px`,
-          '--row-h': '50px',
-          minWidth: `${totalWidth}px`,
-        } as React.CSSProperties}
+          height: isFullScreen ? "calc(100vh - 250px)" : "650px",
+          overflow: "hidden",
+        }}
       >
-        <div className={styles.ganttViewport}>
-          <Gantt
-            tasks={ganttTasks}
-            viewMode={viewMode}
-            viewDate={addDays(dateRange.start, Math.floor(totalDays / 2))}
-            onDateChange={handleTaskChange}
-            onDelete={handleTaskDelete}
-            onClick={handleTaskClick}
-            locale="pt-BR"
-            listCellWidth={isFullScreen ? "240px" : "200px"}
-            columnWidth={columnWidthPerDay}
-            ganttHeight={ganttHeight}
-            barCornerRadius={999}
-            todayColor="rgba(107, 125, 79, 0.08)"
-            barProgressColor="rgba(255, 255, 255, 0.3)"
-            barProgressSelectedColor="rgba(255, 255, 255, 0.5)"
-            TooltipContent={({ task }) => {
-            const activity = activities.find(a => a.id === task.id);
-            if (!activity) return <div />;
-            
-            const duration = differenceInDays(
-              new Date(activity.end_date),
-              new Date(activity.start_date)
-            ) + 1;
-            
-            return (
-              <div className="bg-popover text-popover-foreground p-3 rounded-lg shadow-lg border max-w-xs">
-                <div className="font-semibold text-sm mb-2">{activity.name}</div>
-                <div className="space-y-1.5 text-xs">
-                  <div className="flex justify-between gap-4">
-                    <span className="text-muted-foreground">Início:</span>
-                    <span className="font-medium">
-                      {format(new Date(activity.start_date), "dd/MM/yyyy", { locale: ptBR })}
-                    </span>
-                  </div>
-                  <div className="flex justify-between gap-4">
-                    <span className="text-muted-foreground">Fim:</span>
-                    <span className="font-medium">
-                      {format(new Date(activity.end_date), "dd/MM/yyyy", { locale: ptBR })}
-                    </span>
-                  </div>
-                  <div className="flex justify-between gap-4">
-                    <span className="text-muted-foreground">Duração:</span>
-                    <span className="font-medium">{duration} dias</span>
-                  </div>
-                  <div className="flex justify-between gap-4">
-                    <span className="text-muted-foreground">Progresso:</span>
-                    <span className="font-medium">{activity.progress}%</span>
-                  </div>
-                  <div className="flex justify-between gap-4 items-center">
-                    <span className="text-muted-foreground">Prioridade:</span>
-                    <Badge 
-                      variant={activity.priority === 'urgent' ? 'destructive' : 'secondary'} 
-                      className="text-xs capitalize"
-                    >
-                      {activity.priority === 'urgent' ? 'Urgente' : 
-                       activity.priority === 'high' ? 'Alta' :
-                       activity.priority === 'medium' ? 'Média' : 'Baixa'}
-                    </Badge>
+        <div
+          className={styles.ganttViewport}
+          style={{
+            width: "100%",
+            height: "100%",
+            overflowX: "auto",
+            overflowY: "hidden",
+          }}
+        >
+          <div
+            style={{
+              minWidth: `${totalWidth}px`,
+              height: "100%",
+            }}
+          >
+            <Gantt
+              tasks={ganttTasks}
+              viewMode={viewMode}
+              viewDate={addDays(dateRange.start, Math.floor(totalDays / 2))}
+              onDateChange={handleTaskChange}
+              onDelete={handleTaskDelete}
+              onClick={handleTaskClick}
+              locale="pt-BR"
+              listCellWidth={isFullScreen ? "240px" : "200px"}
+              columnWidth={columnWidthPerDay}
+              ganttHeight={ganttHeight}
+              barCornerRadius={999}
+              todayColor="rgba(107, 125, 79, 0.08)"
+              barProgressColor="rgba(255, 255, 255, 0.3)"
+              barProgressSelectedColor="rgba(255, 255, 255, 0.5)"
+              TooltipContent={({ task }) => {
+              const activity = activities.find(a => a.id === task.id);
+              if (!activity) return <div />;
+              
+              const duration = differenceInDays(
+                new Date(activity.end_date),
+                new Date(activity.start_date)
+              ) + 1;
+              
+              return (
+                <div className="bg-popover text-popover-foreground p-3 rounded-lg shadow-lg border max-w-xs">
+                  <div className="font-semibold text-sm mb-2">{activity.name}</div>
+                  <div className="space-y-1.5 text-xs">
+                    <div className="flex justify-between gap-4">
+                      <span className="text-muted-foreground">Início:</span>
+                      <span className="font-medium">
+                        {format(new Date(activity.start_date), "dd/MM/yyyy", { locale: ptBR })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <span className="text-muted-foreground">Fim:</span>
+                      <span className="font-medium">
+                        {format(new Date(activity.end_date), "dd/MM/yyyy", { locale: ptBR })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <span className="text-muted-foreground">Duração:</span>
+                      <span className="font-medium">{duration} dias</span>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <span className="text-muted-foreground">Progresso:</span>
+                      <span className="font-medium">{activity.progress}%</span>
+                    </div>
+                    <div className="flex justify-between gap-4 items-center">
+                      <span className="text-muted-foreground">Prioridade:</span>
+                      <Badge 
+                        variant={activity.priority === 'urgent' ? 'destructive' : 'secondary'} 
+                        className="text-xs capitalize"
+                      >
+                        {activity.priority === 'urgent' ? 'Urgente' : 
+                         activity.priority === 'high' ? 'Alta' :
+                         activity.priority === 'medium' ? 'Média' : 'Baixa'}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          }}
-          />
+              );
+            }}
+            />
+          </div>
         </div>
       </div>
 
