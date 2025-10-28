@@ -66,14 +66,18 @@ export function ProjectSchedule({
   };
 
   const systemCalendar = useMemo(() => {
+    // Usar data local explicitamente
     const now = new Date();
-    const weekStart = startOfWeek(now, { weekStartsOn: 0 }); // Domingo
-    const weekEnd = endOfWeek(now, { weekStartsOn: 0 });
-    const monthStart = startOfMonth(now);
-    const monthEnd = endOfMonth(now);
+    const localNow = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
+    
+    // Semana começa na segunda-feira (weekStartsOn: 1)
+    const weekStart = startOfWeek(localNow, { weekStartsOn: 1 });
+    const weekEnd = endOfWeek(localNow, { weekStartsOn: 1 });
+    const monthStart = startOfMonth(localNow);
+    const monthEnd = endOfMonth(localNow);
     
     return {
-      today: startOfDay(now),
+      today: startOfDay(localNow),
       startOfWeek: weekStart,
       endOfWeek: weekEnd,
       startOfMonth: monthStart,
@@ -82,37 +86,44 @@ export function ProjectSchedule({
   }, []);
 
   const dateRange = useMemo(() => {
-    // Se houver datas do projeto definidas, usá-las como base
+    // Priorizar viewMode para determinar o range visível
+    let baseRange;
+    
+    switch (viewMode) {
+      case ViewMode.Day:
+        baseRange = { 
+          start: systemCalendar.today, 
+          end: endOfDay(systemCalendar.today) 
+        };
+        break;
+      case ViewMode.Week:
+        baseRange = { 
+          start: systemCalendar.startOfWeek, 
+          end: systemCalendar.endOfWeek 
+        };
+        break;
+      case ViewMode.Month:
+      default:
+        baseRange = { 
+          start: systemCalendar.startOfMonth, 
+          end: systemCalendar.endOfMonth 
+        };
+        break;
+    }
+    
+    // Se houver datas do projeto, expandir o range para incluí-las (mas manter proporção do viewMode)
     if (projectStartDate && projectEndDate) {
       const projectStart = new Date(projectStartDate);
       const projectEnd = new Date(projectEndDate);
       
-      // Expandir um pouco para contexto
+      // Expandir baseRange para incluir as datas do projeto
       return {
-        start: addMonths(projectStart, -1),
-        end: addMonths(projectEnd, 1)
+        start: projectStart < baseRange.start ? projectStart : baseRange.start,
+        end: projectEnd > baseRange.end ? projectEnd : baseRange.end
       };
     }
     
-    // Caso contrário, usar o calendário do sistema baseado no viewMode
-    switch (viewMode) {
-      case ViewMode.Day:
-        return { 
-          start: systemCalendar.today, 
-          end: endOfDay(systemCalendar.today) 
-        };
-      case ViewMode.Week:
-        return { 
-          start: systemCalendar.startOfWeek, 
-          end: systemCalendar.endOfWeek 
-        };
-      case ViewMode.Month:
-      default:
-        return { 
-          start: systemCalendar.startOfMonth, 
-          end: systemCalendar.endOfMonth 
-        };
-    }
+    return baseRange;
   }, [projectStartDate, projectEndDate, viewMode, systemCalendar]);
 
   const ganttTasks: GanttTask[] = useMemo(() => {
@@ -146,11 +157,32 @@ export function ProjectSchedule({
   }, [viewMode]);
 
   const ganttMetrics = useMemo(() => {
-    const totalDays = differenceInDays(dateRange.end, dateRange.start);
-    const totalWidth = Math.max(totalDays * columnWidthPerDay, 1200);
+    const totalDays = differenceInDays(dateRange.end, dateRange.start) + 1;
+    
+    // Ajustar columnWidth com base no número de dias visíveis
+    let adaptiveColumnWidth;
+    
+    if (viewMode === ViewMode.Day) {
+      // Dia: mostrar horas com detalhes
+      adaptiveColumnWidth = 120; 
+    } else if (viewMode === ViewMode.Week) {
+      // Semana: ~7 dias, cada dia deve ter espaço legível
+      adaptiveColumnWidth = Math.max(100, 700 / totalDays);
+    } else {
+      // Mês: ~30 dias, comprimir proporcionalmente
+      adaptiveColumnWidth = Math.max(40, 1200 / totalDays);
+    }
+    
+    const totalWidth = Math.max(totalDays * adaptiveColumnWidth, 1200);
     const ganttHeight = Math.max(ganttTasks.length * 50 + 120, 600);
-    return { totalDays, totalWidth, ganttHeight };
-  }, [dateRange, columnWidthPerDay, ganttTasks]);
+    
+    return { 
+      totalDays, 
+      totalWidth, 
+      ganttHeight, 
+      columnWidth: adaptiveColumnWidth 
+    };
+  }, [dateRange, ganttTasks, viewMode]);
 
   const handleTaskChange = useCallback(
     async (task: GanttTask) => {
@@ -398,7 +430,7 @@ export function ProjectSchedule({
               onClick={handleTaskClick}
               locale="pt-BR"
               listCellWidth={isFullScreen ? "240px" : "200px"}
-              columnWidth={columnWidthPerDay}
+              columnWidth={ganttMetrics.columnWidth}
               ganttHeight={ganttHeight}
               barCornerRadius={999}
               todayColor="rgba(107, 125, 79, 0.08)"
