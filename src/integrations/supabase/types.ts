@@ -134,6 +134,86 @@ export type Database = {
         }
         Relationships: []
       }
+      project_activities: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          dependencies: Json | null
+          description: string | null
+          end_date: string
+          id: string
+          name: string
+          priority: string
+          progress: number | null
+          project_id: string
+          start_date: string
+          task_id: string | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          dependencies?: Json | null
+          description?: string | null
+          end_date: string
+          id?: string
+          name: string
+          priority?: string
+          progress?: number | null
+          project_id: string
+          start_date: string
+          task_id?: string | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          dependencies?: Json | null
+          description?: string | null
+          end_date?: string
+          id?: string
+          name?: string
+          priority?: string
+          progress?: number | null
+          project_id?: string
+          start_date?: string
+          task_id?: string | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_activities_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_activities_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_activities_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_activities_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_areas: {
         Row: {
           budget: number | null

@@ -13,8 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { ProjectFormDialog } from "@/components/projects/ProjectFormDialog";
 import { ProjectAreaCard } from "@/components/projects/ProjectAreaCard";
 import { ProjectAreaFormDialog } from "@/components/projects/ProjectAreaFormDialog";
-import { GanttChart } from "@/components/projects/GanttChart";
-import { InteractiveGanttChart } from "@/components/projects/InteractiveGanttChart";
+import { ProjectSchedule } from "@/components/projects/ProjectSchedule";
 import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
 import { KanbanBoard } from "@/components/tasks/KanbanBoard";
 import { ProjectDashboard } from "@/components/projects/ProjectDashboard";
@@ -363,12 +362,10 @@ export default function ProjectDetails() {
 
             <TabsContent value="gantt">
               {hasFeature('gantt') ? (
-                <InteractiveGanttChart
-                  tasks={projectTasks}
+                <ProjectSchedule
                   projectId={id!}
                   projectStartDate={project.start_date || undefined}
                   projectEndDate={project.end_date || undefined}
-                  onTasksChange={fetchProjectTasks}
                 />
               ) : (
                 <FeatureUpgradeCard
