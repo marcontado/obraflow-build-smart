@@ -119,25 +119,29 @@ export default function Landing() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-card">
       <LandingNavbar />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4">
-        <div className="container mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="inline-block px-4 py-1 bg-accent/10 text-accent rounded-full text-sm font-medium mb-6">
+      <section className="relative pt-32 pb-24 px-4 overflow-hidden">
+        {/* Subtle gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
+        
+        <div className="container mx-auto relative">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="animate-fade-in">
+              <div className="inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-accent/10 to-primary/10 border border-accent/20 text-accent rounded-full text-sm font-medium mb-8 shadow-soft">
+                <span className="w-2 h-2 bg-accent rounded-full animate-pulse" />
                 30 dias grátis • Sem cartão de crédito
               </div>
-              <h1 className="text-5xl md:text-6xl font-bold mb-6 text-foreground">
-                Gestão de obras simplificada para designers
+              <h1 className="font-heading font-bold mb-8 text-foreground leading-tight">
+                Seu atelier digital para gestão de obras
               </h1>
-              <p className="text-xl text-muted-foreground mb-8">
-                Organize projetos, gerencie orçamentos e acompanhe obras em um único lugar
+              <p className="text-xl text-muted-foreground mb-10 leading-relaxed max-w-lg">
+                Organize projetos, gerencie orçamentos e acompanhe obras em um único lugar — com a elegância que seu trabalho merece.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" asChild>
+              <div className="flex flex-col sm:flex-row gap-5">
+                <Button size="lg" asChild className="shadow-elegant">
                   <Link to="/auth?tab=signup">
                     Começar Grátis <ArrowRight className="ml-2 w-5 h-5" />
                   </Link>
@@ -147,11 +151,12 @@ export default function Landing() {
                 </Button>
               </div>
             </div>
-            <div className="relative">
+            <div className="relative animate-fade-in-scale">
+              <div className="absolute -inset-4 bg-gradient-to-br from-primary/20 to-accent/20 rounded-3xl blur-2xl opacity-30" />
               <img
                 src={heroImage}
                 alt="Workspace de design"
-                className="rounded-lg shadow-2xl"
+                className="relative rounded-2xl shadow-elegant hover:scale-[1.02] transition-transform duration-500"
               />
             </div>
           </div>
@@ -159,80 +164,98 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section id="recursos" className="py-20 px-4 bg-muted/30">
+      <section id="recursos" className="py-24 px-4 bg-gradient-to-b from-card to-background">
         <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 text-foreground">Recursos Poderosos</h2>
-            <p className="text-xl text-muted-foreground">
-              Tudo que você precisa para gerenciar suas obras com eficiência
+          <div className="text-center mb-20 animate-fade-in">
+            <h2 className="font-heading font-bold mb-6 text-foreground">Recursos Poderosos</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              Tudo que você precisa para gerenciar suas obras com eficiência e elegância
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <FeatureCard key={index} {...feature} />
+              <div 
+                key={index}
+                className="animate-fade-in-scale"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <FeatureCard {...feature} />
+              </div>
             ))}
           </div>
         </div>
       </section>
 
       {/* Benefits Section */}
-      <section id="beneficios" className="py-20 px-4">
+      <section id="beneficios" className="py-24 px-4">
         <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 text-foreground">Resultados Reais</h2>
-            <p className="text-xl text-muted-foreground">
-              Veja o impacto na sua produtividade
+          <div className="text-center mb-20 animate-fade-in">
+            <h2 className="font-heading font-bold mb-6 text-foreground">Resultados Reais</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              Veja o impacto na sua produtividade e na satisfação dos seus clientes
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-8 rounded-lg bg-card border border-border">
-              <div className="text-5xl font-bold text-primary mb-2">10h</div>
-              <p className="text-muted-foreground">Economize até 10h/semana em gestão</p>
+            <div className="group text-center p-10 rounded-2xl bg-gradient-to-br from-card to-background border border-border/50 shadow-md hover:shadow-elegant transition-all duration-500 hover:-translate-y-2">
+              <div className="text-6xl font-heading font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent mb-4 group-hover:scale-110 transition-transform duration-300">10h</div>
+              <p className="text-muted-foreground leading-relaxed">Economize até 10h/semana em gestão</p>
             </div>
-            <div className="text-center p-8 rounded-lg bg-card border border-border">
-              <div className="text-5xl font-bold text-accent mb-2">40%</div>
-              <p className="text-muted-foreground">Reduza atrasos em até 40%</p>
+            <div className="group text-center p-10 rounded-2xl bg-gradient-to-br from-card to-background border border-border/50 shadow-md hover:shadow-elegant transition-all duration-500 hover:-translate-y-2">
+              <div className="text-6xl font-heading font-bold bg-gradient-to-br from-accent to-accent/70 bg-clip-text text-transparent mb-4 group-hover:scale-110 transition-transform duration-300">40%</div>
+              <p className="text-muted-foreground leading-relaxed">Reduza atrasos em até 40%</p>
             </div>
-            <div className="text-center p-8 rounded-lg bg-card border border-border">
-              <div className="text-5xl font-bold text-secondary mb-2">3x</div>
-              <p className="text-muted-foreground">Clientes 3x mais satisfeitos</p>
+            <div className="group text-center p-10 rounded-2xl bg-gradient-to-br from-card to-background border border-border/50 shadow-md hover:shadow-elegant transition-all duration-500 hover:-translate-y-2">
+              <div className="text-6xl font-heading font-bold bg-gradient-to-br from-secondary to-secondary/70 bg-clip-text text-transparent mb-4 group-hover:scale-110 transition-transform duration-300">3x</div>
+              <p className="text-muted-foreground leading-relaxed">Clientes 3x mais satisfeitos</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 px-4 bg-muted/30">
+      <section className="py-24 px-4 bg-gradient-to-b from-background to-card">
         <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 text-foreground">O que dizem nossos clientes</h2>
-            <p className="text-xl text-muted-foreground">
-              Designers e arquitetos confiam no Archestra
+          <div className="text-center mb-20 animate-fade-in">
+            <h2 className="font-heading font-bold mb-6 text-foreground">O que dizem nossos clientes</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              Designers e arquitetos confiam no Archestra para transformar sua gestão
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <TestimonialCard key={index} {...testimonial} />
+              <div 
+                key={index}
+                className="animate-fade-in-scale"
+                style={{ animationDelay: `${index * 0.15}s` }}
+              >
+                <TestimonialCard {...testimonial} />
+              </div>
             ))}
           </div>
         </div>
       </section>
 
       {/* Plans Preview Section */}
-      <section className="py-20 px-4">
+      <section className="py-24 px-4">
         <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 text-foreground">Escolha o plano ideal</h2>
-            <p className="text-xl text-muted-foreground">
-              Comece grátis e evolua conforme sua necessidade
+          <div className="text-center mb-20 animate-fade-in">
+            <h2 className="font-heading font-bold mb-6 text-foreground">Escolha o plano ideal</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              Comece grátis e evolua conforme sua necessidade — sem compromisso
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {plans.map((plan, index) => (
-              <PlanCardPublic key={index} {...plan} />
+              <div 
+                key={index}
+                className="animate-fade-in-scale"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <PlanCardPublic {...plan} />
+              </div>
             ))}
           </div>
-          <div className="text-center mt-12">
+          <div className="text-center mt-16 animate-fade-in">
             <Button size="lg" variant="outline" asChild>
               <Link to="/plans">Ver Todos os Planos e Detalhes</Link>
             </Button>
@@ -241,15 +264,19 @@ export default function Landing() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-20 px-4 bg-gradient-to-r from-primary to-secondary">
-        <div className="container mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-4 text-primary-foreground">
+      <section className="relative py-32 px-4 overflow-hidden">
+        {/* Animated gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-accent to-secondary opacity-95" />
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
+        
+        <div className="container mx-auto text-center relative z-10 animate-fade-in">
+          <h2 className="font-heading font-bold mb-6 text-white max-w-3xl mx-auto leading-tight">
             Pronto para transformar sua gestão de obras?
           </h2>
-          <p className="text-xl text-primary-foreground/90 mb-8">
-            Não é necessário cartão de crédito
+          <p className="text-xl text-white/90 mb-12 max-w-2xl mx-auto leading-relaxed">
+            Junte-se a centenas de designers e arquitetos que confiam no Archestra — Não é necessário cartão de crédito
           </p>
-          <Button size="lg" variant="secondary" asChild>
+          <Button size="lg" variant="secondary" asChild className="shadow-elegant scale-110">
             <Link to="/auth?tab=signup">
               Começar Grátis Agora <ArrowRight className="ml-2 w-5 h-5" />
             </Link>
