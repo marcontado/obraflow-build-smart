@@ -1,25 +1,28 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export const projectStatsService = {
-  async getProjectStats(projectId: string) {
+  async getProjectStats(projectId: string, workspaceId: string) {
     // Buscar informações do projeto
     const { data: project } = await supabase
       .from("projects")
       .select("*")
       .eq("id", projectId)
+      .eq("workspace_id", workspaceId)
       .single();
 
     // Buscar tarefas do projeto
     const { data: tasks } = await supabase
       .from("tasks")
       .select("*")
-      .eq("project_id", projectId);
+      .eq("project_id", projectId)
+      .eq("workspace_id", workspaceId);
 
     // Buscar áreas do projeto com orçamentos
     const { data: areas } = await supabase
       .from("project_areas")
       .select("*")
-      .eq("project_id", projectId);
+      .eq("project_id", projectId)
+      .eq("workspace_id", workspaceId);
 
     // Calcular estatísticas de tarefas
     const totalTasks = tasks?.length || 0;

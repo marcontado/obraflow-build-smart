@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Edit, Trash2, Plus, Calendar } from "lucide-react";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { FeatureUpgradeCard } from "@/components/plans/FeatureUpgradeCard";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
@@ -45,6 +46,7 @@ const statusLabels = {
 export default function ProjectDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { currentWorkspace } = useWorkspace();
   const { hasFeature, getRequiredPlan } = useFeatureAccess();
   const [project, setProject] = useState<any>(null);
   const [projectAreas, setProjectAreas] = useState<ProjectArea[]>([]);
@@ -58,17 +60,19 @@ export default function ProjectDetails() {
   const [areaToDelete, setAreaToDelete] = useState<ProjectArea | null>(null);
 
   useEffect(() => {
-    fetchProject();
-    fetchProjectAreas();
-    fetchProjectTasks();
-  }, [id]);
+    if (currentWorkspace) {
+      fetchProject();
+      fetchProjectAreas();
+      fetchProjectTasks();
+    }
+  }, [id, currentWorkspace]);
 
   const fetchProject = async () => {
-    if (!id) return;
+    if (!id || !currentWorkspace) return;
     
     try {
       setLoading(true);
-      const { data, error } = await projectsService.getById(id);
+      const { data, error } = await projectsService.getById(id, currentWorkspace.id);
       if (error) throw error;
       setProject(data);
     } catch (error: any) {
@@ -105,11 +109,11 @@ export default function ProjectDetails() {
   };
 
   const confirmDelete = async () => {
-    if (!id) return;
+    if (!id || !currentWorkspace) return;
 
     try {
       setDeleting(true);
-      const { error } = await projectsService.delete(id);
+      const { error } = await projectsService.delete(id, currentWorkspace.id);
       if (error) throw error;
 
       toast.success("Projeto excluído com sucesso!");

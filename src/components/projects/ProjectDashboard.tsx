@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatsCard } from "@/components/dashboard/StatsCard";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { 
   CheckCircle2, 
   ListTodo, 
@@ -43,17 +44,22 @@ const STATUS_LABELS = {
 };
 
 export function ProjectDashboard({ projectId }: ProjectDashboardProps) {
+  const { currentWorkspace } = useWorkspace();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<any>(null);
 
   useEffect(() => {
-    fetchStats();
-  }, [projectId]);
+    if (currentWorkspace) {
+      fetchStats();
+    }
+  }, [projectId, currentWorkspace]);
 
   const fetchStats = async () => {
+    if (!currentWorkspace) return;
+    
     setLoading(true);
     try {
-      const data = await projectStatsService.getProjectStats(projectId);
+      const data = await projectStatsService.getProjectStats(projectId, currentWorkspace.id);
       setStats(data);
     } catch (error) {
       console.error("Erro ao buscar estatísticas:", error);

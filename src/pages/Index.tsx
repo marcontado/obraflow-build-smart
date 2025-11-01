@@ -5,11 +5,13 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { ProjectCard } from "@/components/projects/ProjectCard";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { currentWorkspace } = useWorkspace();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalProjects: 0,
@@ -20,10 +22,14 @@ const Index = () => {
   const [recentProjects, setRecentProjects] = useState<any[]>([]);
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    if (currentWorkspace) {
+      fetchDashboardData();
+    }
+  }, [currentWorkspace]);
 
   const fetchDashboardData = async () => {
+    if (!currentWorkspace) return;
+    
     try {
       const { data: projects, error } = await supabase
         .from("projects")
@@ -31,6 +37,7 @@ const Index = () => {
           *,
           clients (name)
         `)
+        .eq("workspace_id", currentWorkspace.id)
         .order("created_at", { ascending: false })
         .limit(6);
 

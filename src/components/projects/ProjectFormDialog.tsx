@@ -133,7 +133,7 @@ export function ProjectFormDialog({
       };
 
       if (projectId) {
-        const { error } = await projectsService.update(projectId, cleanData);
+        const { error } = await projectsService.update(projectId, cleanData, currentWorkspace.id);
         if (error) throw error;
         toast.success("Projeto atualizado com sucesso!");
       } else {
