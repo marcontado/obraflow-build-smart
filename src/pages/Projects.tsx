@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { Plus, Bot } from "lucide-react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { ProjectCard } from "@/components/projects/ProjectCard";
 import { ProjectFormDialog } from "@/components/projects/ProjectFormDialog";
+import ContratoModal from "@/components/projects/ContratoModal";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { projectsService } from "@/services/projects.service";
@@ -15,6 +16,7 @@ export default function Projects() {
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
+  const [contratoModalOpen, setContratoModalOpen] = useState(false);
 
   useEffect(() => {
     fetchProjects();
@@ -49,10 +51,16 @@ export default function Projects() {
                 {projects.length} projeto(s) no total
               </p>
             </div>
-            <Button onClick={() => setFormOpen(true)} className="gap-2">
-              <Plus className="h-4 w-4" />
-              Novo Projeto
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={() => setFormOpen(true)} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Novo Projeto
+              </Button>
+              <Button onClick={() => setContratoModalOpen(true)} className="gap-2 bg-purple-600 text-white hover:bg-purple-700">
+                <Bot className="h-4 w-4" />
+                Gerar Contrato IA
+              </Button>
+            </div>
           </div>
 
           {loading ? (
@@ -97,6 +105,10 @@ export default function Projects() {
         open={formOpen}
         onClose={() => setFormOpen(false)}
         onSuccess={fetchProjects}
+      />
+      <ContratoModal
+        isOpen={contratoModalOpen}
+        onClose={() => setContratoModalOpen(false)}
       />
     </div>
   );

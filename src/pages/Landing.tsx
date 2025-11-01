@@ -1,4 +1,5 @@
 import { Link, Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { FeatureCard } from "@/components/landing/FeatureCard";
 import { TestimonialCard } from "@/components/landing/TestimonialCard";
@@ -10,6 +11,22 @@ import heroImage from "@/assets/hero-workspace.jpg";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Landing() {
+  const [showWhatsappLabel, setShowWhatsappLabel] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => setShowWhatsappLabel(false), 10000);
+    // Scroll suave se houver intenção salva
+    const scrollToSection = localStorage.getItem("scrollToSection");
+    if (scrollToSection) {
+      setTimeout(() => {
+        const section = document.getElementById(scrollToSection);
+        if (section) {
+          section.scrollIntoView({ behavior: "smooth" });
+        }
+        localStorage.removeItem("scrollToSection");
+      }, 400); // pequeno delay para garantir renderização
+    }
+    return () => clearTimeout(timer);
+  }, []);
   const { user } = useAuth();
   
   // Redirect authenticated users to the app
@@ -119,10 +136,26 @@ export default function Landing() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-card">
+  <div className="min-h-screen bg-gradient-to-b from-background via-background to-card relative">
       <LandingNavbar />
 
-      {/* Hero Section */}
+      {/* Botão flutuante WhatsApp com label temporária */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-center">
+        {showWhatsappLabel && (
+          <div className="mb-2 px-4 py-2 rounded-lg bg-white text-green-700 font-semibold shadow-lg animate-fade-in">
+            Fale com um dos nossos consultores
+          </div>
+        )}
+        <a
+          href="https://wa.me/5511979594378"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="shadow-lg rounded-full bg-green-500 hover:bg-green-600 transition w-16 h-16 flex items-center justify-center"
+          aria-label="Fale com um dos nossos consultores pelo WhatsApp"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="white" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 1.657.336 3.236.956 4.684L2 22l5.455-1.797A9.956 9.956 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-1.528 0-3.018-.437-4.29-1.262l-.306-.192-3.237 1.067 1.07-3.155-.198-.324A7.963 7.963 0 0 1 4 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8zm4.406-5.845c-.242-.121-1.432-.707-1.653-.788-.221-.081-.382-.121-.543.121-.161.242-.623.788-.763.95-.14.161-.282.181-.523.06-.242-.121-1.022-.377-1.947-1.201-.72-.642-1.207-1.435-1.35-1.677-.141-.242-.015-.373.106-.494.109-.108.242-.282.363-.423.121-.141.161-.242.242-.403.081-.161.04-.302-.02-.423-.06-.121-.543-1.312-.744-1.797-.196-.471-.396-.406-.543-.414l-.462-.008c-.161 0-.423.06-.646.282-.221.221-.86.841-.86 2.049 0 1.208.88 2.377 1.002 2.54.121.161 1.73 2.646 4.187 3.601.586.201 1.042.321 1.399.411.587.149 1.122.128 1.545.078.471-.057 1.432-.586 1.634-1.152.202-.566.202-1.051.141-1.152-.06-.101-.221-.161-.463-.282z"/></svg>
+        </a>
+      </div>
       <section className="relative pt-32 pb-24 px-4 overflow-hidden">
         {/* Subtle gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
@@ -235,8 +268,8 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Plans Preview Section */}
-      <section className="py-24 px-4">
+  {/* Plans Preview Section */}
+  <section id="planos" className="py-24 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-20 animate-fade-in">
             <h2 className="font-heading font-bold mb-6 text-foreground">Escolha o plano ideal</h2>

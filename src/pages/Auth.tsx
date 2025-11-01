@@ -79,7 +79,7 @@ export default function Auth() {
 
   return (
     <div className="flex min-h-screen">
-      <Link to="/" className="absolute top-4 left-4 z-10 text-sm text-muted-foreground hover:text-primary flex items-center gap-1">
+      <Link to="/" className="absolute top-4 left-4 z-10 text-sm text-black hover:text-primary flex items-center gap-1">
         ← Voltar para home
       </Link>
       <div className="hidden lg:block lg:w-1/2 relative">
