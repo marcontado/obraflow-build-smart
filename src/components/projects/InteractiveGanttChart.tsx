@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ZoomIn, ZoomOut, Maximize2, Minimize2 } from "lucide-react";
 import { tasksService } from "@/services/tasks.service";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 import "./GanttChartStyles.css";
 
 interface Task {
@@ -31,6 +32,7 @@ const priorityColors: Record<string, string> = {
 };
 
 export function InteractiveGanttChart({ projectId, tasks, onTasksChange }: InteractiveGanttChartProps) {
+  const { currentWorkspace } = useWorkspace();
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Month);
   const [isFullScreen, setIsFullScreen] = useState(false);
 
@@ -75,6 +77,8 @@ export function InteractiveGanttChart({ projectId, tasks, onTasksChange }: Inter
   // -------- Manipuladores --------
   const handleTaskChange = useCallback(
     async (task: GanttTask) => {
+      if (!currentWorkspace) return;
+      
       try {
         const original = tasks.find((t) => t.id === task.id);
         if (!original) return;
@@ -82,7 +86,7 @@ export function InteractiveGanttChart({ projectId, tasks, onTasksChange }: Inter
         // Update due_date based on the end date
         await tasksService.update(task.id, {
           due_date: format(task.end, "yyyy-MM-dd"),
-        });
+        }, currentWorkspace.id);
 
         toast.success("Tarefa atualizada com sucesso!");
         onTasksChange?.();

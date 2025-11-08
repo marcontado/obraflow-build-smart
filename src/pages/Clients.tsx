@@ -10,10 +10,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { clientsService } from "@/services/clients.service";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { toast } from "sonner";
 
 export default function Clients() {
   const navigate = useNavigate();
+  const { currentWorkspace } = useWorkspace();
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -35,11 +37,13 @@ export default function Clients() {
   }, [navigate]);
 
   const fetchClients = async () => {
+    if (!currentWorkspace) return;
+    
     try {
       setLoading(true);
       const { data, error } = searchQuery
-        ? await clientsService.search(searchQuery)
-        : await clientsService.getAll();
+        ? await clientsService.search(searchQuery, currentWorkspace.id)
+        : await clientsService.getAll(currentWorkspace.id);
 
       if (error) throw error;
 
@@ -88,11 +92,11 @@ export default function Clients() {
   };
 
   const confirmDelete = async () => {
-    if (!selectedClient) return;
+    if (!selectedClient || !currentWorkspace) return;
 
     try {
       setDeleting(true);
-      const { error } = await clientsService.delete(selectedClient.id);
+      const { error } = await clientsService.delete(selectedClient.id, currentWorkspace.id);
       if (error) throw error;
 
       toast.success("Cliente excluído com sucesso!");

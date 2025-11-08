@@ -6,21 +6,23 @@ type TaskInsert = Database["public"]["Tables"]["tasks"]["Insert"];
 type TaskUpdate = Database["public"]["Tables"]["tasks"]["Update"];
 
 export const tasksService = {
-  async getByProject(projectId: string) {
+  async getByProject(projectId: string, workspaceId: string) {
     const { data, error } = await supabase
       .from("tasks")
       .select("*, project_areas(name), profiles!tasks_assigned_to_fkey(full_name)")
       .eq("project_id", projectId)
+      .eq("workspace_id", workspaceId)
       .order("created_at", { ascending: false });
 
     return { data, error };
   },
 
-  async getById(id: string) {
+  async getById(id: string, workspaceId: string) {
     const { data, error } = await supabase
       .from("tasks")
       .select("*, project_areas(name), profiles!tasks_assigned_to_fkey(full_name)")
       .eq("id", id)
+      .eq("workspace_id", workspaceId)
       .single();
 
     return { data, error };
@@ -38,18 +40,19 @@ export const tasksService = {
     return { data, error };
   },
 
-  async update(id: string, updates: TaskUpdate) {
+  async update(id: string, updates: TaskUpdate, workspaceId: string) {
     const { data, error } = await supabase
       .from("tasks")
       .update(updates)
       .eq("id", id)
+      .eq("workspace_id", workspaceId)
       .select()
       .single();
 
     return { data, error };
   },
 
-  async updateStatus(id: string, status: string) {
+  async updateStatus(id: string, status: string, workspaceId: string) {
     const updates: TaskUpdate = { 
       status: status as any,
       completed_at: status === "done" ? new Date().toISOString() : null
@@ -59,14 +62,19 @@ export const tasksService = {
       .from("tasks")
       .update(updates)
       .eq("id", id)
+      .eq("workspace_id", workspaceId)
       .select()
       .single();
 
     return { data, error };
   },
 
-  async delete(id: string) {
-    const { error } = await supabase.from("tasks").delete().eq("id", id);
+  async delete(id: string, workspaceId: string) {
+    const { error } = await supabase
+      .from("tasks")
+      .delete()
+      .eq("id", id)
+      .eq("workspace_id", workspaceId);
     return { error };
   },
 };

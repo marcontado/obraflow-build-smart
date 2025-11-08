@@ -129,7 +129,7 @@ export function ActivityFormDialog({
       };
 
       if (activityId) {
-        const { error } = await projectActivitiesService.update(activityId, activityData);
+        const { error } = await projectActivitiesService.update(activityId, activityData, currentWorkspace.id);
         if (error) throw error;
         toast.success("Atividade atualizada com sucesso!");
       } else {

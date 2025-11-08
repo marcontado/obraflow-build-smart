@@ -52,9 +52,11 @@ export function ProjectSchedule({
   }, [projectId]);
 
   const fetchActivities = async () => {
+    if (!currentWorkspace) return;
+    
     try {
       setLoading(true);
-      const { data, error } = await projectActivitiesService.getByProject(projectId);
+      const { data, error } = await projectActivitiesService.getByProject(projectId, currentWorkspace.id);
       if (error) throw error;
       setActivities(data || []);
     } catch (error) {
@@ -186,6 +188,8 @@ export function ProjectSchedule({
 
   const handleTaskChange = useCallback(
     async (task: GanttTask) => {
+      if (!currentWorkspace) return;
+      
       try {
         const newStartDate = format(task.start, "yyyy-MM-dd");
         const newEndDate = format(task.end, "yyyy-MM-dd");
@@ -193,7 +197,7 @@ export function ProjectSchedule({
         await projectActivitiesService.update(task.id, {
           start_date: newStartDate,
           end_date: newEndDate,
-        });
+        }, currentWorkspace.id);
 
         toast.success("Atividade atualizada!");
         fetchActivities();
@@ -228,10 +232,10 @@ export function ProjectSchedule({
   );
 
   const confirmDelete = async () => {
-    if (!activityToDelete) return;
+    if (!activityToDelete || !currentWorkspace) return;
 
     setIsDeleting(true);
-    const { error } = await projectActivitiesService.delete(activityToDelete.id);
+    const { error } = await projectActivitiesService.delete(activityToDelete.id, currentWorkspace.id);
 
     if (error) {
       toast.error("Erro ao excluir atividade");

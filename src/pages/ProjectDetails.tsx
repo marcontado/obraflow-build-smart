@@ -85,10 +85,10 @@ export default function ProjectDetails() {
   };
 
   const fetchProjectAreas = async () => {
-    if (!id) return;
+    if (!id || !currentWorkspace) return;
     
     try {
-      const { data, error } = await projectAreasService.getByProject(id);
+      const { data, error } = await projectAreasService.getByProject(id, currentWorkspace.id);
       if (error) throw error;
       if (data) setProjectAreas(data);
     } catch (error: any) {
@@ -97,10 +97,10 @@ export default function ProjectDetails() {
   };
 
   const fetchProjectTasks = async () => {
-    if (!id) return;
+    if (!id || !currentWorkspace) return;
     
     try {
-      const { data, error } = await tasksService.getByProject(id);
+      const { data, error } = await tasksService.getByProject(id, currentWorkspace.id);
       if (error) throw error;
       if (data) setProjectTasks(data);
     } catch (error: any) {
@@ -135,10 +135,10 @@ export default function ProjectDetails() {
   };
 
   const confirmDeleteArea = async () => {
-    if (!areaToDelete) return;
+    if (!areaToDelete || !currentWorkspace) return;
 
     try {
-      const { error } = await projectAreasService.delete(areaToDelete.id);
+      const { error } = await projectAreasService.delete(areaToDelete.id, currentWorkspace.id);
       if (error) throw error;
       
       toast.success("Área excluída com sucesso!");

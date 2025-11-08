@@ -6,21 +6,23 @@ type ActivityInsert = Database["public"]["Tables"]["project_activities"]["Insert
 type ActivityUpdate = Database["public"]["Tables"]["project_activities"]["Update"];
 
 export const projectActivitiesService = {
-  async getByProject(projectId: string) {
+  async getByProject(projectId: string, workspaceId: string) {
     const { data, error } = await supabase
       .from("project_activities")
       .select("*")
       .eq("project_id", projectId)
+      .eq("workspace_id", workspaceId)
       .order("start_date", { ascending: true });
 
     return { data, error };
   },
 
-  async getById(id: string) {
+  async getById(id: string, workspaceId: string) {
     const { data, error } = await supabase
       .from("project_activities")
       .select("*")
       .eq("id", id)
+      .eq("workspace_id", workspaceId)
       .single();
 
     return { data, error };
@@ -42,32 +44,35 @@ export const projectActivitiesService = {
     return { data, error };
   },
 
-  async update(id: string, updates: ActivityUpdate) {
+  async update(id: string, updates: ActivityUpdate, workspaceId: string) {
     const { data, error } = await supabase
       .from("project_activities")
       .update(updates)
       .eq("id", id)
+      .eq("workspace_id", workspaceId)
       .select()
       .single();
 
     return { data, error };
   },
 
-  async delete(id: string) {
+  async delete(id: string, workspaceId: string) {
     const { error } = await supabase
       .from("project_activities")
       .delete()
-      .eq("id", id);
+      .eq("id", id)
+      .eq("workspace_id", workspaceId);
       
     return { error };
   },
 
-  async bulkUpdate(updates: { id: string; data: ActivityUpdate }[]) {
+  async bulkUpdate(updates: { id: string; data: ActivityUpdate }[], workspaceId: string) {
     const promises = updates.map(({ id, data }) => 
       supabase
         .from("project_activities")
         .update(data)
         .eq("id", id)
+        .eq("workspace_id", workspaceId)
     );
 
     const results = await Promise.all(promises);

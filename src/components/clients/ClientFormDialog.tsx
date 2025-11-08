@@ -116,7 +116,7 @@ export function ClientFormDialog({
       };
 
       if (clientId) {
-        const { error } = await clientsService.update(clientId, cleanData);
+        const { error } = await clientsService.update(clientId, cleanData, currentWorkspace.id);
         if (error) throw error;
         toast.success("Cliente atualizado com sucesso!");
       } else {

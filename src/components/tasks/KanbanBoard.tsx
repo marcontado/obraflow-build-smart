@@ -52,9 +52,11 @@ export function KanbanBoard({ projectId }: KanbanBoardProps) {
   }, [projectId]);
 
   const fetchTasks = async () => {
+    if (!currentWorkspace) return;
+    
     try {
       setLoading(true);
-      const { data, error } = await tasksService.getByProject(projectId);
+      const { data, error } = await tasksService.getByProject(projectId, currentWorkspace.id);
       if (error) throw error;
       setTasks(data || []);
     } catch (error: any) {
@@ -88,14 +90,14 @@ export function KanbanBoard({ projectId }: KanbanBoardProps) {
     ));
 
     try {
-      const { error } = await tasksService.updateStatus(taskId, newStatus);
+      if (!currentWorkspace) return;
+      
+      const { error } = await tasksService.updateStatus(taskId, newStatus, currentWorkspace.id);
       if (error) throw error;
       
       // Recalculate project progress after status change
-      if (currentWorkspace) {
-        const { projectsService } = await import("@/services/projects.service");
-        await projectsService.calculateProjectProgress(projectId, currentWorkspace.id);
-      }
+      const { projectsService } = await import("@/services/projects.service");
+      await projectsService.calculateProjectProgress(projectId, currentWorkspace.id);
       
       toast.success("Status atualizado!");
     } catch (error: any) {
@@ -122,11 +124,11 @@ export function KanbanBoard({ projectId }: KanbanBoardProps) {
   };
 
   const confirmDelete = async () => {
-    if (!selectedTask) return;
+    if (!selectedTask || !currentWorkspace) return;
 
     try {
       setDeleting(true);
-      const { error } = await tasksService.delete(selectedTask.id);
+      const { error } = await tasksService.delete(selectedTask.id, currentWorkspace.id);
       if (error) throw error;
 
       toast.success("Tarefa excluída com sucesso!");
