@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { clientsService } from "@/services/clients.service";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 import {
   Select,
   SelectContent,
@@ -14,6 +15,7 @@ interface ClientSelectProps {
 }
 
 export function ClientSelect({ value, onValueChange }: ClientSelectProps) {
+  const { currentWorkspace } = useWorkspace();
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -22,8 +24,10 @@ export function ClientSelect({ value, onValueChange }: ClientSelectProps) {
   }, []);
 
   const fetchClients = async () => {
+    if (!currentWorkspace) return;
+    
     try {
-      const { data, error } = await clientsService.getAll();
+      const { data, error } = await clientsService.getAll(currentWorkspace.id);
       if (error) throw error;
       setClients(data || []);
     } catch (error) {

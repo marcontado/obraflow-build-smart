@@ -91,7 +91,7 @@ export function ProjectAreaFormDialog({
     };
 
     const { error } = areaId
-      ? await projectAreasService.update(areaId, areaData)
+      ? await projectAreasService.update(areaId, areaData, currentWorkspace.id)
       : await projectAreasService.create(areaData, currentWorkspace.id);
 
     if (error) {

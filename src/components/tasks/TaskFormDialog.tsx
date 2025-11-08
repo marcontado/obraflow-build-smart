@@ -175,7 +175,7 @@ export function TaskFormDialog({
       };
 
       if (taskId) {
-        const { error } = await tasksService.update(taskId, taskData);
+        const { error } = await tasksService.update(taskId, taskData, currentWorkspace.id);
         if (error) throw error;
         toast.success("Tarefa atualizada com sucesso!");
       } else {

@@ -6,20 +6,22 @@ type ClientInsert = Database["public"]["Tables"]["clients"]["Insert"];
 type ClientUpdate = Database["public"]["Tables"]["clients"]["Update"];
 
 export const clientsService = {
-  async getAll() {
+  async getAll(workspaceId: string) {
     const { data, error } = await supabase
       .from("clients")
       .select("*")
+      .eq("workspace_id", workspaceId)
       .order("name", { ascending: true });
 
     return { data, error };
   },
 
-  async getById(id: string) {
+  async getById(id: string, workspaceId: string) {
     const { data, error } = await supabase
       .from("clients")
       .select("*, projects(*)")
       .eq("id", id)
+      .eq("workspace_id", workspaceId)
       .single();
 
     return { data, error };
@@ -37,26 +39,32 @@ export const clientsService = {
     return { data, error };
   },
 
-  async update(id: string, updates: ClientUpdate) {
+  async update(id: string, updates: ClientUpdate, workspaceId: string) {
     const { data, error } = await supabase
       .from("clients")
       .update(updates)
       .eq("id", id)
+      .eq("workspace_id", workspaceId)
       .select()
       .single();
 
     return { data, error };
   },
 
-  async delete(id: string) {
-    const { error } = await supabase.from("clients").delete().eq("id", id);
+  async delete(id: string, workspaceId: string) {
+    const { error } = await supabase
+      .from("clients")
+      .delete()
+      .eq("id", id)
+      .eq("workspace_id", workspaceId);
     return { error };
   },
 
-  async search(query: string) {
+  async search(query: string, workspaceId: string) {
     const { data, error } = await supabase
       .from("clients")
       .select("*")
+      .eq("workspace_id", workspaceId)
       .or(`name.ilike.%${query}%,email.ilike.%${query}%`)
       .order("name", { ascending: true });
 

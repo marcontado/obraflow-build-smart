@@ -6,6 +6,7 @@ import { Header } from "@/components/layout/Header";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { ProjectCard } from "@/components/projects/ProjectCard";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import PartnersPage from "./Partners";
@@ -19,6 +20,7 @@ const TABS = [
 const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { currentWorkspace } = useWorkspace();
   const { currentWorkspace } = useWorkspace();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -37,13 +39,17 @@ const Index = () => {
 
   useEffect(() => {
     if (currentWorkspace) {
+      if (currentWorkspace) {
       fetchDashboardData();
     }
-  }, [currentWorkspace]);
+    }
+  }, [currentWorkspacecurrentWorkspace]);
 
   const fetchDashboardData = async () => {
     if (!currentWorkspace) return;
 
+    if (!currentWorkspace) return;
+    
     try {
       const { data: projects, error } = await supabase
         .from("projects")
@@ -51,6 +57,7 @@ const Index = () => {
           *,
           clients (name)
         `)
+        .eq("workspace_id", currentWorkspace.id)
         .eq("workspace_id", currentWorkspace.id)
         .order("created_at", { ascending: false })
         .limit(6);
