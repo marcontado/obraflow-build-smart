@@ -9,22 +9,28 @@ import ContratoModal from "@/components/projects/ContratoModal";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { projectsService } from "@/services/projects.service";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { toast } from "sonner";
 
 export default function Projects() {
   const navigate = useNavigate();
+  const { currentWorkspace } = useWorkspace();
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [contratoModalOpen, setContratoModalOpen] = useState(false);
 
   useEffect(() => {
-    fetchProjects();
-  }, []);
+    if (currentWorkspace) {
+      fetchProjects();
+    }
+  }, [currentWorkspace]);
 
   const fetchProjects = async () => {
+    if (!currentWorkspace) return;
+    
     try {
-      const { data, error } = await projectsService.getAll();
+      const { data, error } = await projectsService.getAll(currentWorkspace.id);
       if (error) throw error;
       setProjects(data || []);
     } catch (error: any) {

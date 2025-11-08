@@ -1,4 +1,4 @@
-import { Home, FolderKanban, Users, BarChart3, LogOut, Lock } from "lucide-react";
+import { Home, FolderKanban, Users, BarChart3, LogOut, Lock, Handshake } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { authService } from "@/services/auth.service";
@@ -11,6 +11,7 @@ const navigation = [
   { name: "Projetos", href: "/app/projects", icon: FolderKanban },
   { name: "Clientes", href: "/app/clients", icon: Users },
   { name: "Relatórios", href: "/app/reports", icon: BarChart3 },
+  { name: "Fornecedores", href: "/app?tab=partners", icon: Handshake }, 
 ];
 
 export function Sidebar() {
@@ -45,7 +46,7 @@ export function Sidebar() {
                   <TooltipTrigger asChild>
                     <div
                       className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors cursor-not-allowed",
+                        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium",
                         "text-muted-foreground/50"
                       )}
                     >
@@ -68,10 +69,12 @@ export function Sidebar() {
                 end={item.href === "/app"}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                    isActive
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium",
+                    item.name === "Dashboard" && isActive
                       ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      : isActive
+                        ? "bg-muted text-foreground"
+                        : "text-muted-foreground"
                   )
                 }
               >
@@ -86,7 +89,7 @@ export function Sidebar() {
       <div className="border-t p-3">
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground"
         >
           <LogOut className="h-5 w-5" />
           Sair

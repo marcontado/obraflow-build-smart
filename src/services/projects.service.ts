@@ -6,20 +6,22 @@ type ProjectInsert = Database["public"]["Tables"]["projects"]["Insert"];
 type ProjectUpdate = Database["public"]["Tables"]["projects"]["Update"];
 
 export const projectsService = {
-  async getAll() {
+  async getAll(workspaceId: string) {
     const { data, error } = await supabase
       .from("projects")
       .select("*, clients(name)")
+      .eq("workspace_id", workspaceId)
       .order("created_at", { ascending: false });
 
     return { data, error };
   },
 
-  async getById(id: string) {
+  async getById(id: string, workspaceId: string) {
     const { data, error } = await supabase
       .from("projects")
       .select("*, clients(name), project_areas(*)")
       .eq("id", id)
+      .eq("workspace_id", workspaceId)
       .single();
 
     return { data, error };
@@ -37,26 +39,32 @@ export const projectsService = {
     return { data, error };
   },
 
-  async update(id: string, updates: ProjectUpdate) {
+  async update(id: string, updates: ProjectUpdate, workspaceId: string) {
     const { data, error } = await supabase
       .from("projects")
       .update(updates)
       .eq("id", id)
+      .eq("workspace_id", workspaceId)
       .select()
       .single();
 
     return { data, error };
   },
 
-  async delete(id: string) {
-    const { error } = await supabase.from("projects").delete().eq("id", id);
+  async delete(id: string, workspaceId: string) {
+    const { error } = await supabase
+      .from("projects")
+      .delete()
+      .eq("id", id)
+      .eq("workspace_id", workspaceId);
     return { error };
   },
 
-  async getStats() {
+  async getStats(workspaceId: string) {
     const { data: projects, error } = await supabase
       .from("projects")
-      .select("status, budget, spent");
+      .select("status, budget, spent")
+      .eq("workspace_id", workspaceId);
 
     if (error) return { stats: null, error };
 
@@ -71,13 +79,14 @@ export const projectsService = {
     return { stats, error: null };
   },
 
-  async calculateProjectProgress(projectId: string) {
+  async calculateProjectProgress(projectId: string, workspaceId: string) {
     try {
       // Get all tasks for the project
       const { data: tasks, error: tasksError } = await supabase
         .from("tasks")
         .select("status")
-        .eq("project_id", projectId);
+        .eq("project_id", projectId)
+        .eq("workspace_id", workspaceId);
 
       if (tasksError) throw tasksError;
       if (!tasks || tasks.length === 0) return { progress: 0, error: null };
@@ -90,7 +99,8 @@ export const projectsService = {
       const { error: updateError } = await supabase
         .from("projects")
         .update({ progress })
-        .eq("id", projectId);
+        .eq("id", projectId)
+        .eq("workspace_id", workspaceId);
 
       if (updateError) throw updateError;
 

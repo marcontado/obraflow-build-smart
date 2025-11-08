@@ -11,6 +11,7 @@ import {
 import { TaskColumn } from "./TaskColumn";
 import { TaskFormDialog } from "./TaskFormDialog";
 import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { tasksService } from "@/services/tasks.service";
 import { toast } from "sonner";
 import { TaskCard } from "./TaskCard";
@@ -28,6 +29,7 @@ const columns = [
 ];
 
 export function KanbanBoard({ projectId }: KanbanBoardProps) {
+  const { currentWorkspace } = useWorkspace();
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
@@ -90,8 +92,10 @@ export function KanbanBoard({ projectId }: KanbanBoardProps) {
       if (error) throw error;
       
       // Recalculate project progress after status change
-      const { projectsService } = await import("@/services/projects.service");
-      await projectsService.calculateProjectProgress(projectId);
+      if (currentWorkspace) {
+        const { projectsService } = await import("@/services/projects.service");
+        await projectsService.calculateProjectProgress(projectId, currentWorkspace.id);
+      }
       
       toast.success("Status atualizado!");
     } catch (error: any) {
