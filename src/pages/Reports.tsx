@@ -18,9 +18,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { withWorkspaceGuard } from "@/hoc/withWorkspaceGuard";
 
-export default function Reports() {
+function Reports() {
   const navigate = useNavigate();
+  const { currentWorkspace } = useWorkspace();
   const { hasFeature, getRequiredPlan } = useFeatureAccess();
   const [loading, setLoading] = useState(true);
   const [selectedProjectId, setSelectedProjectId] = useState<string>("all");
@@ -37,19 +40,24 @@ export default function Reports() {
   const [tasksByStatus, setTasksByStatus] = useState<any[]>([]);
 
   useEffect(() => {
-    fetchProjectsList();
-  }, []);
+    if (currentWorkspace) {
+      fetchProjectsList();
+    }
+  }, [currentWorkspace]);
 
   useEffect(() => {
-    if (projects.length > 0 || selectedProjectId === "all") {
+    if ((projects.length > 0 || selectedProjectId === "all") && currentWorkspace) {
       fetchReportData(selectedProjectId);
     }
-  }, [selectedProjectId]);
+  }, [selectedProjectId, currentWorkspace]);
 
   const fetchProjectsList = async () => {
+    if (!currentWorkspace) return;
+
     const { data } = await supabase
       .from("projects")
       .select("id, name")
+      .eq("workspace_id", currentWorkspace.id)
       .order("name");
     
     setProjects(data || []);
@@ -61,27 +69,33 @@ export default function Reports() {
   };
 
   const fetchReportData = async (projectId: string) => {
+    if (!currentWorkspace) return;
+
     setLoading(true);
     try {
-      // Buscar projetos (filtrado ou todos)
+      // Buscar projetos (filtrado ou todos) - SEMPRE filtrar por workspace
       let projectsQuery = supabase
         .from("projects")
-        .select("id, status, budget, spent");
+        .select("id, status, budget, spent")
+        .eq("workspace_id", currentWorkspace.id);
       
       if (projectId !== "all") {
         projectsQuery = projectsQuery.eq("id", projectId);
       }
 
-      // Buscar tarefas (filtrado ou todas)
-      let tasksQuery = supabase.from("tasks").select("id, status, project_id");
+      // Buscar tarefas (filtrado ou todas) - SEMPRE filtrar por workspace
+      let tasksQuery = supabase
+        .from("tasks")
+        .select("id, status, project_id")
+        .eq("workspace_id", currentWorkspace.id);
       
       if (projectId !== "all") {
         tasksQuery = tasksQuery.eq("project_id", projectId);
       }
 
-      // Buscar clientes (sempre todos quando filtrado)
+      // Buscar clientes - SEMPRE filtrar por workspace
       const clientsQuery = projectId === "all" 
-        ? supabase.from("clients").select("id")
+        ? supabase.from("clients").select("id").eq("workspace_id", currentWorkspace.id)
         : Promise.resolve({ data: [] });
 
       const [projectsRes, clientsRes, tasksRes] = await Promise.all([
@@ -156,6 +170,11 @@ export default function Reports() {
       setLoading(false);
     }
   };
+
+  // Guard adicional: não renderizar se não houver workspace
+  if (!currentWorkspace) {
+    return null;
+  }
 
   const COLORS = ["hsl(var(--primary))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
 
@@ -365,3 +384,5 @@ export default function Reports() {
     </div>
   );
 }
+
+export default withWorkspaceGuard(Reports);

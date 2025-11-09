@@ -11,9 +11,10 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { clientsService } from "@/services/clients.service";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { withWorkspaceGuard } from "@/hoc/withWorkspaceGuard";
 import { toast } from "sonner";
 
-export default function Clients() {
+function Clients() {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspace();
   const [clients, setClients] = useState<any[]>([]);
@@ -190,3 +191,5 @@ export default function Clients() {
     </div>
   );
 }
+
+export default withWorkspaceGuard(Clients);
