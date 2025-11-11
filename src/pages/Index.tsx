@@ -6,21 +6,21 @@ import { Header } from "@/components/layout/Header";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { ProjectCard } from "@/components/projects/ProjectCard";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
-import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import PartnersPage from "./Partners";
+import Suporte from "./Suporte";
 
 const TABS = [
   { key: "dashboard", label: "Dashboard" },
   { key: "projects", label: "Projetos" },
   { key: "partners", label: "Parceiros" },
+  { key: "suporte", label: "Suporte" },
 ];
 
 const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentWorkspace } = useWorkspace();
   const { currentWorkspace } = useWorkspace();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -43,7 +43,7 @@ const Index = () => {
       fetchDashboardData();
     }
     }
-  }, [currentWorkspacecurrentWorkspace]);
+  }, [currentWorkspace]);
 
   const fetchDashboardData = async () => {
     if (!currentWorkspace) return;
@@ -84,12 +84,22 @@ const Index = () => {
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header
-          title={activeTab === "dashboard" ? "Dashboard" : activeTab === "partners" ? "Parceiros e Fornecedores" : "Projetos"}
+          title={
+            activeTab === "dashboard"
+              ? "Dashboard"
+              : activeTab === "partners"
+              ? "Parceiros e Fornecedores"
+              : activeTab === "suporte"
+              ? "Suporte & Avaliação"
+              : "Projetos"
+          }
           subtitle={
             activeTab === "dashboard"
               ? "Visão geral dos seus projetos e métricas"
               : activeTab === "partners"
               ? "Gerencie seus parceiros e fornecedores"
+              : activeTab === "suporte"
+              ? "Avalie a plataforma ou entre em contato para suporte."
               : undefined
           }
         />
@@ -175,6 +185,7 @@ const Index = () => {
             </>
           )}
           {activeTab === "partners" && <PartnersPage />}
+          {activeTab === "suporte" && <Suporte />}
           {/* Adicione outras abas conforme necessário */}
         </main>
       </div>

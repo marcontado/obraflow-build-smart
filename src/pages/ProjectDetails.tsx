@@ -365,7 +365,8 @@ export default function ProjectDetails() {
             </TabsContent>
 
             <TabsContent value="gantt">
-              {hasFeature('gantt') ? (
+              {/* Remover restrição de feature para admins */}
+              {true ? (
                 <ProjectSchedule
                   projectId={id!}
                   projectStartDate={project.start_date || undefined}

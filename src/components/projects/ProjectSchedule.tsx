@@ -407,7 +407,7 @@ export function ProjectSchedule({
         className={`${styles.archestraGantt} ${isFullScreen ? styles.fullscreen : ''}`}
         style={{
           height: isFullScreen ? "calc(100vh - 250px)" : "650px",
-          overflow: "hidden",
+          overflow: "visible",
         }}
       >
         <div
@@ -417,12 +417,15 @@ export function ProjectSchedule({
             height: "100%",
             overflowX: "auto",
             overflowY: "hidden",
+            minHeight: 400,
+            WebkitOverflowScrolling: "touch",
           }}
         >
           <div
             style={{
-              minWidth: `${totalWidth}px`,
+              minWidth: `${Math.max(totalWidth, 1200)}px`,
               height: "100%",
+              paddingBottom: 8,
             }}
           >
             <Gantt
@@ -434,60 +437,59 @@ export function ProjectSchedule({
               onClick={handleTaskClick}
               locale="pt-BR"
               listCellWidth={isFullScreen ? "240px" : "200px"}
-              columnWidth={ganttMetrics.columnWidth}
+              columnWidth={Math.max(ganttMetrics.columnWidth, 90)}
               ganttHeight={ganttHeight}
               barCornerRadius={999}
+              barFill={0.85}
               todayColor="rgba(107, 125, 79, 0.08)"
               barProgressColor="rgba(255, 255, 255, 0.3)"
               barProgressSelectedColor="rgba(255, 255, 255, 0.5)"
               TooltipContent={({ task }) => {
-              const activity = activities.find(a => a.id === task.id);
-              if (!activity) return <div />;
-              
-              const duration = differenceInDays(
-                new Date(activity.end_date),
-                new Date(activity.start_date)
-              ) + 1;
-              
-              return (
-                <div className="bg-popover text-popover-foreground p-3 rounded-lg shadow-lg border max-w-xs">
-                  <div className="font-semibold text-sm mb-2">{activity.name}</div>
-                  <div className="space-y-1.5 text-xs">
-                    <div className="flex justify-between gap-4">
-                      <span className="text-muted-foreground">Início:</span>
-                      <span className="font-medium">
-                        {format(new Date(activity.start_date), "dd/MM/yyyy", { locale: ptBR })}
-                      </span>
-                    </div>
-                    <div className="flex justify-between gap-4">
-                      <span className="text-muted-foreground">Fim:</span>
-                      <span className="font-medium">
-                        {format(new Date(activity.end_date), "dd/MM/yyyy", { locale: ptBR })}
-                      </span>
-                    </div>
-                    <div className="flex justify-between gap-4">
-                      <span className="text-muted-foreground">Duração:</span>
-                      <span className="font-medium">{duration} dias</span>
-                    </div>
-                    <div className="flex justify-between gap-4">
-                      <span className="text-muted-foreground">Progresso:</span>
-                      <span className="font-medium">{activity.progress}%</span>
-                    </div>
-                    <div className="flex justify-between gap-4 items-center">
-                      <span className="text-muted-foreground">Prioridade:</span>
-                      <Badge 
-                        variant={activity.priority === 'urgent' ? 'destructive' : 'secondary'} 
-                        className="text-xs capitalize"
-                      >
-                        {activity.priority === 'urgent' ? 'Urgente' : 
-                         activity.priority === 'high' ? 'Alta' :
-                         activity.priority === 'medium' ? 'Média' : 'Baixa'}
-                      </Badge>
+                const activity = activities.find(a => a.id === task.id);
+                if (!activity) return <div />;
+                const duration = differenceInDays(
+                  new Date(activity.end_date),
+                  new Date(activity.start_date)
+                ) + 1;
+                return (
+                  <div className="bg-popover text-popover-foreground p-3 rounded-lg shadow-lg border max-w-xs">
+                    <div className="font-semibold text-sm mb-2">{activity.name}</div>
+                    <div className="space-y-1.5 text-xs">
+                      <div className="flex justify-between gap-4">
+                        <span className="text-muted-foreground">Início:</span>
+                        <span className="font-medium">
+                          {format(new Date(activity.start_date), "dd/MM/yyyy", { locale: ptBR })}
+                        </span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-muted-foreground">Fim:</span>
+                        <span className="font-medium">
+                          {format(new Date(activity.end_date), "dd/MM/yyyy", { locale: ptBR })}
+                        </span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-muted-foreground">Duração:</span>
+                        <span className="font-medium">{duration} dias</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-muted-foreground">Progresso:</span>
+                        <span className="font-medium">{activity.progress}%</span>
+                      </div>
+                      <div className="flex justify-between gap-4 items-center">
+                        <span className="text-muted-foreground">Prioridade:</span>
+                        <Badge 
+                          variant={activity.priority === 'urgent' ? 'destructive' : 'secondary'} 
+                          className="text-xs capitalize"
+                        >
+                          {activity.priority === 'urgent' ? 'Urgente' : 
+                          activity.priority === 'high' ? 'Alta' :
+                          activity.priority === 'medium' ? 'Média' : 'Baixa'}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            }}
+                );
+              }}
             />
           </div>
         </div>

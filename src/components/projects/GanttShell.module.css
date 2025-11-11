@@ -32,8 +32,9 @@
 }
 
 /* Row heights */
+
 .archestraGantt :global([class*="ganttTable"]) {
-  --row-h: 50px;
+  --row-h: 44px;
 }
 
 .archestraGantt :global([class*="ganttVerticalContainer"]) {
@@ -50,16 +51,20 @@
 }
 
 /* Task bars */
+
 .archestraGantt :global([class*="barWrapper"]) {
-  height: var(--row-h, 50px) !important;
+  height: var(--row-h, 44px) !important;
   display: flex;
   align-items: center;
+  margin-top: 2px;
+  margin-bottom: 2px;
 }
 
+
 .archestraGantt :global([class*="bar"]) {
-  height: 18px !important;
+  height: 12px !important;
   border-radius: 999px !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
   transition: all 0.2s ease;
 }
 
@@ -80,15 +85,26 @@
   border-bottom: 2px solid hsl(var(--border));
 }
 
+
+
 .archestraGantt :global([class*="calendarTopTick"]),
 .archestraGantt :global([class*="calendarBottomTick"]) {
   fill: hsl(var(--foreground));
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: white;
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin: 0 2px;
+  box-shadow: 0 1px 0 0 hsl(var(--border) / 0.08);
+  white-space: nowrap;
 }
 
 .archestraGantt :global([class*="calendarTopTick"]) {
-  font-weight: 600;
+  font-size: 16px;
+  padding: 4px 12px;
+  margin-bottom: 2px;
 }
 
 /* Grid */

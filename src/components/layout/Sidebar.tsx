@@ -1,4 +1,4 @@
-import { Home, FolderKanban, Users, BarChart3, LogOut, Lock, Handshake } from "lucide-react";
+import { Home, FolderKanban, Users, BarChart3, LogOut, Lock, Handshake, MessageCircle } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { authService } from "@/services/auth.service";
@@ -11,7 +11,8 @@ const navigation = [
   { name: "Projetos", href: "/app/projects", icon: FolderKanban },
   { name: "Clientes", href: "/app/clients", icon: Users },
   { name: "Relatórios", href: "/app/reports", icon: BarChart3 },
-  { name: "Fornecedores", href: "/app?tab=partners", icon: Handshake }, 
+  { name: "Fornecedores", href: "/app?tab=partners", icon: Handshake },
+  { name: "Suporte", href: "/app?tab=suporte", icon: MessageCircle },
 ];
 
 export function Sidebar() {
