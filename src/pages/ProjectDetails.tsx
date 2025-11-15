@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Edit, Trash2, Plus, Calendar } from "lucide-react";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { withWorkspaceGuard } from "@/hoc/withWorkspaceGuard";
 import { FeatureUpgradeCard } from "@/components/plans/FeatureUpgradeCard";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
@@ -43,7 +44,7 @@ const statusLabels = {
   on_hold: "Em Espera",
 };
 
-export default function ProjectDetails() {
+function ProjectDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspace();
@@ -426,3 +427,5 @@ export default function ProjectDetails() {
     </div>
   );
 }
+
+export default withWorkspaceGuard(ProjectDetails);

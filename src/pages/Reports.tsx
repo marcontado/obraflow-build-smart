@@ -18,9 +18,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
-export default function Reports() {
+// import { withWorkspaceGuard } from "@/hoc/withWorkspaceGuard";
+
+function Reports() {
   const navigate = useNavigate();
+  const { currentWorkspace } = useWorkspace();
   const { hasFeature, getRequiredPlan } = useFeatureAccess();
   const [loading, setLoading] = useState(true);
   const [selectedProjectId, setSelectedProjectId] = useState<string>("all");
@@ -37,19 +43,24 @@ export default function Reports() {
   const [tasksByStatus, setTasksByStatus] = useState<any[]>([]);
 
   useEffect(() => {
-    fetchProjectsList();
-  }, []);
+    if (currentWorkspace) {
+      fetchProjectsList();
+    }
+  }, [currentWorkspace]);
 
   useEffect(() => {
-    if (projects.length > 0 || selectedProjectId === "all") {
+    if ((projects.length > 0 || selectedProjectId === "all") && currentWorkspace) {
       fetchReportData(selectedProjectId);
     }
-  }, [selectedProjectId]);
+  }, [selectedProjectId, currentWorkspace]);
 
   const fetchProjectsList = async () => {
+    if (!currentWorkspace) return;
+
     const { data } = await supabase
       .from("projects")
       .select("id, name")
+      .eq("workspace_id", currentWorkspace.id)
       .order("name");
     
     setProjects(data || []);
@@ -61,27 +72,33 @@ export default function Reports() {
   };
 
   const fetchReportData = async (projectId: string) => {
+    if (!currentWorkspace) return;
+
     setLoading(true);
     try {
-      // Buscar projetos (filtrado ou todos)
+      // Buscar projetos (filtrado ou todos) - SEMPRE filtrar por workspace
       let projectsQuery = supabase
         .from("projects")
-        .select("id, status, budget, spent");
+        .select("id, status, budget, spent")
+        .eq("workspace_id", currentWorkspace.id);
       
       if (projectId !== "all") {
         projectsQuery = projectsQuery.eq("id", projectId);
       }
 
-      // Buscar tarefas (filtrado ou todas)
-      let tasksQuery = supabase.from("tasks").select("id, status, project_id");
+      // Buscar tarefas (filtrado ou todas) - SEMPRE filtrar por workspace
+      let tasksQuery = supabase
+        .from("tasks")
+        .select("id, status, project_id")
+        .eq("workspace_id", currentWorkspace.id);
       
       if (projectId !== "all") {
         tasksQuery = tasksQuery.eq("project_id", projectId);
       }
 
-      // Buscar clientes (sempre todos quando filtrado)
+      // Buscar clientes - SEMPRE filtrar por workspace
       const clientsQuery = projectId === "all" 
-        ? supabase.from("clients").select("id")
+        ? supabase.from("clients").select("id").eq("workspace_id", currentWorkspace.id)
         : Promise.resolve({ data: [] });
 
       const [projectsRes, clientsRes, tasksRes] = await Promise.all([
@@ -157,6 +174,57 @@ export default function Reports() {
     }
   };
 
+  // Função para exportar PDF
+  const handleExportPDF = () => {
+    if (!currentWorkspace) return;
+    const doc = new jsPDF();
+    const isGeral = selectedProjectId === "all";
+    const workspaceName = currentWorkspace.name || "Escritório";
+    let title = isGeral ? `Relatório Geral - ${workspaceName}` : `Relatório da Obra`;
+    let y = 14;
+    doc.setFontSize(16);
+    doc.text(title, 14, y);
+    y += 10;
+    doc.setFontSize(12);
+    doc.text(`Data: ${new Date().toLocaleDateString()}`, 14, y);
+    y += 10;
+    doc.text(`Escritório: ${workspaceName}`, 14, y);
+    y += 8;
+    if (!isGeral) {
+      const project = projects.find(p => p.id === selectedProjectId);
+      if (project) {
+        doc.text(`Projeto: ${project.name}`, 14, y);
+        y += 8;
+        if (project.client_name) {
+          doc.text(`Cliente: ${project.client_name}`, 14, y);
+          y += 8;
+        }
+      }
+    }
+    y += 2;
+    // Tabela de estatísticas
+    const tableBody = [];
+    if (isGeral) {
+      tableBody.push(["Total de Projetos", stats.totalProjects]);
+      tableBody.push(["Total de Clientes", stats.totalClients]);
+    }
+    tableBody.push(["Tarefas Totais", stats.totalTasks]);
+    tableBody.push(["Tarefas Concluídas", stats.completedTasks]);
+    tableBody.push([isGeral ? "Orçamento Total" : "Orçamento do Projeto", `R$ ${stats.totalBudget.toLocaleString("pt-BR")}`]);
+    tableBody.push([isGeral ? "Total Gasto" : "Gasto do Projeto", `R$ ${stats.totalSpent.toLocaleString("pt-BR")}`]);
+    autoTable(doc, {
+      startY: y + 4,
+      head: [["Indicador", "Valor"]],
+      body: tableBody,
+    });
+    doc.save(isGeral ? `relatorio-geral.pdf` : `relatorio-obra.pdf`);
+  };
+
+  // Guard adicional: não renderizar se não houver workspace
+  if (!currentWorkspace) {
+    return null;
+  }
+
   const COLORS = ["hsl(var(--primary))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
 
   const budgetData = [
@@ -191,13 +259,14 @@ export default function Reports() {
     );
   }
 
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header title="Relatórios" subtitle="Análises e métricas dos seus projetos" />
         <main className="flex-1 overflow-y-auto p-6">
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex items-center justify-between gap-4 flex-wrap">
             <div>
               <h2 className="text-2xl font-semibold">
                 {selectedProjectId === "all" 
@@ -212,21 +281,28 @@ export default function Reports() {
                 }
               </p>
             </div>
-            
-            <div className="w-64">
-              <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um projeto" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os Projetos</SelectItem>
-                  {projects.map((project) => (
-                    <SelectItem key={project.id} value={project.id}>
-                      {project.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleExportPDF}
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 shadow"
+              >
+                Exportar PDF
+              </button>
+              <div className="w-64">
+                <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um projeto" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os Projetos</SelectItem>
+                    {projects.map((project) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
           {loading ? (
@@ -365,3 +441,5 @@ export default function Reports() {
     </div>
   );
 }
+
+export default Reports;

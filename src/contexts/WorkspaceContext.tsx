@@ -77,8 +77,20 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const switchWorkspace = async (workspaceId: string) => {
     const workspace = workspaces.find((w) => w.id === workspaceId);
     if (workspace) {
+      const oldWorkspaceId = currentWorkspace?.id;
+      
       setCurrentWorkspace(workspace);
       localStorage.setItem("currentWorkspaceId", workspaceId);
+      
+      // Dispatch evento customizado para invalidação de cache
+      window.dispatchEvent(new CustomEvent("workspace-changed", {
+        detail: { oldWorkspaceId, newWorkspaceId: workspaceId }
+      }));
+      
+      toast({
+        title: "Workspace alterado",
+        description: `Agora você está trabalhando em: ${workspace.name}`,
+      });
     }
   };
 

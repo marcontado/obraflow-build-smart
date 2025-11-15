@@ -1,3 +1,10 @@
+// Utilitário para formatar data YYYY-MM-DD para DD/MM/AAAA
+function formatDateBR(dateStr?: string) {
+  if (!dateStr) return '';
+  const [year, month, day] = dateStr.split('-');
+  if (!year || !month || !day) return dateStr;
+  return `${day}/${month}/${year}`;
+}
 import { Calendar, TrendingUp, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -92,12 +99,12 @@ export function ProjectCard({
           {startDate && (
             <div className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              <span>{new Date(startDate).toLocaleDateString("pt-BR")}</span>
+              <span>{formatDateBR(startDate)}</span>
             </div>
           )}
           {endDate && (
             <div className="flex items-center gap-1">
-              <span>até {new Date(endDate).toLocaleDateString("pt-BR")}</span>
+              <span>até {formatDateBR(endDate)}</span>
             </div>
           )}
         </div>

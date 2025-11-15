@@ -1,3 +1,4 @@
+import { checkAndNotifyExpiringProjectsAndTasks } from "./notificationsCron.service";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -29,13 +30,14 @@ export const projectsService = {
 
   async create(project: ProjectInsert, workspaceId: string) {
     const { data: { user } } = await supabase.auth.getUser();
-    
     const { data, error } = await supabase
       .from("projects")
       .insert({ ...project, created_by: user?.id, workspace_id: workspaceId })
       .select()
       .single();
-
+    if (data?.id) {
+      await checkAndNotifyExpiringProjectsAndTasks({ projectId: data.id });
+    }
     return { data, error };
   },
 
@@ -47,7 +49,9 @@ export const projectsService = {
       .eq("workspace_id", workspaceId)
       .select()
       .single();
-
+    if (data?.id) {
+      await checkAndNotifyExpiringProjectsAndTasks({ projectId: data.id });
+    }
     return { data, error };
   },
 

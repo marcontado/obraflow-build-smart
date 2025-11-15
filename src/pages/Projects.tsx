@@ -10,9 +10,10 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { projectsService } from "@/services/projects.service";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { withWorkspaceGuard } from "@/hoc/withWorkspaceGuard";
 import { toast } from "sonner";
 
-export default function Projects() {
+function Projects() {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspace();
   const [projects, setProjects] = useState<any[]>([]);
@@ -119,3 +120,5 @@ export default function Projects() {
     </div>
   );
 }
+
+export default withWorkspaceGuard(Projects);

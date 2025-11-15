@@ -1,3 +1,10 @@
+// Utilitário para formatar data YYYY-MM-DD para DD/MM/AAAA
+function formatDateBR(dateStr?: string) {
+  if (!dateStr) return '';
+  const [year, month, day] = dateStr.split('-');
+  if (!year || !month || !day) return dateStr;
+  return `${day}/${month}/${year}`;
+}
 import { Calendar, Clock, Edit, Trash2, User } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -100,7 +107,7 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
           {task.due_date && (
             <div className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
-              <span>{new Date(task.due_date).toLocaleDateString("pt-BR")}</span>
+              <span>{formatDateBR(task.due_date)}</span>
             </div>
           )}
           {task.profiles?.full_name && (

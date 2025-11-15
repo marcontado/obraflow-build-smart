@@ -5,21 +5,27 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { MessageCircle } from "lucide-react";
+import { sendN8nWebhook } from "@/services/n8nWebhook.service";
 
 export default function Suporte() {
   const [feedback, setFeedback] = useState("");
   const [email, setEmail] = useState("");
+  const [nome, setNome] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    const ok = await sendN8nWebhook({ nome, email, mensagem: feedback });
+    setLoading(false);
+    if (ok) {
       setFeedback("");
       setEmail("");
+      setNome("");
       toast.success("Avaliação enviada! Obrigado pelo feedback.");
-    }, 1200);
+    } else {
+      toast.error("Erro ao enviar feedback. Tente novamente.");
+    }
   };
 
   return (
@@ -33,6 +39,19 @@ export default function Suporte() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Seu nome</label>
+              <Input
+                type="text"
+                placeholder="Seu nome"
+                value={nome}
+                onChange={e => setNome(e.target.value)}
+                disabled={loading}
+                required
+                minLength={2}
+                maxLength={60}
+              />
+            </div>
             <div>
               <label className="block text-sm font-medium mb-1">Seu e-mail (opcional)</label>
               <Input
