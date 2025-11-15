@@ -7,6 +7,7 @@ import { StorySection } from "@/components/landing/StorySection";
 import { FeatureCard } from "@/components/landing/FeatureCard";
 import { TestimonialCard } from "@/components/landing/TestimonialCard";
 import { PlanCardPublic } from "@/components/landing/PlanCardPublic";
+import { FAQSection } from "@/components/landing/FAQSection";
 import { ArrowRight, Sparkles, Calendar, Users, BarChart3, FileText, Palette, Ruler } from "lucide-react";
 import architectWoman from "@/assets/architect-woman.jpg";
 import designerMan from "@/assets/designer-man.jpg";
@@ -278,6 +279,9 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* FAQ Section */}
+      <FAQSection />
 
       {/* Final CTA Section */}
       <section id="contato" className="py-32 relative overflow-hidden">
