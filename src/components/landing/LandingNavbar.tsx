@@ -7,12 +7,12 @@ export function LandingNavbar() {
       {/* Glass morphism navbar */}
       <div className="relative bg-white/70 dark:bg-background/60 backdrop-blur-glass border-b border-white/20 dark:border-white/10 shadow-glass">
         {/* Subtle glow effect */}
-        <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+        <div className="absolute inset-x-0 -top-px h-px bg-primary/50" />
         
         <div className="container mx-auto px-4 h-20 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group relative">
-            <div className="absolute -inset-2 bg-gradient-to-r from-primary/20 to-accent/20 rounded-lg blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="relative text-3xl font-heading font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent group-hover:scale-105 transition-transform duration-300">
+            <div className="absolute -inset-2 bg-primary/20 rounded-lg blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative text-3xl font-heading font-bold text-primary group-hover:scale-105 transition-transform duration-300">
               Archestra
             </div>
           </Link>

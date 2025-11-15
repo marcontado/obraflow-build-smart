@@ -21,8 +21,8 @@ export default function Landing() {
 
       {/* Hero Section */}
       <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-        {/* Animated background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5 animate-glow" />
+        {/* Animated background */}
+        <div className="absolute inset-0 bg-primary/5 animate-glow" />
         
         {/* Architectural grid pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(var(--primary-rgb)/0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(var(--primary-rgb)/0.03)_1px,transparent_1px)] bg-[size:64px_64px]" />
@@ -37,11 +37,11 @@ export default function Landing() {
 
             {/* Main heading */}
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-heading font-bold leading-tight">
-              <span className="bg-gradient-to-br from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent">
+              <span className="text-foreground">
                 Projete o Futuro
               </span>
               <br />
-              <span className="bg-gradient-to-br from-primary via-accent to-arch-gold bg-clip-text text-transparent animate-shimmer">
+              <span className="text-primary animate-shimmer">
                 da sua Arquitetura
               </span>
             </h1>
@@ -54,16 +54,15 @@ export default function Landing() {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
               <Link to="/auth">
-                <Button size="lg" className="group relative overflow-hidden bg-gradient-to-br from-primary to-accent hover:shadow-glow transition-all duration-500 text-lg px-8 py-6">
+                <Button size="lg" className="group relative overflow-hidden bg-primary hover:bg-primary/90 hover:shadow-glow transition-all duration-500 text-lg px-8 py-6">
                   <span className="relative z-10 flex items-center gap-2">
                     Começar Gratuitamente
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </span>
-                  <div className="absolute inset-0 bg-gradient-to-br from-accent to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 </Button>
               </Link>
               <Link to="/plans">
-                <Button size="lg" variant="outline" className="text-lg px-8 py-6 bg-white/50 dark:bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/50 hover:bg-gradient-to-br hover:from-primary/10 hover:to-accent/10 transition-all duration-500">
+                <Button size="lg" variant="outline" className="text-lg px-8 py-6 bg-white/50 dark:bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/50 hover:bg-primary/10 transition-all duration-500">
                   Ver Planos
                 </Button>
               </Link>
@@ -71,9 +70,9 @@ export default function Landing() {
 
             {/* Architectural accent lines */}
             <div className="flex justify-center gap-4 pt-8">
-              <div className="h-1 w-24 bg-gradient-to-r from-transparent via-primary to-transparent rounded-full animate-pulse" />
-              <div className="h-1 w-16 bg-gradient-to-r from-transparent via-accent to-transparent rounded-full animate-pulse delay-75" />
-              <div className="h-1 w-20 bg-gradient-to-r from-transparent via-arch-gold to-transparent rounded-full animate-pulse delay-150" />
+              <div className="h-1 w-24 bg-primary/50 rounded-full animate-pulse" />
+              <div className="h-1 w-16 bg-accent/50 rounded-full animate-pulse delay-75" />
+              <div className="h-1 w-20 bg-arch-gold/50 rounded-full animate-pulse delay-150" />
             </div>
           </div>
         </div>
@@ -87,7 +86,7 @@ export default function Landing() {
       </section>
 
       {/* Story Sections */}
-      <section id="recursos" className="py-20 bg-gradient-to-b from-background via-primary/5 to-background">
+      <section id="recursos" className="py-20 bg-primary/5">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16 space-y-4">
             <h2 className="text-4xl md:text-5xl font-heading font-bold text-foreground">
@@ -136,7 +135,7 @@ export default function Landing() {
 
       {/* Features Section */}
       <section className="py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-accent/5 to-background" />
+        <div className="absolute inset-0 bg-accent/5" />
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-16 space-y-4">
@@ -184,7 +183,7 @@ export default function Landing() {
       </section>
 
       {/* Plans Section */}
-      <section id="planos" className="py-20 bg-gradient-to-b from-background via-primary/5 to-background">
+      <section id="planos" className="py-20 bg-primary/5">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16 space-y-4">
             <h2 className="text-4xl md:text-5xl font-heading font-bold text-foreground">
@@ -282,14 +281,14 @@ export default function Landing() {
 
       {/* Final CTA Section */}
       <section id="contato" className="py-32 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/10 to-arch-gold/10" />
+        <div className="absolute inset-0 bg-primary/10" />
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <h2 className="text-4xl md:text-6xl font-heading font-bold text-foreground leading-tight">
               Pronto para Transformar
               <br />
-              <span className="bg-gradient-to-br from-primary via-accent to-arch-gold bg-clip-text text-transparent">
+              <span className="text-primary">
                 Sua Gestão Arquitetônica?
               </span>
             </h2>
@@ -300,12 +299,11 @@ export default function Landing() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
               <Link to="/auth">
-                <Button size="lg" className="group relative overflow-hidden bg-gradient-to-br from-primary to-accent hover:shadow-glow transition-all duration-500 text-lg px-8 py-6">
-                  <span className="relative z-10 flex items-center gap-2">
+                <Button size="lg" className="group bg-primary hover:bg-primary/90 hover:shadow-glow transition-all duration-500 text-lg px-8 py-6">
+                  <span className="flex items-center gap-2">
                     Criar Conta Gratuita
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </span>
-                  <div className="absolute inset-0 bg-gradient-to-br from-accent to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 </Button>
               </Link>
             </div>

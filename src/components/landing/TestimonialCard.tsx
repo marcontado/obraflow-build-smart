@@ -16,7 +16,7 @@ export function TestimonialCard({ name, role, company, testimonial, initials }: 
       <div className="absolute inset-0 bg-white/60 dark:bg-card/60 backdrop-blur-glass border border-white/20 dark:border-border/30 rounded-2xl shadow-glass" />
       
       {/* Subtle glow on hover */}
-      <div className="absolute -inset-1 bg-gradient-to-br from-arch-gold/20 to-primary/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+      <div className="absolute -inset-1 bg-primary/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
       
       {/* Content */}
       <div className="relative z-10">
@@ -30,7 +30,7 @@ export function TestimonialCard({ name, role, company, testimonial, initials }: 
         </p>
         <div className="flex items-center gap-4 mt-auto pt-6 border-t border-border/20">
           <Avatar className="w-14 h-14 border-2 border-primary/20">
-            <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground font-semibold text-lg">
+            <AvatarFallback className="bg-primary text-primary-foreground font-semibold text-lg">
               {initials}
             </AvatarFallback>
           </Avatar>
