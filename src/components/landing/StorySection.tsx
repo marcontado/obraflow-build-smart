@@ -44,7 +44,7 @@ export function StorySection({ title, description, image, imageAlt, reverse, ste
       {/* Image side */}
       <div className={`relative group ${reverse ? "md:col-start-2" : ""}`}>
         {/* Decorative frame */}
-        <div className="absolute -inset-4 bg-gradient-to-br from-primary/20 to-accent/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+        <div className="absolute -inset-4 bg-primary/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
         
         <div className="relative overflow-hidden rounded-2xl shadow-elegant border border-border/50">
           <img
@@ -55,7 +55,7 @@ export function StorySection({ title, description, image, imageAlt, reverse, ste
           
           {/* Glass overlay with step number */}
           <div className="absolute top-6 left-6 w-16 h-16 rounded-2xl bg-white/80 dark:bg-card/80 backdrop-blur-glass border border-white/20 flex items-center justify-center shadow-glass">
-            <span className="text-2xl font-heading font-bold bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">
+            <span className="text-2xl font-heading font-bold text-primary">
               {step}
             </span>
           </div>
@@ -79,9 +79,9 @@ export function StorySection({ title, description, image, imageAlt, reverse, ste
 
           {/* Decorative architectural lines */}
           <div className="flex gap-3 pt-4">
-            <div className="h-1 w-20 bg-gradient-to-r from-primary to-transparent rounded-full" />
-            <div className="h-1 w-12 bg-gradient-to-r from-accent to-transparent rounded-full" />
-            <div className="h-1 w-8 bg-gradient-to-r from-arch-gold to-transparent rounded-full" />
+            <div className="h-1 w-20 bg-primary rounded-full" />
+            <div className="h-1 w-12 bg-accent rounded-full" />
+            <div className="h-1 w-8 bg-arch-gold rounded-full" />
           </div>
         </div>
       </div>
