@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { authService } from "@/services/auth.service";
+import { adminAuthService } from "@/services/admin-auth.service";
 import { 
   LayoutDashboard, 
   Building2, 
@@ -51,13 +51,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleLogoutAdmin = async () => {
-    // Limpar sessão admin
+  const handleLogoutAdmin = () => {
+    // Limpar token e sessão admin (NÃO faz logout do sistema)
+    adminAuthService.clearAdminToken();
     sessionStorage.removeItem('admin_session');
     sessionStorage.removeItem('admin_session_timestamp');
-    
-    // Fazer logout completo do Supabase
-    await authService.signOut();
     
     toast.info("Você saiu do painel administrativo");
     
