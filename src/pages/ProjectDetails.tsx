@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { ProjectFormDialog } from "@/components/projects/ProjectFormDialog";
+import { ProjectWizard } from "@/components/projects/wizard/ProjectWizard";
 import { ProjectAreaCard } from "@/components/projects/ProjectAreaCard";
 import { ProjectAreaFormDialog } from "@/components/projects/ProjectAreaFormDialog";
 import { ProjectSchedule } from "@/components/projects/ProjectSchedule";
@@ -57,7 +57,7 @@ function ProjectDetails() {
   const [projectAreas, setProjectAreas] = useState<ProjectArea[]>([]);
   const [projectTasks, setProjectTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [formOpen, setFormOpen] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [areaDialogOpen, setAreaDialogOpen] = useState(false);
@@ -192,7 +192,7 @@ function ProjectDetails() {
               Voltar
             </Button>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setFormOpen(true)} className="gap-2">
+              <Button variant="outline" onClick={() => setWizardOpen(true)} className="gap-2">
                 <Edit className="h-4 w-4" />
                 Editar
               </Button>
@@ -420,9 +420,9 @@ function ProjectDetails() {
         </main>
       </div>
 
-      <ProjectFormDialog
-        open={formOpen}
-        onClose={() => setFormOpen(false)}
+      <ProjectWizard
+        open={wizardOpen}
+        onClose={() => setWizardOpen(false)}
         onSuccess={fetchProject}
         projectId={project.id}
         initialData={project}
