@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { authService } from "@/services/auth.service";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -74,32 +75,34 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      const { supabase } = await import("@/integrations/supabase/client");
-      
       // Atualizar senha durante o fluxo de recovery
       const { error } = await supabase.auth.updateUser({
         password: newPassword
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao atualizar senha:', error);
+        toast.error(error.message || "Erro ao atualizar senha");
+        return;
+      }
 
       toast.success("Senha atualizada com sucesso! Faça login com a nova senha.");
-      
-      // IMPORTANTE: Fazer logout para forçar novo login
-      await authService.signOut();
       
       // Limpar estados
       setIsPasswordRecovery(false);
       setNewPassword("");
       setConfirmPassword("");
       
-      // Redirecionar para login após 1 segundo
+      // IMPORTANTE: Fazer logout para forçar novo login
+      await supabase.auth.signOut();
+      
+      // Redirecionar para login após breve delay
       setTimeout(() => {
-        navigate("/auth");
-      }, 1000);
+        navigate("/auth", { replace: true });
+      }, 1500);
     } catch (error: any) {
-      console.error('Erro ao atualizar senha:', error);
-      toast.error(error.message || "Erro ao atualizar senha");
+      console.error('Erro inesperado ao atualizar senha:', error);
+      toast.error("Erro inesperado ao atualizar senha. Tente novamente.");
     } finally {
       setLoading(false);
     }
