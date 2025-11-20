@@ -67,8 +67,12 @@ Deno.serve(async (req) => {
 
     const { action, userId, role, newRole } = await req.json();
 
+    console.log('Action:', action, 'User:', adminUser.email);
+
     // LIST: Listar todos os admins
     if (action === 'list') {
+      console.log('Listando admins...');
+      
       // Primeiro buscar os admins
       const { data: admins, error: adminsError } = await supabaseClient
         .from('platform_admins')
