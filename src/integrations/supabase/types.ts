@@ -77,6 +77,135 @@ export type Database = {
           },
         ]
       }
+      document_templates: {
+        Row: {
+          category: string
+          content: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          signatures: Json | null
+          updated_at: string
+          variables_used: string[] | null
+          workspace_id: string
+        }
+        Insert: {
+          category: string
+          content?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          signatures?: Json | null
+          updated_at?: string
+          variables_used?: string[] | null
+          workspace_id: string
+        }
+        Update: {
+          category?: string
+          content?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          signatures?: Json | null
+          updated_at?: string
+          variables_used?: string[] | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_templates_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      generated_documents: {
+        Row: {
+          client_id: string | null
+          content_rendered: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          pdf_url: string | null
+          project_id: string | null
+          template_id: string | null
+          workspace_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          content_rendered: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          pdf_url?: string | null
+          project_id?: string | null
+          template_id?: string | null
+          workspace_id: string
+        }
+        Update: {
+          client_id?: string | null
+          content_rendered?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          pdf_url?: string | null
+          project_id?: string | null
+          template_id?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_documents_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "generated_documents_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "generated_documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "generated_documents_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "document_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "generated_documents_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partners: {
         Row: {
           address: string | null

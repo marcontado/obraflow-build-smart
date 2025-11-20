@@ -25,6 +25,9 @@ import Clients from "./pages/Clients";
 import Reports from "./pages/Reports";
 import Partners from "./pages/Partners";
 import Suporte from "./pages/Suporte";
+import Templates from "./pages/Templates";
+import TemplateEditor from "./pages/TemplateEditor";
+import DocumentGenerator from "./pages/DocumentGenerator";
 import NotFound from "./pages/NotFound";
 import WorkspaceSelect from "./pages/WorkspaceSelect";
 import WorkspaceNew from "./pages/WorkspaceNew";
@@ -76,6 +79,9 @@ const App = () => (
                 <Route path="/app/clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
                 <Route path="/app/partners" element={<ProtectedRoute><Partners /></ProtectedRoute>} />
                 <Route path="/app/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+                <Route path="/app/templates" element={<ProtectedRoute><Templates /></ProtectedRoute>} />
+                <Route path="/app/templates/:id/edit" element={<ProtectedRoute><TemplateEditor /></ProtectedRoute>} />
+                <Route path="/app/templates/:id/generate" element={<ProtectedRoute><DocumentGenerator /></ProtectedRoute>} />
                 <Route path="/app/suporte" element={<ProtectedRoute><Suporte /></ProtectedRoute>} />
                 <Route path="/app/plan-upgrade" element={<ProtectedRoute><PlanUpgrade /></ProtectedRoute>} />
                 

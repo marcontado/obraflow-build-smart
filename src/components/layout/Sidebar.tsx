@@ -1,4 +1,4 @@
-import { Home, FolderKanban, Users, BarChart3, LogOut, Lock, Handshake, MessageCircle } from "lucide-react";
+import { Home, FolderKanban, Users, BarChart3, LogOut, Lock, Handshake, MessageCircle, FileText } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { authService } from "@/services/auth.service";
@@ -12,6 +12,7 @@ const navigation = [
   { name: "Clientes", href: "/app/clients", icon: Users },
   { name: "Fornecedores", href: "/app/partners", icon: Handshake },
   { name: "Relatórios", href: "/app/reports", icon: BarChart3, feature: "reports" as const },
+  { name: "Modelos e Documentos", href: "/app/templates", icon: FileText },
   { name: "Suporte", href: "/app/suporte", icon: MessageCircle },
 ];
 
