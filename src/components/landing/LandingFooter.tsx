@@ -3,11 +3,11 @@ import { Mail } from "lucide-react";
 
 export function LandingFooter() {
   return (
-    <footer className="bg-gradient-to-b from-card to-background border-t border-border/50">
+    <footer className="bg-card border-t border-border/50">
       <div className="container mx-auto px-4 py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div>
-            <div className="text-2xl font-heading font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4">
+            <div className="text-2xl font-heading font-bold text-primary mb-4">
               Archestra
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">

@@ -16,7 +16,7 @@ export function PlanCardPublic({ name, price, description, features, planId, hig
   return (
     <Card className={highlighted ? "border-primary/60 shadow-elegant relative scale-105" : "border-border/50"}>
       {highlighted && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-accent to-primary text-white px-6 py-2 rounded-full text-xs font-semibold shadow-md">
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-6 py-2 rounded-full text-xs font-semibold shadow-md">
           Mais Popular
         </div>
       )}
