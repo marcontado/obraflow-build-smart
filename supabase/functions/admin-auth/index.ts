@@ -106,6 +106,56 @@ serve(async (req) => {
   const path = url.pathname.replace('/admin-auth', '');
 
   try {
+    // VERIFY TOKEN (quando não há path específico, verificar body.action)
+    if ((path === '' || path === '/') && req.method === 'POST') {
+      const body = await req.json();
+      
+      if (body.action === 'verify') {
+        const authHeader = req.headers.get('authorization');
+        
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+          return new Response(
+            JSON.stringify({ error: 'Token não fornecido' }),
+            { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        const token = authHeader.substring(7);
+        const tokenData = verifyAdminToken(token);
+
+        if (!tokenData) {
+          return new Response(
+            JSON.stringify({ error: 'Token inválido ou expirado' }),
+            { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        // Buscar informações completas do admin
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('full_name, avatar_url, email')
+          .eq('id', tokenData.userId)
+          .single();
+
+        const { data: adminData } = await supabaseClient
+          .from('platform_admins')
+          .select('role')
+          .eq('user_id', tokenData.userId)
+          .single();
+
+        return new Response(
+          JSON.stringify({
+            userId: tokenData.userId,
+            email: profile?.email || tokenData.email,
+            fullName: profile?.full_name || null,
+            avatarUrl: profile?.avatar_url || null,
+            role: adminData?.role || 'analyst',
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
     // LOGIN
     if (path === '/login' && req.method === 'POST') {
       const { email, password }: LoginRequest = await req.json();
@@ -421,52 +471,6 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ message: 'Senha alterada com sucesso!' }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // VERIFY TOKEN
-    if (path === '/verify' && req.method === 'POST') {
-      const authHeader = req.headers.get('authorization');
-      
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return new Response(
-          JSON.stringify({ error: 'Token não fornecido' }),
-          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      const token = authHeader.substring(7);
-      const tokenData = verifyAdminToken(token);
-
-      if (!tokenData) {
-        return new Response(
-          JSON.stringify({ error: 'Token inválido ou expirado' }),
-          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      // Buscar informações completas do admin
-      const { data: profile } = await supabaseClient
-        .from('profiles')
-        .select('full_name, avatar_url, email')
-        .eq('id', tokenData.userId)
-        .single();
-
-      const { data: adminData } = await supabaseClient
-        .from('platform_admins')
-        .select('role')
-        .eq('user_id', tokenData.userId)
-        .single();
-
-      return new Response(
-        JSON.stringify({
-          userId: tokenData.userId,
-          email: profile?.email || tokenData.email,
-          fullName: profile?.full_name || null,
-          avatarUrl: profile?.avatar_url || null,
-          role: adminData?.role || 'analyst',
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
