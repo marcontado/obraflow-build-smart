@@ -19,6 +19,8 @@ import AdminUsers from "./pages/admin/Users";
 import AdminSubscriptions from "./pages/admin/Subscriptions";
 import Auth from "./pages/Auth";
 import AdminLogin from "./pages/AdminLogin";
+import AdminResetPassword from "./pages/AdminResetPassword";
+import AdminResetPasswordConfirm from "./pages/AdminResetPasswordConfirm";
 import AdminManagement from "./pages/admin/AdminManagement";
 import ResetPassword from "./pages/ResetPassword";
 import Projects from "./pages/Projects";
@@ -65,7 +67,10 @@ const App = () => (
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/auth" element={<Auth />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
+                {/* Admin Routes */}
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin/reset-password" element={<AdminResetPassword />} />
+                <Route path="/admin/reset-password-confirm" element={<AdminResetPasswordConfirm />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/invite/accept" element={<InviteAccept />} />
                 
