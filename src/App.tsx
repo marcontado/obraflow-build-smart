@@ -18,6 +18,7 @@ import AdminOrganizations from "./pages/admin/Organizations";
 import AdminUsers from "./pages/admin/Users";
 import AdminSubscriptions from "./pages/admin/Subscriptions";
 import Auth from "./pages/Auth";
+import AdminLogin from "./pages/AdminLogin";
 import ResetPassword from "./pages/ResetPassword";
 import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
@@ -63,6 +64,7 @@ const App = () => (
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/invite/accept" element={<InviteAccept />} />
                 
@@ -94,10 +96,11 @@ const App = () => (
                 <Route path="/subscription/cancel" element={<ProtectedRoute><SubscriptionCancel /></ProtectedRoute>} />
                 
                 {/* Admin Routes */}
-                <Route path="/admin" element={<ProtectedRoute><AdminRoute><AdminDashboard /></AdminRoute></ProtectedRoute>} />
-                <Route path="/admin/organizations" element={<ProtectedRoute><AdminRoute><AdminOrganizations /></AdminRoute></ProtectedRoute>} />
-                <Route path="/admin/users" element={<ProtectedRoute><AdminRoute><AdminUsers /></AdminRoute></ProtectedRoute>} />
-                <Route path="/admin/subscriptions" element={<ProtectedRoute><AdminRoute><AdminSubscriptions /></AdminRoute></ProtectedRoute>} />
+                <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+                <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+                <Route path="/admin/organizations" element={<AdminRoute><AdminOrganizations /></AdminRoute>} />
+                <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+                <Route path="/admin/subscriptions" element={<AdminRoute><AdminSubscriptions /></AdminRoute>} />
                 
                 {/* Legacy Route Redirects */}
                 <Route path="/projects" element={<Navigate to="/app/projects" replace />} />

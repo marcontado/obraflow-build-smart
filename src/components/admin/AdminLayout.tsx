@@ -19,7 +19,7 @@ interface AdminLayoutProps {
 const adminNavItems = [
   { 
     title: "Dashboard", 
-    href: "/admin", 
+    href: "/admin/dashboard", 
     icon: LayoutDashboard 
   },
   { 
