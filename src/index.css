@@ -61,13 +61,6 @@ All colors MUST be HSL.
     --arch-concrete: 30 5% 75%;
     --primary-glow: 215 20% 68%;
     
-    /* Gradientes arquitetônicos suaves */
-    --gradient-primary: linear-gradient(135deg, hsl(215 17% 56%) 0%, hsl(215 20% 68%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(14 48% 58%) 0%, hsl(14 50% 68%) 100%);
-    --gradient-subtle: linear-gradient(180deg, hsl(210 17% 98%) 0%, hsl(220 10% 95%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(215 17% 56% / 0.05) 0%, hsl(14 48% 58% / 0.05) 100%);
-    --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-    
     /* Sombras ultra-suaves para profundidade elegante */
     --shadow-soft: 0 2px 8px -2px hsl(215 17% 56% / 0.06);
     --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.04);
