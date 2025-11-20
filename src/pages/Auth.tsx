@@ -16,6 +16,9 @@ export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   
   const defaultTab = searchParams.get("tab") || "signin";
   const selectedPlan = searchParams.get("plan");
@@ -30,7 +33,11 @@ export default function Auth() {
     checkSession();
 
     const { data: { subscription } } = authService.onAuthStateChange((event, session) => {
-      if (session && event === 'SIGNED_IN') {
+      if (event === 'PASSWORD_RECOVERY') {
+        // Usuário clicou no link de reset de senha
+        setIsPasswordRecovery(true);
+        toast.info("Digite sua nova senha abaixo");
+      } else if (session && event === 'SIGNED_IN') {
         // For sign in, go to /app (ProtectedRoute will handle workspace check)
         navigate("/app");
       }
@@ -38,6 +45,48 @@ export default function Auth() {
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (newPassword !== confirmPassword) {
+      toast.error("As senhas não coincidem");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      toast.error("A senha deve ter no mínimo 8 caracteres");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { supabase } = await import("@/integrations/supabase/client");
+      
+      // Durante PASSWORD_RECOVERY, o usuário já está autenticado temporariamente
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+      
+      if (error) throw error;
+
+      toast.success("Senha atualizada com sucesso!");
+      setIsPasswordRecovery(false);
+      setNewPassword("");
+      setConfirmPassword("");
+      
+      // Redirecionar para login
+      setTimeout(() => {
+        navigate("/app");
+      }, 1000);
+    } catch (error: any) {
+      console.error('Erro ao atualizar senha:', error);
+      toast.error(error.message || "Erro ao atualizar senha");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,14 +152,53 @@ export default function Auth() {
       </div>
 
       <div className="flex w-full lg:w-1/2 items-center justify-center p-8 bg-background">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-3xl font-bold text-center">Bem-vindo</CardTitle>
-            <CardDescription className="text-center">
-              Entre ou crie uma conta para começar
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+        {isPasswordRecovery ? (
+          <Card className="w-full max-w-md">
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-3xl font-bold text-center">Redefinir Senha</CardTitle>
+              <CardDescription className="text-center">
+                Digite sua nova senha abaixo
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handlePasswordReset} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="new-password">Nova Senha</Label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    placeholder="Mínimo 8 caracteres"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    placeholder="Digite a senha novamente"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Atualizando..." : "Atualizar Senha"}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="w-full max-w-md">
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-3xl font-bold text-center">Bem-vindo</CardTitle>
+              <CardDescription className="text-center">
+                Entre ou crie uma conta para começar
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
             {selectedPlan && (
               <div className="mb-4 p-3 bg-accent/10 rounded-md text-sm text-center">
                 Você selecionou o plano <strong>{selectedPlan}</strong>
@@ -203,9 +291,10 @@ export default function Auth() {
                   </Button>
                 </form>
               </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+            </Tabs>
+          </CardContent>
+        </Card>
+        )}
       </div>
     </div>
   );
