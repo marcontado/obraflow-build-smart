@@ -23,6 +23,7 @@ import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
 import Clients from "./pages/Clients";
 import Reports from "./pages/Reports";
+import ReportsWrapper from "./pages/ReportsWrapper";
 import PartnersWrapper from "./pages/PartnersWrapper";
 import Suporte from "./pages/Suporte";
 import TemplatesWrapper from "./pages/TemplatesWrapper";
@@ -79,7 +80,7 @@ const App = () => (
                 <Route path="/app/projects/:id" element={<ProtectedRoute><ProjectDetails /></ProtectedRoute>} />
                 <Route path="/app/clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
                 <Route path="/app/partners" element={<ProtectedRoute><PartnersWrapper /></ProtectedRoute>} />
-                <Route path="/app/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+                <Route path="/app/reports" element={<ProtectedRoute><ReportsWrapper /></ProtectedRoute>} />
                 <Route path="/app/financeiro" element={<ProtectedRoute><Financeiro /></ProtectedRoute>} />
                 <Route path="/app/templates" element={<ProtectedRoute><TemplatesWrapper /></ProtectedRoute>} />
                 <Route path="/app/templates/new" element={<ProtectedRoute><TemplateEditor /></ProtectedRoute>} />

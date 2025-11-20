@@ -2,14 +2,12 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
-import { useFeatureAccess } from "@/hooks/useFeatureAccess";
-import { FeatureUpgradeCard } from "@/components/plans/FeatureUpgradeCard";
 import { supabase } from "@/integrations/supabase/client";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid } from "recharts";
-import { FolderKanban, Users, CheckSquare, Clock, DollarSign, TrendingUp, BarChart3 } from "lucide-react";
+import { FolderKanban, Users, CheckSquare, Clock, DollarSign, TrendingUp } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
@@ -21,9 +19,6 @@ import {
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-
-// import { withWorkspaceGuard } from "@/hoc/withWorkspaceGuard";
-
 import { withWorkspaceGuard } from "@/hoc/withWorkspaceGuard";
 import { ChangeEvent } from "react";
 import { BrainCircuit } from "lucide-react";
@@ -39,7 +34,6 @@ function Reports() {
     return null;
   }
 
-  const { hasFeature, getRequiredPlan } = useFeatureAccess();
   const [loading, setLoading] = useState(true);
   const isFirstMount = useRef(true);
   const [selectedProjectId, setSelectedProjectId] = useState<string>("all");
@@ -97,7 +91,6 @@ function Reports() {
   };
 
   const fetchReportData = async (projectId: string) => {
-    setLoading(true);
     try {
       // Buscar projetos (filtrado ou todos) - SEMPRE filtrar por workspace
       let projectsQuery = supabase
@@ -259,27 +252,6 @@ function Reports() {
       color: "hsl(var(--primary))",
     },
   };
-
-  // Verificar acesso à feature
-  if (!hasFeature('reports')) {
-    return (
-      <div className="flex h-screen overflow-hidden bg-background">
-        <Sidebar />
-        <div className="flex flex-1 flex-col overflow-hidden">
-          <Header title="Relatórios" subtitle="Análises e métricas dos seus projetos" />
-          <main className="flex-1 overflow-y-auto p-6">
-            <FeatureUpgradeCard
-              title="Relatórios Avançados"
-              description="Acesse análises detalhadas, métricas de projetos, gráficos e exportação de dados"
-              requiredPlan={getRequiredPlan('reports')}
-              icon={<BarChart3 className="h-6 w-6" />}
-            />
-          </main>
-        </div>
-      </div>
-    );
-  }
-
 
   async function handlePhotoUpload(event: ChangeEvent<HTMLInputElement>): Promise<void> {
     const file = event.target.files?.[0];
