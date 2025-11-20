@@ -133,10 +133,15 @@ serve(async (req) => {
         );
       }
 
-      // Verificar senha
-      const passwordMatch = await bcrypt.compare(password, credentials.password_hash);
-      if (!passwordMatch) {
-        console.log('Senha incorreta para:', email);
+      // Verificar senha usando função do Postgres
+      const { data: passwordCheck, error: passwordError } = await supabaseClient
+        .rpc('verify_admin_password', {
+          _admin_email: email,
+          _password: password
+        });
+
+      if (passwordError || !passwordCheck) {
+        console.log('Senha incorreta para:', email, passwordError);
         return new Response(
           JSON.stringify({ error: 'Credenciais inválidas' }),
           { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -326,20 +331,12 @@ serve(async (req) => {
         );
       }
 
-      // Hash da nova senha
-      const newPasswordHash = await bcrypt.hash(newPassword, await bcrypt.genSalt(10));
-
-      // Atualizar senha e limpar token de reset
+      // Atualizar senha usando função do Postgres
       const { error: updateError } = await supabaseClient
-        .from('admin_credentials')
-        .update({
-          password_hash: newPasswordHash,
-          first_login: false,
-          reset_token: null,
-          reset_token_expires_at: null,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', adminData.id);
+        .rpc('update_admin_password', {
+          _user_id: adminData.user_id,
+          _new_password: newPassword
+        });
 
       if (updateError) {
         console.error('Erro ao atualizar senha:', updateError);
@@ -377,10 +374,10 @@ serve(async (req) => {
         );
       }
 
-      // Buscar credenciais
+      // Buscar credenciais com admin_email
       const { data: credentials, error: credError } = await supabaseClient
         .from('admin_credentials')
-        .select('id, password_hash')
+        .select('id, user_id, admin_email')
         .eq('user_id', tokenData.userId)
         .single();
 
@@ -391,27 +388,26 @@ serve(async (req) => {
         );
       }
 
-      // Verificar senha antiga
-      const passwordMatch = await bcrypt.compare(oldPassword, credentials.password_hash);
-      if (!passwordMatch) {
+      // Verificar senha antiga usando função do Postgres
+      const { data: passwordCheck, error: passwordError } = await supabaseClient
+        .rpc('verify_admin_password', {
+          _admin_email: credentials.admin_email,
+          _password: oldPassword
+        });
+
+      if (passwordError || !passwordCheck) {
         return new Response(
           JSON.stringify({ error: 'Senha atual incorreta' }),
           { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
-      // Hash da nova senha
-      const newPasswordHash = await bcrypt.hash(newPassword);
-
-      // Atualizar senha e marcar first_login como false
+      // Atualizar senha usando função do Postgres
       const { error: updateError } = await supabaseClient
-        .from('admin_credentials')
-        .update({
-          password_hash: newPasswordHash,
-          first_login: false,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', credentials.id);
+        .rpc('update_admin_password', {
+          _user_id: tokenData.userId,
+          _new_password: newPassword
+        });
 
       if (updateError) {
         console.error('Erro ao atualizar senha:', updateError);
