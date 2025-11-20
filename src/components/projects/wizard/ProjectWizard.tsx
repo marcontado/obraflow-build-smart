@@ -191,6 +191,7 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
       
       toast.success("Informações salvas!");
       setHasUnsavedChanges(false);
+      onSuccess();
     } catch (error: any) {
       toast.error("Erro ao salvar informações");
       console.error(error);
