@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Bot } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { ProjectCard } from "@/components/projects/ProjectCard";
@@ -58,16 +58,10 @@ function Projects() {
                 {projects.length} projeto(s) no total
               </p>
             </div>
-            <div className="flex gap-2">
-              <Button onClick={() => setFormOpen(true)} className="gap-2">
-                <Plus className="h-4 w-4" />
-                Novo Projeto
-              </Button>
-              <Button onClick={() => setContratoModalOpen(true)} className="gap-2 bg-purple-600 text-white hover:bg-purple-700">
-                <Bot className="h-4 w-4" />
-                Gerar Contrato IA
-              </Button>
-            </div>
+            <Button onClick={() => setFormOpen(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Novo Projeto
+            </Button>
           </div>
 
           {loading ? (

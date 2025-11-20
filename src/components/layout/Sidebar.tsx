@@ -12,7 +12,7 @@ const navigation = [
   { name: "Clientes", href: "/app/clients", icon: Users },
   { name: "Fornecedores", href: "/app/partners", icon: Handshake },
   { name: "Relatórios", href: "/app/reports", icon: BarChart3, feature: "reports" as const },
-  { name: "Modelos e Documentos", href: "/app/templates", icon: FileText },
+  { name: "Templates de Documentos", href: "/app/templates", icon: FileText },
   { name: "Suporte", href: "/app/suporte", icon: MessageCircle },
 ];
 

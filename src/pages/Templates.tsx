@@ -113,7 +113,7 @@ function TemplatesPage() {
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header
-          title="Modelos e Documentos"
+          title="Templates de Documentos"
           subtitle="Crie e gerencie templates para seus documentos profissionais"
         />
         <main className="flex-1 overflow-y-auto p-6">
