@@ -19,6 +19,8 @@ export interface PlanLimits {
     aiAssist: boolean;
     clientPortal: boolean;
     customization: boolean;
+    templates: boolean;
+    partners: boolean;
   };
 }
 
@@ -36,6 +38,8 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, PlanLimits> = {
       aiAssist: false,
       clientPortal: false,
       customization: false,
+      templates: false,
+      partners: false,
     },
   },
   studio: {
@@ -51,6 +55,8 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, PlanLimits> = {
       aiAssist: false,
       clientPortal: false,
       customization: false,
+      templates: true,
+      partners: true,
     },
   },
   domus: {
@@ -66,6 +72,8 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, PlanLimits> = {
       aiAssist: true,
       clientPortal: true,
       customization: true,
+      templates: true,
+      partners: true,
     },
   },
 };
