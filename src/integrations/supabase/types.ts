@@ -338,6 +338,7 @@ export type Database = {
       }
       projects: {
         Row: {
+          briefing: Json | null
           budget: number | null
           client_id: string | null
           created_at: string
@@ -345,15 +346,20 @@ export type Database = {
           description: string | null
           end_date: string | null
           id: string
+          location: string | null
+          moodboard: Json | null
           name: string
           progress: number | null
           spent: number | null
           start_date: string | null
           status: Database["public"]["Enums"]["project_status"] | null
+          technical_files: Json | null
+          type: string | null
           updated_at: string
           workspace_id: string
         }
         Insert: {
+          briefing?: Json | null
           budget?: number | null
           client_id?: string | null
           created_at?: string
@@ -361,15 +367,20 @@ export type Database = {
           description?: string | null
           end_date?: string | null
           id?: string
+          location?: string | null
+          moodboard?: Json | null
           name: string
           progress?: number | null
           spent?: number | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["project_status"] | null
+          technical_files?: Json | null
+          type?: string | null
           updated_at?: string
           workspace_id: string
         }
         Update: {
+          briefing?: Json | null
           budget?: number | null
           client_id?: string | null
           created_at?: string
@@ -377,11 +388,15 @@ export type Database = {
           description?: string | null
           end_date?: string | null
           id?: string
+          location?: string | null
+          moodboard?: Json | null
           name?: string
           progress?: number | null
           spent?: number | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["project_status"] | null
+          technical_files?: Json | null
+          type?: string | null
           updated_at?: string
           workspace_id?: string
         }
