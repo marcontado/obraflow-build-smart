@@ -25,7 +25,19 @@ export default function AdminLogin() {
         });
         
         if (isAdminData) {
-          navigate("/admin/dashboard");
+          // Verificar se precisa configurar senha
+          const { data: needsSetup } = await supabase.rpc('admin_needs_password_setup', {
+            _user_id: session.user.id
+          });
+
+          if (needsSetup) {
+            navigate('/admin/setup');
+          } else {
+            // Marcar sessão admin e ir para dashboard
+            sessionStorage.setItem('admin_session', 'true');
+            sessionStorage.setItem('admin_session_timestamp', Date.now().toString());
+            navigate('/admin/dashboard');
+          }
         } else {
           // Se está logado mas não é admin, fazer logout e mostrar mensagem
           await authService.signOut();
@@ -62,8 +74,20 @@ export default function AdminLogin() {
         return;
       }
 
-      toast.success("Login admin realizado com sucesso!");
-      navigate("/admin/dashboard");
+      // Verificar se precisa configurar senha
+      const { data: needsSetup } = await supabase.rpc('admin_needs_password_setup', {
+        _user_id: data.user.id
+      });
+
+      if (needsSetup) {
+        navigate('/admin/setup');
+      } else {
+        // Marcar sessão admin
+        sessionStorage.setItem('admin_session', 'true');
+        sessionStorage.setItem('admin_session_timestamp', Date.now().toString());
+        toast.success("Login admin realizado com sucesso!");
+        navigate("/admin/dashboard");
+      }
     }
   };
 

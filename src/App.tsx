@@ -19,6 +19,7 @@ import AdminUsers from "./pages/admin/Users";
 import AdminSubscriptions from "./pages/admin/Subscriptions";
 import Auth from "./pages/Auth";
 import AdminLogin from "./pages/AdminLogin";
+import AdminSetup from "./pages/AdminSetup";
 import ResetPassword from "./pages/ResetPassword";
 import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
@@ -65,6 +66,7 @@ const App = () => (
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin/setup" element={<AdminSetup />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/invite/accept" element={<InviteAccept />} />
                 

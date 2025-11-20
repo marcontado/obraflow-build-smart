@@ -300,6 +300,7 @@ export type Database = {
           granted_at: string
           granted_by: string | null
           id: string
+          password_configured: boolean | null
           role: Database["public"]["Enums"]["platform_role"]
           user_id: string
         }
@@ -307,6 +308,7 @@ export type Database = {
           granted_at?: string
           granted_by?: string | null
           id?: string
+          password_configured?: boolean | null
           role?: Database["public"]["Enums"]["platform_role"]
           user_id: string
         }
@@ -314,6 +316,7 @@ export type Database = {
           granted_at?: string
           granted_by?: string | null
           id?: string
+          password_configured?: boolean | null
           role?: Database["public"]["Enums"]["platform_role"]
           user_id?: string
         }
@@ -827,6 +830,10 @@ export type Database = {
           workspace_name: string
         }[]
       }
+      admin_needs_password_setup: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       count_user_workspaces: { Args: { _user_id: string }; Returns: number }
       count_workspace_members: {
         Args: { _workspace_id: string }
@@ -872,6 +879,10 @@ export type Database = {
       is_workspace_member: {
         Args: { _user_id: string; _workspace_id: string }
         Returns: boolean
+      }
+      mark_admin_password_configured: {
+        Args: { _user_id: string }
+        Returns: undefined
       }
     }
     Enums: {

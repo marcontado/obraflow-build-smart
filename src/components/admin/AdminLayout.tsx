@@ -1,14 +1,16 @@
 import { ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { 
   LayoutDashboard, 
   Building2, 
   Users, 
   CreditCard,
   ArrowLeft,
-  Shield
+  Shield,
+  LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +43,14 @@ const adminNavItems = [
 
 export function AdminLayout({ children }: AdminLayoutProps) {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogoutAdmin = () => {
+    sessionStorage.removeItem('admin_session');
+    sessionStorage.removeItem('admin_session_timestamp');
+    toast.info("Você saiu do painel administrativo");
+    navigate("/admin/login");
+  };
 
   return (
     <div className="flex h-screen bg-background">
@@ -76,7 +86,15 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           })}
         </nav>
 
-        <div className="p-4 border-t">
+        <div className="p-4 border-t space-y-2">
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={handleLogoutAdmin}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Sair do Painel Admin
+          </Button>
           <Link to="/">
             <Button variant="outline" className="w-full">
               <ArrowLeft className="mr-2 h-4 w-4" />
