@@ -48,17 +48,19 @@ function Clients() {
 
       if (error) throw error;
 
-      // Count projects for each client
+      // Count active projects for each client
       const clientsWithProjects = await Promise.all(
         (data || []).map(async (client) => {
           const { data: projects } = await supabase
             .from("projects")
-            .select("id", { count: "exact" })
-            .eq("client_id", client.id);
+            .select("id, name, status")
+            .eq("client_id", client.id)
+            .in("status", ["planning", "in_progress"]);
 
           return {
             ...client,
             projectCount: projects?.length || 0,
+            activeProjects: projects || [],
           };
         })
       );
@@ -163,6 +165,7 @@ function Clients() {
                   city={client.city}
                   state={client.state}
                   projectCount={client.projectCount}
+                  activeProjects={client.activeProjects}
                   onEdit={() => handleEdit(client)}
                   onDelete={() => handleDelete(client)}
                 />

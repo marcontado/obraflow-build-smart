@@ -18,13 +18,18 @@ export type Database = {
         Row: {
           address: string | null
           city: string | null
+          cpf: string | null
           created_at: string
           created_by: string | null
           email: string | null
           id: string
+          marital_status: string | null
           name: string
+          nationality: string | null
           notes: string | null
+          occupation: string | null
           phone: string | null
+          rg: string | null
           state: string | null
           updated_at: string
           workspace_id: string
@@ -33,13 +38,18 @@ export type Database = {
         Insert: {
           address?: string | null
           city?: string | null
+          cpf?: string | null
           created_at?: string
           created_by?: string | null
           email?: string | null
           id?: string
+          marital_status?: string | null
           name: string
+          nationality?: string | null
           notes?: string | null
+          occupation?: string | null
           phone?: string | null
+          rg?: string | null
           state?: string | null
           updated_at?: string
           workspace_id: string
@@ -48,13 +58,18 @@ export type Database = {
         Update: {
           address?: string | null
           city?: string | null
+          cpf?: string | null
           created_at?: string
           created_by?: string | null
           email?: string | null
           id?: string
+          marital_status?: string | null
           name?: string
+          nationality?: string | null
           notes?: string | null
+          occupation?: string | null
           phone?: string | null
+          rg?: string | null
           state?: string | null
           updated_at?: string
           workspace_id?: string

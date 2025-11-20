@@ -51,6 +51,11 @@ export function ClientFormDialog({
       state: "",
       zip_code: "",
       notes: "",
+      cpf: "",
+      rg: "",
+      nationality: "Brasileiro(a)",
+      occupation: "",
+      marital_status: "",
     },
   });
 
@@ -65,6 +70,11 @@ export function ClientFormDialog({
         state: initialData.state || "",
         zip_code: initialData.zip_code || "",
         notes: initialData.notes || "",
+        cpf: initialData.cpf || "",
+        rg: initialData.rg || "",
+        nationality: initialData.nationality || "Brasileiro(a)",
+        occupation: initialData.occupation || "",
+        marital_status: initialData.marital_status || "",
       });
     } else {
       form.reset({
@@ -76,6 +86,11 @@ export function ClientFormDialog({
         state: "",
         zip_code: "",
         notes: "",
+        cpf: "",
+        rg: "",
+        nationality: "Brasileiro(a)",
+        occupation: "",
+        marital_status: "",
       });
     }
   }, [initialData, form]);
@@ -112,6 +127,11 @@ export function ClientFormDialog({
         state: data.state || null,
         zip_code: data.zip_code || null,
         notes: data.notes || null,
+        cpf: data.cpf || null,
+        rg: data.rg || null,
+        nationality: data.nationality || null,
+        occupation: data.occupation || null,
+        marital_status: data.marital_status || null,
         workspace_id: currentWorkspace.id,
       };
 
@@ -243,6 +263,84 @@ export function ClientFormDialog({
                   </FormItem>
                 )}
               />
+            </div>
+
+            <div className="border-t pt-4 mt-4">
+              <h3 className="text-sm font-medium mb-3">Documentação</h3>
+              
+              <div className="grid gap-4 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="cpf"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>CPF</FormLabel>
+                      <FormControl>
+                        <Input placeholder="000.000.000-00" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="rg"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>RG</FormLabel>
+                      <FormControl>
+                        <Input placeholder="00.000.000-0" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-3 mt-4">
+                <FormField
+                  control={form.control}
+                  name="nationality"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nacionalidade</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Brasileiro(a)" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="occupation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Profissão</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: Engenheiro" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="marital_status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estado Civil</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: Solteiro(a)" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
             <FormField
