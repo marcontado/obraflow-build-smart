@@ -146,6 +146,12 @@ export default function AdminLogin() {
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Autenticando..." : "Acessar Painel Admin"}
               </Button>
+
+              <div className="text-center">
+                <Link to="/admin/reset-password" className="text-sm text-primary hover:underline">
+                  Esqueci minha senha
+                </Link>
+              </div>
             </form>
           </CardContent>
         </Card>

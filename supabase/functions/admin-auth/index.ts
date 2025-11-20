@@ -27,6 +27,11 @@ interface ChangePasswordRequest {
   newPassword: string;
 }
 
+interface VerifyResetRequest {
+  token: string;
+  newPassword: string;
+}
+
 // Rate limiting simples (em produção, usar Redis ou similar)
 const loginAttempts = new Map<string, { count: number; lastAttempt: number }>();
 
@@ -170,66 +175,197 @@ serve(async (req) => {
 
     // RESET PASSWORD
     if (path === '/reset-password' && req.method === 'POST') {
-      const { email }: ResetPasswordRequest = await req.json();
+      try {
+        const { email }: ResetPasswordRequest = await req.json();
 
-      // Buscar admin credentials
-      const { data: credentials } = await supabaseClient
-        .from('admin_credentials')
-        .select('id, user_id, admin_email')
-        .eq('admin_email', email)
-        .single();
+        if (!email || typeof email !== 'string') {
+          return new Response(
+            JSON.stringify({ error: 'Email é obrigatório' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
 
-      if (!credentials) {
-        // Não revelar se email existe ou não (segurança)
+        // VERIFICAÇÃO 1: Buscar admin pelo email em admin_credentials
+        const { data: adminData, error: adminError } = await supabaseClient
+          .from('admin_credentials')
+          .select('id, user_id, admin_email')
+          .eq('admin_email', email.toLowerCase().trim())
+          .single();
+
+        // Retornar sempre a mesma mensagem para evitar enumeration
+        const successMessage = 'Se você é um administrador autorizado, receberá um email com instruções para redefinir sua senha.';
+
+        if (adminError || !adminData) {
+          console.log('Email não encontrado em admin_credentials:', email);
+          return new Response(
+            JSON.stringify({ message: successMessage }),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        // VERIFICAÇÃO 2: Confirmar que user_id está em platform_admins (SEGURANÇA EXTRA)
+        const { data: platformAdmin, error: platformError } = await supabaseClient
+          .from('platform_admins')
+          .select('user_id, role')
+          .eq('user_id', adminData.user_id)
+          .single();
+
+        if (platformError || !platformAdmin) {
+          console.log('user_id não autorizado em platform_admins:', adminData.user_id);
+          return new Response(
+            JSON.stringify({ message: successMessage }),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        // Gerar token de reset
+        const resetToken = generateResetToken();
+        const resetTokenExpiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
+        
+        // Salvar token no banco
+        const { error: updateError } = await supabaseClient
+          .from('admin_credentials')
+          .update({ 
+            reset_token: resetToken, 
+            reset_token_expires_at: resetTokenExpiresAt.toISOString() 
+          })
+          .eq('id', adminData.id);
+
+        if (updateError) {
+          console.error('Erro ao salvar token:', updateError);
+          return new Response(
+            JSON.stringify({ message: successMessage }),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        // URL de reset
+        const resetUrl = `https://f07d6f7d-4b0d-4937-86d7-d4806ed4aa16.lovableproject.com/admin/reset-password-confirm?token=${resetToken}`;
+        
+        // Enviar email via Resend
+        try {
+          const emailResponse = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${Deno.env.get('RESEND_API_KEY')}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from: 'Archestra Admin <onboarding@resend.dev>',
+              to: [email],
+              subject: 'Reset de Senha - Painel Admin',
+              html: `
+                <h1>Reset de Senha do Painel Administrativo</h1>
+                <p>Você solicitou reset de senha para o painel admin.</p>
+                <p>Clique no link abaixo para criar uma nova senha:</p>
+                <p><a href="${resetUrl}" style="background: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Redefinir Senha</a></p>
+                <p style="color: #dc2626; font-weight: bold;">⚠️ Este link expira em 1 hora.</p>
+                <p style="color: #6b7280;">Se você não solicitou este reset, ignore este email.</p>
+              `,
+            }),
+          });
+
+          if (!emailResponse.ok) {
+            console.error('Erro ao enviar email:', await emailResponse.text());
+          }
+        } catch (emailError) {
+          console.error('Erro ao enviar email de reset:', emailError);
+        }
+
+        console.log('Email de reset processado para:', email);
         return new Response(
-          JSON.stringify({ message: 'Se o email existir, um link de reset será enviado.' }),
+          JSON.stringify({ message: successMessage }),
           { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      } catch (error: any) {
+        console.error('Erro em /reset-password:', error);
+        return new Response(
+          JSON.stringify({ error: 'Erro ao processar solicitação' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+  // Rota: /verify-reset (POST) - Verifica token e atualiza senha
+  if (path === '/verify-reset' && req.method === 'POST') {
+    try {
+      const { token, newPassword }: VerifyResetRequest = await req.json();
+
+      if (!token || !newPassword) {
+        return new Response(
+          JSON.stringify({ error: 'Token e nova senha são obrigatórios' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
-      // Gerar token de reset
-      const resetToken = generateResetToken();
-      
-      // Enviar email via fetch para função Resend
-      const resetUrl = `${Deno.env.get('SUPABASE_URL')}/admin/reset-password?token=${resetToken}`;
-      
-      try {
-        const emailResponse = await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${Deno.env.get('RESEND_API_KEY')}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            from: 'Archestra Admin <onboarding@resend.dev>',
-            to: [email],
-            subject: 'Reset de Senha - Painel Admin',
-            html: `
-              <h1>Reset de Senha do Painel Administrativo</h1>
-              <p>Você solicitou reset de senha para o painel admin.</p>
-              <p>Clique no link abaixo para criar uma nova senha:</p>
-              <p><a href="${resetUrl}">${resetUrl}</a></p>
-              <p>Este link expira em 1 hora.</p>
-              <p>Se você não solicitou este reset, ignore este email.</p>
-            `,
-          }),
-        });
-
-        if (!emailResponse.ok) {
-          console.error('Erro ao enviar email:', await emailResponse.text());
-        }
-      } catch (emailError) {
-        console.error('Erro ao enviar email:', emailError);
+      if (newPassword.length < 8) {
+        return new Response(
+          JSON.stringify({ error: 'A senha deve ter no mínimo 8 caracteres' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
 
-      console.log('Email de reset enviado para:', email);
+      // Buscar admin pelo token de reset válido
+      const { data: adminData, error: adminError } = await supabaseClient
+        .from('admin_credentials')
+        .select('id, user_id, admin_email, reset_token, reset_token_expires_at')
+        .eq('reset_token', token)
+        .single();
+
+      if (adminError || !adminData) {
+        return new Response(
+          JSON.stringify({ error: 'Token inválido ou expirado' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Verificar se o token expirou
+      if (!adminData.reset_token_expires_at || new Date(adminData.reset_token_expires_at) < new Date()) {
+        return new Response(
+          JSON.stringify({ error: 'Token expirado. Solicite um novo reset de senha.' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Hash da nova senha
+      const newPasswordHash = await bcrypt.hash(newPassword, await bcrypt.genSalt(10));
+
+      // Atualizar senha e limpar token de reset
+      const { error: updateError } = await supabaseClient
+        .from('admin_credentials')
+        .update({
+          password_hash: newPasswordHash,
+          first_login: false,
+          reset_token: null,
+          reset_token_expires_at: null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', adminData.id);
+
+      if (updateError) {
+        console.error('Erro ao atualizar senha:', updateError);
+        return new Response(
+          JSON.stringify({ error: 'Erro ao atualizar senha' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      console.log('Senha atualizada com sucesso via reset para:', adminData.admin_email);
+
       return new Response(
-        JSON.stringify({ message: 'Email de reset enviado com sucesso!' }),
+        JSON.stringify({ message: 'Senha atualizada com sucesso!' }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    } catch (error: any) {
+      console.error('Erro em /verify-reset:', error);
+      return new Response(
+        JSON.stringify({ error: 'Erro ao processar reset de senha' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
+  }
 
-    // CHANGE PASSWORD
+  // CHANGE PASSWORD
     if (path === '/change-password' && req.method === 'POST') {
       const { adminToken, oldPassword, newPassword }: ChangePasswordRequest = await req.json();
 
