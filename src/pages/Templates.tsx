@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { withWorkspaceGuard } from "@/hoc/withWorkspaceGuard";
 import { templatesService } from "@/services/templates.service";
@@ -21,7 +21,8 @@ function TemplatesPage() {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspace();
   const [templates, setTemplates] = useState<DocumentTemplate[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const isFirstMount = useRef(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<TemplateCategory | "all">("all");
   const [showBanner, setShowBanner] = useState(false);
@@ -57,8 +58,11 @@ function TemplatesPage() {
   const fetchTemplates = async () => {
     if (!currentWorkspace) return;
 
-    try {
+    if (isFirstMount.current) {
       setLoading(true);
+    }
+
+    try {
       const { data, error } = await templatesService.getAll(
         currentWorkspace.id,
         categoryFilter === "all" ? undefined : categoryFilter
@@ -71,6 +75,9 @@ function TemplatesPage() {
       toast.error("Erro ao carregar templates");
     } finally {
       setLoading(false);
+      if (isFirstMount.current) {
+        isFirstMount.current = false;
+      }
     }
   };
 

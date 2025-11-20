@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +23,8 @@ import { Header } from "@/components/layout/Header";
 export default function Partners() {
   const { currentWorkspace } = useWorkspace();
   const [partners, setPartners] = useState<Partner[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const isFirstMount = useRef(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [formOpen, setFormOpen] = useState(false);
@@ -42,16 +43,25 @@ export default function Partners() {
   const fetchPartners = async () => {
     if (!currentWorkspace) return;
 
-    setLoading(true);
-    const { data, error } = await partnersService.getAll(currentWorkspace.id);
-
-    if (error) {
-      toast.error("Erro ao carregar parceiros");
-      console.error(error);
-    } else {
-      setPartners(data || []);
+    if (isFirstMount.current) {
+      setLoading(true);
     }
-    setLoading(false);
+
+    try {
+      const { data, error } = await partnersService.getAll(currentWorkspace.id);
+
+      if (error) {
+        toast.error("Erro ao carregar parceiros");
+        console.error(error);
+      } else {
+        setPartners(data || []);
+      }
+    } finally {
+      setLoading(false);
+      if (isFirstMount.current) {
+        isFirstMount.current = false;
+      }
+    }
   };
 
   const filteredPartners = useMemo(() => {

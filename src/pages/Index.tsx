@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { FolderKanban, TrendingUp, Clock, CheckCircle2 } from "lucide-react";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -12,7 +12,8 @@ import { toast } from "sonner";
 const Index = () => {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspace();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const isFirstMount = useRef(true);
   const [stats, setStats] = useState({
     totalProjects: 0,
     inProgress: 0,
@@ -29,6 +30,10 @@ const Index = () => {
 
   const fetchDashboardData = async () => {
     if (!currentWorkspace) return;
+    
+    if (isFirstMount.current) {
+      setLoading(true);
+    }
     
     try {
       const { data: projects, error } = await supabase
@@ -55,6 +60,9 @@ const Index = () => {
       console.error(error);
     } finally {
       setLoading(false);
+      if (isFirstMount.current) {
+        isFirstMount.current = false;
+      }
     }
   };
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
@@ -40,7 +40,8 @@ function Reports() {
   }
 
   const { hasFeature, getRequiredPlan } = useFeatureAccess();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const isFirstMount = useRef(true);
   const [selectedProjectId, setSelectedProjectId] = useState<string>("all");
   const [projects, setProjects] = useState<any[]>([]);
   const [stats, setStats] = useState({
@@ -73,17 +74,25 @@ function Reports() {
   }, [selectedProjectId, currentWorkspace]);
 
   const fetchProjectsList = async () => {
-    const { data } = await supabase
-      .from("projects")
-      .select("id, name")
-      .eq("workspace_id", currentWorkspace.id)
-      .order("name");
+    if (isFirstMount.current) {
+      setLoading(true);
+    }
     
-    setProjects(data || []);
-    if (data && data.length > 0) {
-      fetchReportData("all");
-    } else {
-      setLoading(false);
+    try {
+      const { data } = await supabase
+        .from("projects")
+        .select("id, name")
+        .eq("workspace_id", currentWorkspace.id)
+        .order("name");
+      
+      setProjects(data || []);
+      if (data && data.length > 0) {
+        fetchReportData("all");
+      }
+    } finally {
+      if (isFirstMount.current) {
+        isFirstMount.current = false;
+      }
     }
   };
 

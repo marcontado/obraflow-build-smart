@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -17,7 +17,8 @@ function Projects() {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspace();
   const [projects, setProjects] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const isFirstMount = useRef(true);
   const [formOpen, setFormOpen] = useState(false);
   const [contratoModalOpen, setContratoModalOpen] = useState(false);
 
@@ -30,6 +31,10 @@ function Projects() {
   const fetchProjects = async () => {
     if (!currentWorkspace) return;
     
+    if (isFirstMount.current) {
+      setLoading(true);
+    }
+    
     try {
       const { data, error } = await projectsService.getAll(currentWorkspace.id);
       if (error) throw error;
@@ -39,6 +44,9 @@ function Projects() {
       console.error(error);
     } finally {
       setLoading(false);
+      if (isFirstMount.current) {
+        isFirstMount.current = false;
+      }
     }
   };
 
