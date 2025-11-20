@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,11 +24,12 @@ export default function Onboarding() {
   const { refreshWorkspaces, hasWorkspaces } = useWorkspace();
   const [submitting, setSubmitting] = useState(false);
 
-  // Guard: Se já tem workspace, redirecionar para /app
-  if (hasWorkspaces()) {
-    navigate("/app", { replace: true });
-    return null;
-  }
+  // Guard: Se já tem workspace, redirecionar para /app (movido para useEffect)
+  useEffect(() => {
+    if (hasWorkspaces()) {
+      navigate("/app", { replace: true });
+    }
+  }, [hasWorkspaces, navigate]);
 
   const form = useForm<WorkspaceFormData>({
     resolver: zodResolver(workspaceSchema),

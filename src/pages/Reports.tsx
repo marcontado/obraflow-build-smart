@@ -33,6 +33,12 @@ import { Button } from "@/components/ui/button";
 function Reports() {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspace();
+  
+  // Guard: não renderizar se não houver workspace (ANTES de todos os hooks)
+  if (!currentWorkspace) {
+    return null;
+  }
+
   const { hasFeature, getRequiredPlan } = useFeatureAccess();
   const [loading, setLoading] = useState(true);
   const [selectedProjectId, setSelectedProjectId] = useState<string>("all");
@@ -56,27 +62,20 @@ function Reports() {
 
   useEffect(() => {
     if (currentWorkspace) {
-      if (currentWorkspace) {
       fetchProjectsList();
-    }
     }
   }, [currentWorkspace]);
 
   useEffect(() => {
-    if (((projects.length > 0 || selectedProjectId === "all") && currentWorkspace) && currentWorkspace) {
+    if ((projects.length > 0 || selectedProjectId === "all") && currentWorkspace) {
       fetchReportData(selectedProjectId);
     }
-  }, [selectedProjectId, currentWorkspace, currentWorkspace]);
+  }, [selectedProjectId, currentWorkspace]);
 
   const fetchProjectsList = async () => {
-    if (!currentWorkspace) return;
-
-    if (!currentWorkspace) return;
-
     const { data } = await supabase
       .from("projects")
       .select("id, name")
-      .eq("workspace_id", currentWorkspace.id)
       .eq("workspace_id", currentWorkspace.id)
       .order("name");
     
@@ -89,13 +88,9 @@ function Reports() {
   };
 
   const fetchReportData = async (projectId: string) => {
-    if (!currentWorkspace) return;
-
-    if (!currentWorkspace) return;
-
     setLoading(true);
     try {
-      // Buscar projetos (filtrado ou todos) - SEMPRE filtrar por workspace - SEMPRE filtrar por workspace
+      // Buscar projetos (filtrado ou todos) - SEMPRE filtrar por workspace
       let projectsQuery = supabase
         .from("projects")
         .select("id, status, budget, spent")
@@ -197,14 +192,8 @@ function Reports() {
     }
   };
 
-  // Guard adicional: não renderizar se não houver workspace
-  if (!currentWorkspace) {
-    return null;
-  }
-
   // Função para exportar PDF
   const handleExportPDF = () => {
-    if (!currentWorkspace) return;
     const doc = new jsPDF();
     const isGeral = selectedProjectId === "all";
     const workspaceName = currentWorkspace.name || "Escritório";
@@ -247,11 +236,6 @@ function Reports() {
     });
     doc.save(isGeral ? `relatorio-geral.pdf` : `relatorio-obra.pdf`);
   };
-
-  // Guard adicional: não renderizar se não houver workspace
-  if (!currentWorkspace) {
-    return null;
-  }
 
   const COLORS = ["hsl(var(--primary))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
 
