@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { FolderKanban, TrendingUp, Clock, CheckCircle2 } from "lucide-react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
@@ -8,19 +8,9 @@ import { ProjectCard } from "@/components/projects/ProjectCard";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import PartnersPage from "./Partners";
-import Suporte from "./Suporte";
-
-const TABS = [
-  { key: "dashboard", label: "Dashboard" },
-  { key: "projects", label: "Projetos" },
-  { key: "partners", label: "Parceiros" },
-  { key: "suporte", label: "Suporte" },
-];
 
 const Index = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { currentWorkspace } = useWorkspace();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -30,24 +20,14 @@ const Index = () => {
     totalBudget: 0,
   });
   const [recentProjects, setRecentProjects] = useState<any[]>([]);
-  const queryTab = new URLSearchParams(location.search).get("tab");
-  const [activeTab, setActiveTab] = useState(queryTab || "dashboard");
-
-  useEffect(() => {
-    setActiveTab(queryTab || "dashboard");
-  }, [queryTab]);
 
   useEffect(() => {
     if (currentWorkspace) {
-      if (currentWorkspace) {
       fetchDashboardData();
-    }
     }
   }, [currentWorkspace]);
 
   const fetchDashboardData = async () => {
-    if (!currentWorkspace) return;
-
     if (!currentWorkspace) return;
     
     try {
@@ -57,7 +37,6 @@ const Index = () => {
           *,
           clients (name)
         `)
-        .eq("workspace_id", currentWorkspace.id)
         .eq("workspace_id", currentWorkspace.id)
         .order("created_at", { ascending: false })
         .limit(6);
@@ -84,29 +63,11 @@ const Index = () => {
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header
-          title={
-            activeTab === "dashboard"
-              ? "Dashboard"
-              : activeTab === "partners"
-              ? "Parceiros e Fornecedores"
-              : activeTab === "suporte"
-              ? "Suporte & Avaliação"
-              : "Projetos"
-          }
-          subtitle={
-            activeTab === "dashboard"
-              ? "Visão geral dos seus projetos e métricas"
-              : activeTab === "partners"
-              ? "Gerencie seus parceiros e fornecedores"
-              : activeTab === "suporte"
-              ? "Avalie a plataforma ou entre em contato para suporte."
-              : undefined
-          }
+          title="Dashboard"
+          subtitle="Visão geral dos seus projetos e métricas"
         />
         <main className="flex-1 overflow-y-auto p-6">
-          {activeTab === "dashboard" && (
-            <>
-              <div className="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 <StatsCard
                   title="Total de Projetos"
                   value={stats.totalProjects}
@@ -131,9 +92,9 @@ const Index = () => {
                   icon={TrendingUp}
                   description="Soma de todos os orçamentos"
                 />
-              </div>
+            </div>
 
-              <div className="mb-6 flex items-center justify-between">
+            <div className="mb-6 flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Projetos Recentes</h3>
                 <button
                   onClick={() => navigate("/app/projects")}
@@ -143,50 +104,45 @@ const Index = () => {
                 </button>
               </div>
 
-              {loading ? (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-64 animate-pulse rounded-lg bg-muted" />
-                  ))}
-                </div>
-              ) : recentProjects.length === 0 ? (
-                <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-12 text-center">
-                  <FolderKanban className="mb-4 h-12 w-12 text-muted-foreground" />
-                  <h3 className="mb-2 text-lg font-semibold">Nenhum projeto ainda</h3>
-                  <p className="mb-4 text-sm text-muted-foreground">
-                    Comece criando seu primeiro projeto
-                  </p>
-                  <button
-                    onClick={() => navigate("/app/projects")}
-                    className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                  >
-                    Criar Projeto
-                  </button>
-                </div>
-              ) : (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {recentProjects.map((project) => (
-                    <ProjectCard
-                      key={project.id}
-                      id={project.id}
-                      name={project.name}
-                      client={project.clients?.name}
-                      status={project.status}
-                      progress={project.progress}
-                      budget={project.budget}
-                      spent={project.spent}
-                      startDate={project.start_date}
-                      endDate={project.end_date}
-                      onClick={() => navigate(`/app/projects/${project.id}`)}
-                    />
-                  ))}
-                </div>
-              )}
-            </>
+          {loading ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-64 animate-pulse rounded-lg bg-muted" />
+              ))}
+            </div>
+          ) : recentProjects.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-12 text-center">
+              <FolderKanban className="mb-4 h-12 w-12 text-muted-foreground" />
+              <h3 className="mb-2 text-lg font-semibold">Nenhum projeto ainda</h3>
+              <p className="mb-4 text-sm text-muted-foreground">
+                Comece criando seu primeiro projeto
+              </p>
+              <button
+                onClick={() => navigate("/app/projects")}
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              >
+                Criar Projeto
+              </button>
+            </div>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {recentProjects.map((project) => (
+                <ProjectCard
+                  key={project.id}
+                  id={project.id}
+                  name={project.name}
+                  client={project.clients?.name}
+                  status={project.status}
+                  progress={project.progress}
+                  budget={project.budget}
+                  spent={project.spent}
+                  startDate={project.start_date}
+                  endDate={project.end_date}
+                  onClick={() => navigate(`/app/projects/${project.id}`)}
+                />
+              ))}
+            </div>
           )}
-          {activeTab === "partners" && <PartnersPage />}
-          {activeTab === "suporte" && <Suporte />}
-          {/* Adicione outras abas conforme necessário */}
         </main>
       </div>
     </div>

@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { MessageCircle } from "lucide-react";
 import { sendN8nWebhook } from "@/services/n8nWebhook.service";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { Header } from "@/components/layout/Header";
 
 export default function Suporte() {
   const [feedback, setFeedback] = useState("");
@@ -29,8 +31,16 @@ export default function Suporte() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-10">
-      <Card>
+    <div className="flex h-screen overflow-hidden bg-background">
+      <Sidebar />
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Header
+          title="Suporte & Avaliação"
+          subtitle="Avalie a plataforma ou entre em contato para suporte"
+        />
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-2xl mx-auto">
+            <Card>
         <CardHeader>
           <CardTitle>Suporte & Avaliação</CardTitle>
           <CardDescription>
@@ -92,6 +102,9 @@ export default function Suporte() {
           </div>
         </CardContent>
       </Card>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
