@@ -58,34 +58,38 @@ export default function AdminManagement() {
     },
   });
 
-  // Mutation para reset de senha
+  // Mutation para reset de senha (novo sistema)
   const resetPasswordMutation = useMutation({
     mutationFn: async (email: string) => {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+      const { data, error } = await supabase.functions.invoke('admin-auth/reset-password', {
+        body: { email }
       });
       if (error) throw error;
+      if (data.error) throw new Error(data.error);
     },
     onSuccess: () => {
-      toast.success("Email de recuperação enviado com sucesso!");
+      toast.success("Email de recuperação admin enviado com sucesso!");
       setResetEmail("");
     },
-    onError: () => {
-      toast.error("Erro ao enviar email de recuperação");
+    onError: (error: Error) => {
+      toast.error(error.message || "Erro ao enviar email de recuperação");
     },
   });
 
   // Mutation para adicionar admin
+  const [newAdminEmail2, setNewAdminEmail2] = useState(""); // Email admin separado
+  
   const addAdminMutation = useMutation({
     mutationFn: async () => {
-      // Buscar user_id pelo email
+      // Buscar user_id pelo email do sistema
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("id")
+        .select("id, email")
         .eq("email", newAdminEmail)
-        .single();
+        .maybeSingle();
 
-      if (profileError) throw new Error("Usuário não encontrado");
+      if (profileError) throw new Error("Erro ao buscar usuário");
+      if (!profile) throw new Error("Usuário não encontrado no sistema");
 
       // Inserir na tabela platform_admins
       const { error: insertError } = await supabase
@@ -95,11 +99,41 @@ export default function AdminManagement() {
           role: newAdminRole,
         });
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        if (insertError.code === '23505') {
+          throw new Error("Este usuário já é um administrador");
+        }
+        throw insertError;
+      }
+
+      // Criar credenciais admin usando edge function
+      const adminEmailToUse = newAdminEmail2.trim() || newAdminEmail;
+      const { data, error } = await supabase.functions.invoke('admin-create', {
+        body: {
+          userId: profile.id,
+          adminEmail: adminEmailToUse,
+          systemEmail: profile.email
+        }
+      });
+
+      if (error) throw error;
+      if (data.error) throw new Error(data.error);
+
+      return { temporaryPassword: data.temporaryPassword, adminEmail: adminEmailToUse };
     },
-    onSuccess: () => {
-      toast.success("Administrador adicionado com sucesso!");
+    onSuccess: (data) => {
+      toast.success(
+        `Administrador adicionado! Senha temporária enviada por email.`,
+        { duration: 10000 }
+      );
+      // Também mostrar a senha na UI como fallback
+      console.log('Senha temporária:', data.temporaryPassword);
+      toast.info(
+        `Senha temporária (guarde em local seguro): ${data.temporaryPassword}`,
+        { duration: 20000 }
+      );
       setNewAdminEmail("");
+      setNewAdminEmail2("");
       setNewAdminRole("analyst");
       queryClient.invalidateQueries({ queryKey: ["platform-admins"] });
     },
@@ -210,7 +244,7 @@ export default function AdminManagement() {
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <Label htmlFor="new-admin-email">Email do Usuário</Label>
+                <Label htmlFor="new-admin-email">Email do Sistema (usuário existente)</Label>
                 <Input
                   id="new-admin-email"
                   type="email"
@@ -218,27 +252,52 @@ export default function AdminManagement() {
                   value={newAdminEmail}
                   onChange={(e) => setNewAdminEmail(e.target.value)}
                 />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Email da conta no sistema principal
+                </p>
               </div>
               <div>
-                <Label htmlFor="new-admin-role">Função</Label>
-                <Select value={newAdminRole} onValueChange={(value: AdminRole) => setNewAdminRole(value)}>
-                  <SelectTrigger id="new-admin-role">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="analyst">Analista</SelectItem>
-                    <SelectItem value="support">Suporte</SelectItem>
-                    <SelectItem value="super_admin">Super Admin</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="new-admin-email2">Email Admin (opcional)</Label>
+                <Input
+                  id="new-admin-email2"
+                  type="email"
+                  placeholder="admin@empresa.com"
+                  value={newAdminEmail2}
+                  onChange={(e) => setNewAdminEmail2(e.target.value)}
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Deixe vazio para usar o mesmo email
+                </p>
               </div>
+            </div>
+            <div>
+              <Label htmlFor="new-admin-role">Função</Label>
+              <Select value={newAdminRole} onValueChange={(value: AdminRole) => setNewAdminRole(value)}>
+                <SelectTrigger id="new-admin-role">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="analyst">Analista</SelectItem>
+                  <SelectItem value="support">Suporte</SelectItem>
+                  <SelectItem value="super_admin">Super Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="bg-muted p-4 rounded-lg space-y-2">
+              <p className="text-sm font-medium">ℹ️ Como funciona:</p>
+              <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                <li>O usuário deve estar cadastrado no sistema (com email do sistema)</li>
+                <li>Será criado um acesso admin separado com senha própria</li>
+                <li>A senha temporária será enviada por email</li>
+                <li>No primeiro login, será obrigatório trocar a senha</li>
+              </ul>
             </div>
             <Button
               onClick={() => addAdminMutation.mutate()}
               disabled={!newAdminEmail || addAdminMutation.isPending}
             >
               <UserPlus className="mr-2 h-4 w-4" />
-              Adicionar Administrador
+              {addAdminMutation.isPending ? "Adicionando..." : "Adicionar Administrador"}
             </Button>
           </CardContent>
         </Card>

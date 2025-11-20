@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_credentials: {
+        Row: {
+          admin_email: string
+          created_at: string
+          first_login: boolean
+          id: string
+          password_hash: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_email: string
+          created_at?: string
+          first_login?: boolean
+          id?: string
+          password_hash: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_email?: string
+          created_at?: string
+          first_login?: boolean
+          id?: string
+          password_hash?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       clients: {
         Row: {
           address: string | null
@@ -300,7 +330,6 @@ export type Database = {
           granted_at: string
           granted_by: string | null
           id: string
-          password_configured: boolean | null
           role: Database["public"]["Enums"]["platform_role"]
           user_id: string
         }
@@ -308,7 +337,6 @@ export type Database = {
           granted_at?: string
           granted_by?: string | null
           id?: string
-          password_configured?: boolean | null
           role?: Database["public"]["Enums"]["platform_role"]
           user_id: string
         }
@@ -316,7 +344,6 @@ export type Database = {
           granted_at?: string
           granted_by?: string | null
           id?: string
-          password_configured?: boolean | null
           role?: Database["public"]["Enums"]["platform_role"]
           user_id?: string
         }
