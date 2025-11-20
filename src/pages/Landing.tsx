@@ -47,9 +47,9 @@ export default function Landing() {
   <GlassSidebar />
 
       {/* Botão flutuante WhatsApp com label temporária */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-center">
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
         {showWhatsappLabel && (
-          <div className="mb-2 px-4 py-2 rounded-lg bg-white text-green-700 font-semibold shadow-lg animate-fade-in">
+          <div className="px-4 py-2 rounded-lg bg-white text-green-700 font-semibold shadow-lg animate-fade-in whitespace-nowrap">
             Fale com um dos nossos consultores
           </div>
         )}
