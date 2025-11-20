@@ -40,6 +40,7 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
   const [technicalFiles, setTechnicalFiles] = useState<TechnicalFile[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdProjectId, setCreatedProjectId] = useState<string | null>(projectId || null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { currentWorkspace } = useWorkspace();
 
   const form = useForm<ProjectWizardData>({
@@ -85,8 +86,19 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
       setMoodboardItems(initialData.moodboard || []);
       setTechnicalFiles(initialData.technical_files || []);
       setCreatedProjectId(projectId || null);
+      setHasUnsavedChanges(false);
     }
   }, [initialData, projectId, form]);
+
+  // Detectar mudanças no formulário
+  useEffect(() => {
+    if (projectId) {
+      const subscription = form.watch(() => {
+        setHasUnsavedChanges(true);
+      });
+      return () => subscription.unsubscribe();
+    }
+  }, [form, projectId]);
 
   const progress = (currentStep / STEPS.length) * 100;
 
@@ -101,6 +113,11 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
     if (fieldsToValidate.length > 0) {
       const isValid = await form.trigger(fieldsToValidate);
       if (!isValid) return;
+    }
+
+    // Se está editando e no Step 1, salvar as informações básicas
+    if (currentStep === 1 && projectId) {
+      await saveBasicInfo();
     }
 
     // Se está no Step 1 e ainda não criou o projeto, criar agora
@@ -148,6 +165,41 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
     }
   };
 
+  const saveBasicInfo = async () => {
+    if (!projectId || !currentWorkspace) return;
+
+    try {
+      setIsSubmitting(true);
+      const formData = form.getValues();
+      
+      const updateData = {
+        name: formData.name,
+        description: formData.description,
+        client_id: formData.client_id || null,
+        status: formData.status,
+        start_date: formData.start_date || null,
+        end_date: formData.end_date || null,
+        budget: formData.budget ? parseFloat(formData.budget) : null,
+        progress: formData.progress || 0,
+        type: formData.type || null,
+        location: formData.location || null,
+      };
+
+      const { error } = await projectsService.update(projectId, updateData, currentWorkspace.id);
+      
+      if (error) throw error;
+      
+      toast.success("Informações salvas!");
+      setHasUnsavedChanges(false);
+    } catch (error: any) {
+      toast.error("Erro ao salvar informações");
+      console.error(error);
+      throw error;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
@@ -155,11 +207,19 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
   };
 
   const handleClose = () => {
+    if (hasUnsavedChanges && projectId) {
+      const confirmed = window.confirm(
+        "Você tem alterações não salvas. Deseja sair sem salvar?"
+      );
+      if (!confirmed) return;
+    }
+    
     form.reset();
     setCurrentStep(1);
     setMoodboardItems([]);
     setTechnicalFiles([]);
     setCreatedProjectId(null);
+    setHasUnsavedChanges(false);
     onClose();
   };
 
@@ -195,6 +255,7 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
       if (error) throw error;
       
       toast.success(projectId ? "Projeto atualizado!" : "Projeto criado com sucesso!");
+      setHasUnsavedChanges(false);
       handleClose();
       onSuccess();
     } catch (error: any) {
@@ -286,8 +347,19 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
               onClick={handleClose}
               disabled={isSubmitting}
             >
-              Cancelar
+              {hasUnsavedChanges ? "Sair sem Salvar" : "Cancelar"}
             </Button>
+
+            {projectId && currentStep === 1 && (
+              <Button 
+                type="button" 
+                variant="outline"
+                onClick={saveBasicInfo} 
+                disabled={isSubmitting || !hasUnsavedChanges}
+              >
+                {isSubmitting ? "Salvando..." : "Salvar Alterações"}
+              </Button>
+            )}
 
             {currentStep < STEPS.length ? (
               <Button type="button" onClick={handleNext} disabled={isSubmitting}>
@@ -301,7 +373,7 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
                 disabled={isSubmitting}
               >
                 <Check className="mr-2 h-4 w-4" />
-                {isSubmitting ? "Criando..." : "Criar Projeto Completo"}
+                {isSubmitting ? (projectId ? "Salvando..." : "Criando...") : (projectId ? "Salvar Projeto" : "Criar Projeto Completo")}
               </Button>
             )}
           </div>
