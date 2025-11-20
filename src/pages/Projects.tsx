@@ -17,7 +17,7 @@ function Projects() {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspace();
   const [projects, setProjects] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [contratoModalOpen, setContratoModalOpen] = useState(false);
 

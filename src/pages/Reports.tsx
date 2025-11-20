@@ -40,7 +40,7 @@ function Reports() {
   }
 
   const { hasFeature, getRequiredPlan } = useFeatureAccess();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string>("all");
   const [projects, setProjects] = useState<any[]>([]);
   const [stats, setStats] = useState({

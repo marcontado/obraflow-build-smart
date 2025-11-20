@@ -18,7 +18,7 @@ function Clients() {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspace();
   const [clients, setClients] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);

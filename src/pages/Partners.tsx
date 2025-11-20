@@ -23,7 +23,7 @@ import { Header } from "@/components/layout/Header";
 export default function Partners() {
   const { currentWorkspace } = useWorkspace();
   const [partners, setPartners] = useState<Partner[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [formOpen, setFormOpen] = useState(false);

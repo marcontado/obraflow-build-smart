@@ -21,7 +21,7 @@ function TemplatesPage() {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspace();
   const [templates, setTemplates] = useState<DocumentTemplate[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<TemplateCategory | "all">("all");
   const [showBanner, setShowBanner] = useState(false);
