@@ -77,6 +77,80 @@ export type Database = {
           },
         ]
       }
+      partners: {
+        Row: {
+          address: string | null
+          category: string
+          city: string | null
+          created_at: string
+          created_by: string | null
+          diferencial: string | null
+          email: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          notes: string | null
+          phone: string | null
+          rating: number | null
+          state: string | null
+          status: string
+          tags: string[] | null
+          updated_at: string
+          workspace_id: string
+          zip_code: string | null
+        }
+        Insert: {
+          address?: string | null
+          category: string
+          city?: string | null
+          created_at?: string
+          created_by?: string | null
+          diferencial?: string | null
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          notes?: string | null
+          phone?: string | null
+          rating?: number | null
+          state?: string | null
+          status?: string
+          tags?: string[] | null
+          updated_at?: string
+          workspace_id: string
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string | null
+          category?: string
+          city?: string | null
+          created_at?: string
+          created_by?: string | null
+          diferencial?: string | null
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          rating?: number | null
+          state?: string | null
+          status?: string
+          tags?: string[] | null
+          updated_at?: string
+          workspace_id?: string
+          zip_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partners_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platform_admins: {
         Row: {
           granted_at: string

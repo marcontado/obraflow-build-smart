@@ -5,6 +5,7 @@ export type Client = Database["public"]["Tables"]["clients"]["Row"];
 export type Project = Database["public"]["Tables"]["projects"]["Row"];
 export type ProjectArea = Database["public"]["Tables"]["project_areas"]["Row"];
 export type Task = Database["public"]["Tables"]["tasks"]["Row"];
+export type Partner = Database["public"]["Tables"]["partners"]["Row"];
 
 export type ProjectStatus = Database["public"]["Enums"]["project_status"];
 export type TaskStatus = Database["public"]["Enums"]["task_status"];
