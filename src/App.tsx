@@ -80,6 +80,7 @@ const App = () => (
                 <Route path="/app/partners" element={<ProtectedRoute><Partners /></ProtectedRoute>} />
                 <Route path="/app/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
                 <Route path="/app/templates" element={<ProtectedRoute><Templates /></ProtectedRoute>} />
+                <Route path="/app/templates/new" element={<ProtectedRoute><TemplateEditor /></ProtectedRoute>} />
                 <Route path="/app/templates/:id/edit" element={<ProtectedRoute><TemplateEditor /></ProtectedRoute>} />
                 <Route path="/app/templates/:id/generate" element={<ProtectedRoute><DocumentGenerator /></ProtectedRoute>} />
                 <Route path="/app/suporte" element={<ProtectedRoute><Suporte /></ProtectedRoute>} />
