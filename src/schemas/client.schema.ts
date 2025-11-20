@@ -9,6 +9,11 @@ export const clientSchema = z.object({
   state: z.string().max(2, "Use sigla do estado (ex: SP)").optional().or(z.literal("")),
   zip_code: z.string().optional().or(z.literal("")),
   notes: z.string().optional().or(z.literal("")),
+  cpf: z.string().optional().or(z.literal("")),
+  rg: z.string().optional().or(z.literal("")),
+  nationality: z.string().optional().or(z.literal("")),
+  occupation: z.string().optional().or(z.literal("")),
+  marital_status: z.string().optional().or(z.literal("")),
 });
 
 export type ClientFormData = z.infer<typeof clientSchema>;

@@ -1,6 +1,13 @@
-import { Mail, Phone, MapPin, Edit, Trash2 } from "lucide-react";
+import { Mail, Phone, MapPin, Edit, Trash2, FolderOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+
+interface ActiveProject {
+  id: string;
+  name: string;
+  status: string;
+}
 
 interface ClientCardProps {
   id: string;
@@ -10,6 +17,7 @@ interface ClientCardProps {
   city?: string | null;
   state?: string | null;
   projectCount?: number;
+  activeProjects?: ActiveProject[];
   onEdit: () => void;
   onDelete: () => void;
 }
@@ -21,6 +29,7 @@ export function ClientCard({
   city,
   state,
   projectCount = 0,
+  activeProjects = [],
   onEdit,
   onDelete,
 }: ClientCardProps) {
@@ -90,9 +99,26 @@ export function ClientCard({
         )}
 
         <div className="mt-4 pt-3 border-t">
-          <p className="text-sm text-muted-foreground">
-            {projectCount} projeto{projectCount !== 1 ? "s" : ""}
-          </p>
+          <div className="flex items-center gap-2 mb-2">
+            <FolderOpen className="h-4 w-4 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
+              {projectCount} projeto{projectCount !== 1 ? "s" : ""} ativo{projectCount !== 1 ? "s" : ""}
+            </p>
+          </div>
+          
+          {activeProjects.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {activeProjects.map((project) => (
+                <Badge 
+                  key={project.id} 
+                  variant="secondary" 
+                  className="text-xs"
+                >
+                  {project.name}
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
