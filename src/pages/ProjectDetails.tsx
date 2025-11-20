@@ -56,7 +56,7 @@ function ProjectDetails() {
   const [project, setProject] = useState<any>(null);
   const [projectAreas, setProjectAreas] = useState<ProjectArea[]>([]);
   const [projectTasks, setProjectTasks] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);

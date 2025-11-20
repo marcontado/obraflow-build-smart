@@ -12,7 +12,7 @@ import { toast } from "sonner";
 const Index = () => {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspace();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState({
     totalProjects: 0,
     inProgress: 0,
