@@ -39,6 +39,7 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
   const [moodboardItems, setMoodboardItems] = useState<MoodboardItem[]>([]);
   const [technicalFiles, setTechnicalFiles] = useState<TechnicalFile[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [createdProjectId, setCreatedProjectId] = useState<string | null>(projectId || null);
   const { currentWorkspace } = useWorkspace();
 
   const form = useForm<ProjectWizardData>({
@@ -83,8 +84,9 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
       });
       setMoodboardItems(initialData.moodboard || []);
       setTechnicalFiles(initialData.technical_files || []);
+      setCreatedProjectId(projectId || null);
     }
-  }, [initialData, form]);
+  }, [initialData, projectId, form]);
 
   const progress = (currentStep / STEPS.length) * 100;
 
@@ -101,6 +103,46 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
       if (!isValid) return;
     }
 
+    // Se está no Step 1 e ainda não criou o projeto, criar agora
+    if (currentStep === 1 && !createdProjectId && !projectId) {
+      try {
+        setIsSubmitting(true);
+        const formData = form.getValues();
+        
+        if (!currentWorkspace) {
+          toast.error("Workspace não selecionado");
+          return;
+        }
+
+        const projectData = {
+          name: formData.name,
+          description: formData.description,
+          client_id: formData.client_id || null,
+          status: formData.status,
+          start_date: formData.start_date || null,
+          end_date: formData.end_date || null,
+          budget: formData.budget ? parseFloat(formData.budget) : null,
+          progress: formData.progress || 0,
+          type: formData.type || null,
+          location: formData.location || null,
+          workspace_id: currentWorkspace.id,
+        };
+
+        const { data, error } = await projectsService.create(projectData, currentWorkspace.id);
+        
+        if (error) throw error;
+        
+        setCreatedProjectId(data.id);
+        toast.success("Projeto criado! Continue preenchendo os detalhes.");
+      } catch (error: any) {
+        toast.error("Erro ao criar projeto");
+        console.error(error);
+        return;
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+
     if (currentStep < STEPS.length) {
       setCurrentStep(currentStep + 1);
     }
@@ -113,55 +155,59 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
   };
 
   const handleClose = () => {
-    setCurrentStep(1);
     form.reset();
+    setCurrentStep(1);
     setMoodboardItems([]);
     setTechnicalFiles([]);
+    setCreatedProjectId(null);
     onClose();
   };
 
   const onSubmit = async (data: ProjectWizardData) => {
     if (!currentWorkspace) {
-      toast.error("Nenhum workspace selecionado");
+      toast.error("Workspace não selecionado");
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      if (projectId) {
-        await projectsService.updateWithWizardData(
-          projectId,
-          data,
-          moodboardItems,
-          technicalFiles,
-          currentWorkspace.id
-        );
-        toast.success("Projeto atualizado com sucesso!");
-      } else {
-        await projectsService.createWithWizardData(
-          data,
-          moodboardItems,
-          technicalFiles,
-          currentWorkspace.id
-        );
-        toast.success("Projeto criado com sucesso!");
+      const finalProjectId = createdProjectId || projectId;
+      
+      if (!finalProjectId) {
+        toast.error("Erro: ID do projeto não encontrado");
+        return;
       }
 
+      // Atualizar projeto com briefing, moodboard e technical_files
+      const updateData = {
+        briefing: data.briefing,
+        moodboard: moodboardItems as any,
+        technical_files: technicalFiles as any,
+      };
+
+      const { error } = await projectsService.update(
+        finalProjectId,
+        updateData,
+        currentWorkspace.id
+      );
+      
+      if (error) throw error;
+      
+      toast.success(projectId ? "Projeto atualizado!" : "Projeto criado com sucesso!");
       handleClose();
       onSuccess();
     } catch (error: any) {
-      console.error("Error saving project:", error);
       toast.error(error.message || "Erro ao salvar projeto");
+      console.error(error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Gerar um ID temporário para upload de arquivos antes de criar o projeto
-  const tempProjectId = projectId || `temp-${Date.now()}`;
-
   const renderStep = () => {
+    const activeProjectId = createdProjectId || projectId || 'temp';
+    
     switch (currentStep) {
       case 1:
         return <ProjectBasicInfoStep form={form} />;
@@ -170,7 +216,7 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
       case 3:
         return (
           <ProjectMoodboardStep
-            projectId={tempProjectId}
+            projectId={activeProjectId}
             items={moodboardItems}
             onItemsChange={setMoodboardItems}
           />
@@ -178,7 +224,7 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
       case 4:
         return (
           <ProjectTechnicalFilesStep
-            projectId={tempProjectId}
+            projectId={activeProjectId}
             files={technicalFiles}
             onFilesChange={setTechnicalFiles}
           />
