@@ -105,60 +105,66 @@ serve(async (req) => {
   const url = new URL(req.url);
   const path = url.pathname.replace('/admin-auth', '');
 
+  // Ler body uma única vez se for POST
+  let body: any = {};
+  if (req.method === 'POST') {
+    try {
+      body = await req.json();
+    } catch (e) {
+      // Body vazio ou inválido
+    }
+  }
+
   try {
-    // VERIFY TOKEN (quando não há path específico, verificar body.action)
-    if ((path === '' || path === '/') && req.method === 'POST') {
-      const body = await req.json();
+    // VERIFY TOKEN (via body.action)
+    if (body.action === 'verify') {
+      const authHeader = req.headers.get('authorization');
       
-      if (body.action === 'verify') {
-        const authHeader = req.headers.get('authorization');
-        
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-          return new Response(
-            JSON.stringify({ error: 'Token não fornecido' }),
-            { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
-
-        const token = authHeader.substring(7);
-        const tokenData = verifyAdminToken(token);
-
-        if (!tokenData) {
-          return new Response(
-            JSON.stringify({ error: 'Token inválido ou expirado' }),
-            { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
-
-        // Buscar informações completas do admin
-        const { data: profile } = await supabaseClient
-          .from('profiles')
-          .select('full_name, avatar_url, email')
-          .eq('id', tokenData.userId)
-          .single();
-
-        const { data: adminData } = await supabaseClient
-          .from('platform_admins')
-          .select('role')
-          .eq('user_id', tokenData.userId)
-          .single();
-
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return new Response(
-          JSON.stringify({
-            userId: tokenData.userId,
-            email: profile?.email || tokenData.email,
-            fullName: profile?.full_name || null,
-            avatarUrl: profile?.avatar_url || null,
-            role: adminData?.role || 'analyst',
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ error: 'Token não fornecido' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+
+      const token = authHeader.substring(7);
+      const tokenData = verifyAdminToken(token);
+
+      if (!tokenData) {
+        return new Response(
+          JSON.stringify({ error: 'Token inválido ou expirado' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Buscar informações completas do admin
+      const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('full_name, avatar_url, email')
+        .eq('id', tokenData.userId)
+        .single();
+
+      const { data: adminData } = await supabaseClient
+        .from('platform_admins')
+        .select('role')
+        .eq('user_id', tokenData.userId)
+        .single();
+
+      return new Response(
+        JSON.stringify({
+          userId: tokenData.userId,
+          email: profile?.email || tokenData.email,
+          fullName: profile?.full_name || null,
+          avatarUrl: profile?.avatar_url || null,
+          role: adminData?.role || 'analyst',
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // LOGIN
     if (path === '/login' && req.method === 'POST') {
-      const { email, password }: LoginRequest = await req.json();
+      const { email, password }: LoginRequest = body;
 
       // Rate limiting
       if (!checkRateLimit(email)) {
@@ -230,7 +236,7 @@ serve(async (req) => {
     // RESET PASSWORD
     if (path === '/reset-password' && req.method === 'POST') {
       try {
-        const { email }: ResetPasswordRequest = await req.json();
+        const { email }: ResetPasswordRequest = body;
 
         if (!email || typeof email !== 'string') {
           return new Response(
@@ -343,7 +349,7 @@ serve(async (req) => {
   // Rota: /verify-reset (POST) - Verifica token e atualiza senha
   if (path === '/verify-reset' && req.method === 'POST') {
     try {
-      const { token, newPassword }: VerifyResetRequest = await req.json();
+      const { token, newPassword }: VerifyResetRequest = body;
 
       if (!token || !newPassword) {
         return new Response(
@@ -413,7 +419,7 @@ serve(async (req) => {
 
   // CHANGE PASSWORD
     if (path === '/change-password' && req.method === 'POST') {
-      const { adminToken, oldPassword, newPassword }: ChangePasswordRequest = await req.json();
+      const { adminToken, oldPassword, newPassword }: ChangePasswordRequest = body;
 
       // Verificar token
       const tokenData = verifyAdminToken(adminToken);

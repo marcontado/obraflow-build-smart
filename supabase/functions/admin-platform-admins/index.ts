@@ -69,29 +69,39 @@ Deno.serve(async (req) => {
 
     // LIST: Listar todos os admins
     if (action === 'list') {
-      const { data: admins, error } = await supabaseClient
+      // Primeiro buscar os admins
+      const { data: admins, error: adminsError } = await supabaseClient
         .from('platform_admins')
-        .select(`
-          *,
-          profile:profiles!platform_admins_user_id_fkey (
-            full_name,
-            email,
-            avatar_url
-          ),
-          granter:profiles!platform_admins_granted_by_fkey (
-            full_name,
-            email
-          )
-        `)
+        .select('*')
         .order('granted_at', { ascending: false });
 
-      if (error) {
-        console.error('Erro ao buscar admins:', error);
-        throw error;
+      if (adminsError) {
+        console.error('Erro ao buscar admins:', adminsError);
+        throw adminsError;
       }
 
+      // Buscar profiles para todos os user_ids
+      const userIds = admins?.map(a => a.user_id) || [];
+      const granterIds = admins?.map(a => a.granted_by).filter(Boolean) || [];
+      const allIds = [...new Set([...userIds, ...granterIds])];
+
+      const { data: profiles } = await supabaseClient
+        .from('profiles')
+        .select('id, full_name, email, avatar_url')
+        .in('id', allIds);
+
+      // Criar mapa de profiles
+      const profilesMap = new Map(profiles?.map(p => [p.id, p]) || []);
+
+      // Enriquecer admins com dados dos profiles
+      const enrichedAdmins = admins?.map(admin => ({
+        ...admin,
+        profile: profilesMap.get(admin.user_id) || null,
+        granter: admin.granted_by ? profilesMap.get(admin.granted_by) : null,
+      })) || [];
+
       return new Response(
-        JSON.stringify({ admins: admins || [] }),
+        JSON.stringify({ admins: enrichedAdmins }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
