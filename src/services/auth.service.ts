@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "./supabase.server";
 
 export const authService = {
   async signUp(email: string, password: string) {

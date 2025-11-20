@@ -1,143 +1,50 @@
-import { Link, Navigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
+import { LandingFooter } from "@/components/landing/LandingFooter";
+import { GlassSidebar } from "@/components/landing/GlassSidebar";
+import { StorySection } from "@/components/landing/StorySection";
 import { FeatureCard } from "@/components/landing/FeatureCard";
 import { TestimonialCard } from "@/components/landing/TestimonialCard";
-import { LandingFooter } from "@/components/landing/LandingFooter";
 import { PlanCardPublic } from "@/components/landing/PlanCardPublic";
-import { Button } from "@/components/ui/button";
-import { Columns3, DollarSign, BarChart3, Sparkles, Users, Calendar, ArrowRight } from "lucide-react";
-import heroImage from "@/assets/hero-workspace.jpg";
-import { useAuth } from "@/contexts/AuthContext";
+import { FAQSection } from "@/components/landing/FAQSection";
+import { ArrowRight, Sparkles, Calendar, Users, BarChart3, FileText, Palette, Ruler } from "lucide-react";
+import architectWoman from "@/assets/architect-woman.jpg";
+import designerMan from "@/assets/designer-man.jpg";
+import workspaceModern from "@/assets/workspace-modern.jpg";
+import teamCollaboration from "@/assets/team-collaboration.jpg";
+import { useEffect, useState } from "react";
 
 export default function Landing() {
   const [showWhatsappLabel, setShowWhatsappLabel] = useState(true);
   useEffect(() => {
     const timer = setTimeout(() => setShowWhatsappLabel(false), 10000);
     // Scroll suave se houver intenção salva
-    const scrollToSection = localStorage.getItem("scrollToSection");
-    if (scrollToSection) {
-      setTimeout(() => {
+    const tryScroll = () => {
+      const scrollToSection = localStorage.getItem("scrollToSection");
+      if (scrollToSection) {
         const section = document.getElementById(scrollToSection);
         if (section) {
-          section.scrollIntoView({ behavior: "smooth" });
+          section.scrollIntoView({ behavior: "smooth", block: "start" });
+          setTimeout(() => {
+            // Ajuste de offset para header fixo (ex: 64px)
+            window.scrollBy({ top: -64, left: 0, behavior: "smooth" });
+          }, 400); // tempo para scrollIntoView terminar
+          localStorage.removeItem("scrollToSection");
+        } else {
+          setTimeout(tryScroll, 150);
         }
-        localStorage.removeItem("scrollToSection");
-      }, 400); // pequeno delay para garantir renderização
-    }
+      }
+    };
+    tryScroll();
     return () => clearTimeout(timer);
   }, []);
-  const { user } = useAuth();
-  
-  // Redirect authenticated users to the app
-  if (user) return <Navigate to="/app" replace />;
-  const features = [
-    {
-      icon: Columns3,
-      title: "Kanban Visual",
-      description: "Organize tarefas com quadros visuais intuitivos e arraste para reorganizar",
-    },
-    {
-      icon: DollarSign,
-      title: "Orçamento Inteligente",
-      description: "Controle custos e compare orçado vs. realizado em tempo real",
-    },
-    {
-      icon: BarChart3,
-      title: "Relatórios Avançados",
-      description: "Gere relatórios completos em segundos com gráficos e análises",
-    },
-    {
-      icon: Sparkles,
-      title: "Assistente IA",
-      description: "Deixe a IA te ajudar a otimizar processos e tomar decisões",
-    },
-    {
-      icon: Users,
-      title: "Portal do Cliente",
-      description: "Clientes acompanham seus projetos em tempo real",
-    },
-    {
-      icon: Calendar,
-      title: "Gantt Automático",
-      description: "Visualize cronogramas e prazos facilmente com gráficos de Gantt",
-    },
-  ];
-
-  const testimonials = [
-    {
-      name: "Maria Silva",
-      role: "Designer de Interiores",
-      company: "Silva Design",
-      testimonial: "Com Archestra, consegui organizar 5 obras simultâneas sem perder o controle. Essencial!",
-      initials: "MS",
-    },
-    {
-      name: "João Costa",
-      role: "Arquiteto",
-      company: "Costa Arquitetura",
-      testimonial: "A melhor ferramenta para gestão de projetos. Economizo horas toda semana!",
-      initials: "JC",
-    },
-    {
-      name: "Ana Paula",
-      role: "Designer",
-      company: "AP Studio",
-      testimonial: "Meus clientes adoram acompanhar o progresso. Profissionalismo e transparência!",
-      initials: "AP",
-    },
-  ];
-
-  const plans = [
-    {
-      name: "Atelier",
-      planId: "atelier",
-      price: 0,
-      description: "Para começar sua jornada",
-      features: [
-        "1 workspace",
-        "Até 3 membros e 5 clientes",
-        "2 projetos ativos",
-        "Kanban básico",
-        "Relatórios simples",
-        "Uploads até 2 GB",
-      ],
-    },
-    {
-      name: "Studio",
-      price: 149,
-      description: "Para designers e pequenos escritórios",
-      planId: "studio",
-      features: [
-        "2 workspaces com até 10 membros",
-        "Projetos e clientes ilimitados",
-        "Dashboard completo com métricas",
-        "Cronograma Gantt e orçamentos",
-        "Relatórios automáticos",
-        "Armazenamento de 10 GB",
-      ],
-    },
-    {
-      name: "Domus",
-      price: 399,
-      description: "Para escritórios estabelecidos",
-      planId: "domus",
-      features: [
-        "Workspaces e membros ilimitados",
-        "Projetos e clientes ilimitados",
-        "IA Assist para cronogramas",
-        "Portal do Cliente",
-        "Relatórios customizados",
-        "100 GB de armazenamento",
-        "Suporte prioritário",
-      ],
-      highlighted: true,
-    },
-  ];
-
   return (
   <div className="min-h-screen bg-gradient-to-b from-background via-background to-card relative">
-      <LandingNavbar />
+  <LandingNavbar />
+  {/* âncora invisível para scroll do botão Início */}
+  <div id="hero" style={{ position: "relative", top: "-96px", height: 0 }} aria-hidden="true" />
+  <GlassSidebar />
 
       {/* Botão flutuante WhatsApp com label temporária */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col items-center">
@@ -160,110 +67,218 @@ export default function Landing() {
         {/* Subtle gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
         
-        <div className="container mx-auto relative">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div className="animate-fade-in">
-              <div className="inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-accent/10 to-primary/10 border border-accent/20 text-accent rounded-full text-sm font-medium mb-8 shadow-soft">
-                <span className="w-2 h-2 bg-accent rounded-full animate-pulse" />
-                30 dias grátis • Sem cartão de crédito
-              </div>
-              <h1 className="font-heading font-bold mb-8 text-foreground leading-tight">
-                Seu atelier digital para gestão de obras
-              </h1>
-              <p className="text-xl text-muted-foreground mb-10 leading-relaxed max-w-lg">
-                Organize projetos, gerencie orçamentos e acompanhe obras em um único lugar — com a elegância que seu trabalho merece.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-5">
-                <Button size="lg" asChild className="shadow-elegant">
-                  <Link to="/auth?tab=signup">
-                    Começar Grátis <ArrowRight className="ml-2 w-5 h-5" />
-                  </Link>
-                </Button>
-                <Button size="lg" variant="outline" asChild>
-                  <Link to="/plans">Ver Planos</Link>
-                </Button>
-              </div>
+  <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-5xl mx-auto text-center space-y-8 animate-fade-in">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 dark:bg-card/60 backdrop-blur-glass border border-white/20 shadow-glass">
+              <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+              <span className="text-sm font-medium text-foreground">Gestão Arquitetônica Inteligente</span>
             </div>
-            <div className="relative animate-fade-in-scale">
-              <div className="absolute -inset-4 bg-gradient-to-br from-primary/20 to-accent/20 rounded-3xl blur-2xl opacity-30" />
-              <img
-                src={heroImage}
-                alt="Workspace de design"
-                className="relative rounded-2xl shadow-elegant hover:scale-[1.02] transition-transform duration-500"
-              />
+
+            {/* Main heading */}
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-heading font-bold leading-tight">
+              <span className="text-foreground">
+                Projete o Futuro
+              </span>
+              <br />
+              <span className="text-primary animate-shimmer">
+                da sua Arquitetura
+              </span>
+            </h1>
+
+            {/* Description */}
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              A plataforma completa que transforma a gestão de projetos arquitetônicos em uma experiência fluida, visual e colaborativa
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+              <Link to="/auth">
+                <Button size="lg" className="group relative overflow-hidden bg-primary hover:bg-primary/90 hover:shadow-glow transition-all duration-500 text-lg px-8 py-6">
+                  <span className="relative z-10 flex items-center gap-2">
+                    Começar Gratuitamente
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                </Button>
+              </Link>
+              <Link to="/plans">
+                <Button size="lg" variant="outline" className="text-lg px-8 py-6 bg-white/50 dark:bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/50 hover:bg-primary/10 transition-all duration-500">
+                  Ver Planos
+                </Button>
+              </Link>
+            </div>
+
+            {/* Architectural accent lines */}
+            <div className="flex justify-center gap-4 pt-8">
+              <div className="h-1 w-24 bg-primary/50 rounded-full animate-pulse" />
+              <div className="h-1 w-16 bg-accent/50 rounded-full animate-pulse delay-75" />
+              <div className="h-1 w-20 bg-arch-gold/50 rounded-full animate-pulse delay-150" />
             </div>
           </div>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+          <div className="w-6 h-10 border-2 border-primary/30 rounded-full flex justify-center p-2">
+            <div className="w-1.5 h-3 bg-primary rounded-full animate-slide-down" />
+          </div>
+        </div>
+      </section>
+
+      {/* Story Sections */}
+      <section id="recursos" className="py-20 bg-primary/5">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-4xl md:text-5xl font-heading font-bold text-foreground">
+              Como Transformamos Seu Trabalho
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Uma jornada visual através das funcionalidades que fazem a diferença
+            </p>
+          </div>
+
+          <StorySection
+            step="1"
+            title="Visualize Cada Detalhe"
+            description="Gantt interativo que transforma cronogramas complexos em visualizações claras e intuitivas. Acompanhe cada fase do projeto com precisão arquitetônica, ajuste prazos com facilidade e identifique dependências instantaneamente."
+            image={workspaceModern}
+            imageAlt="Workspace moderno de arquitetura com múltiplas telas mostrando projetos"
+          />
+
+          <StorySection
+            step="2"
+            title="Colabore em Tempo Real"
+            description="Sua equipe, seus clientes e fornecedores conectados em uma única plataforma. Compartilhe progresso, receba feedback instantâneo e mantenha todos alinhados com o conceito do projeto, do primeiro esboço à entrega final."
+            image={teamCollaboration}
+            imageAlt="Equipe de arquitetos colaborando em projeto"
+            reverse
+          />
+
+          <StorySection
+            step="3"
+            title="Controle Financeiro Preciso"
+            description="Orçamentos detalhados por área do projeto, acompanhamento de gastos em tempo real e relatórios visuais que simplificam decisões complexas. Mantenha a rentabilidade sem perder a criatividade."
+            image={architectWoman}
+            imageAlt="Arquiteta trabalhando com plantas e orçamentos"
+          />
+
+          <StorySection
+            step="4"
+            title="Gestão Profissional"
+            description="De briefings a entregas finais, organize cada etapa com elegância. Cadastre clientes, gerencie múltiplos projetos simultaneamente e acesse relatórios detalhados que impressionam e informam."
+            image={designerMan}
+            imageAlt="Designer de interiores apresentando projeto para cliente"
+            reverse
+          />
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="recursos" className="py-24 px-4 bg-gradient-to-b from-card to-background">
-        <div className="container mx-auto">
-          <div className="text-center mb-20 animate-fade-in">
-            <h2 className="font-heading font-bold mb-6 text-foreground">Recursos Poderosos</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Tudo que você precisa para gerenciar suas obras com eficiência e elegância
-            </p>
+      <section className="py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-accent/5" />
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-16 space-y-4">
+            {/* âncora invisível para scroll com offset */}
+            <div id="ferramentas" style={{ position: "relative", top: "-96px", height: 0 }} aria-hidden="true" />
+            <div className="inline-block px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4">
+              Recursos Completos
+            </div>
+            <h2 className="text-4xl md:text-5xl font-heading font-bold text-foreground">
+              Ferramentas para Arquitetos Modernos
+            </h2>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <div 
-                key={index}
-                className="animate-fade-in-scale"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <FeatureCard {...feature} />
-              </div>
-            ))}
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+            <FeatureCard
+              icon={Calendar}
+              title="Gantt Interativo"
+              description="Cronogramas visuais que se adaptam ao seu fluxo de trabalho. Arraste, ajuste e visualize dependências com facilidade."
+            />
+            <FeatureCard
+              icon={Users}
+              title="Gestão de Equipes"
+              description="Atribua tarefas, defina permissões e acompanhe o progresso de cada membro em tempo real."
+            />
+            <FeatureCard
+              icon={BarChart3}
+              title="Relatórios Visuais"
+              description="Dashboards elegantes que transformam dados em insights acionáveis para seus projetos."
+            />
+            <FeatureCard
+              icon={FileText}
+              title="Documentação Organizada"
+              description="Centralize briefings, contratos e documentos técnicos em um único lugar acessível."
+            />
+            <FeatureCard
+              icon={Palette}
+              title="Interface Refinada"
+              description="Design pensado para arquitetos. Interface limpa, moderna e intuitiva como seus projetos."
+            />
+            <FeatureCard
+              icon={Ruler}
+              title="Controle de Orçamento"
+              description="Gerencie custos por área, acompanhe despesas e mantenha a rentabilidade dos projetos."
+            />
           </div>
         </div>
       </section>
 
-      {/* Benefits Section */}
-      <section id="beneficios" className="py-24 px-4">
-        <div className="container mx-auto">
-          <div className="text-center mb-20 animate-fade-in">
-            <h2 className="font-heading font-bold mb-6 text-foreground">Resultados Reais</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Veja o impacto na sua produtividade e na satisfação dos seus clientes
+      {/* Plans Section */}
+      <section id="planos" className="py-20 bg-primary/5">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-4xl md:text-5xl font-heading font-bold text-foreground">
+              Planos para Cada Ateliê
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Do freelancer ao grande escritório, temos o plano perfeito para você
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="group text-center p-10 rounded-2xl bg-gradient-to-br from-card to-background border border-border/50 shadow-md hover:shadow-elegant transition-all duration-500 hover:-translate-y-2">
-              <div className="text-6xl font-heading font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent mb-4 group-hover:scale-110 transition-transform duration-300">10h</div>
-              <p className="text-muted-foreground leading-relaxed">Economize até 10h/semana em gestão</p>
-            </div>
-            <div className="group text-center p-10 rounded-2xl bg-gradient-to-br from-card to-background border border-border/50 shadow-md hover:shadow-elegant transition-all duration-500 hover:-translate-y-2">
-              <div className="text-6xl font-heading font-bold bg-gradient-to-br from-accent to-accent/70 bg-clip-text text-transparent mb-4 group-hover:scale-110 transition-transform duration-300">40%</div>
-              <p className="text-muted-foreground leading-relaxed">Reduza atrasos em até 40%</p>
-            </div>
-            <div className="group text-center p-10 rounded-2xl bg-gradient-to-br from-card to-background border border-border/50 shadow-md hover:shadow-elegant transition-all duration-500 hover:-translate-y-2">
-              <div className="text-6xl font-heading font-bold bg-gradient-to-br from-secondary to-secondary/70 bg-clip-text text-transparent mb-4 group-hover:scale-110 transition-transform duration-300">3x</div>
-              <p className="text-muted-foreground leading-relaxed">Clientes 3x mais satisfeitos</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Testimonials Section */}
-      <section className="py-24 px-4 bg-gradient-to-b from-background to-card">
-        <div className="container mx-auto">
-          <div className="text-center mb-20 animate-fade-in">
-            <h2 className="font-heading font-bold mb-6 text-foreground">O que dizem nossos clientes</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Designers e arquitetos confiam no Archestra para transformar sua gestão
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div 
-                key={index}
-                className="animate-fade-in-scale"
-                style={{ animationDelay: `${index * 0.15}s` }}
-              >
-                <TestimonialCard {...testimonial} />
-              </div>
-            ))}
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <PlanCardPublic
+              name="Atelier"
+              price={0}
+              description="Perfeito para arquitetos iniciantes"
+              features={[
+                "1 projeto simultâneo",
+                "3 membros da equipe",
+                "Gantt básico",
+                "5GB de armazenamento"
+              ]}
+              planId="atelier"
+              highlighted={false}
+            />
+            <PlanCardPublic
+              name="Studio"
+              price={97}
+              description="Para escritórios em crescimento"
+              features={[
+                "10 projetos simultâneos",
+                "10 membros da equipe",
+                "Gantt avançado com dependências",
+                "50GB de armazenamento",
+                "Relatórios personalizados"
+              ]}
+              planId="studio"
+              highlighted={true}
+            />
+            <PlanCardPublic
+              name="Domus"
+              price={297}
+              description="Solução empresarial completa"
+              features={[
+                "Projetos ilimitados",
+                "Membros ilimitados",
+                "Todas as funcionalidades",
+                "200GB de armazenamento",
+                "Suporte prioritário",
+                "API de integração"
+              ]}
+              planId="domus"
+              highlighted={false}
+            />
           </div>
         </div>
       </section>
@@ -277,43 +292,81 @@ export default function Landing() {
               Comece grátis e evolua conforme sua necessidade — sem compromisso
             </p>
           </div>
+
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {plans.map((plan, index) => (
-              <div 
-                key={index}
-                className="animate-fade-in-scale"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <PlanCardPublic {...plan} />
-              </div>
-            ))}
-          </div>
-          <div className="text-center mt-16 animate-fade-in">
-            <Button size="lg" variant="outline" asChild>
-              <Link to="/plans">Ver Todos os Planos e Detalhes</Link>
-            </Button>
+            <TestimonialCard
+              testimonial="Revolucionou a forma como gerencio meus projetos. O Gantt interativo é simplesmente perfeito."
+              name="Marina Silva"
+              role="Arquiteta"
+              company="Studio MS"
+              initials="MS"
+            />
+            <TestimonialCard
+              testimonial="A colaboração com minha equipe ficou muito mais fluida. Todos sabem exatamente o que fazer."
+              name="Carlos Mendes"
+              role="Diretor"
+              company="Mendes Arquitetura"
+              initials="CM"
+            />
+            <TestimonialCard
+              testimonial="Os relatórios financeiros me ajudam a tomar decisões mais assertivas e manter os projetos rentáveis."
+              name="Ana Paula Costa"
+              role="Arquiteta e Urbanista"
+              company="APC Design"
+              initials="AC"
+            />
           </div>
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <FAQSection />
+
       {/* Final CTA Section */}
-      <section className="relative py-32 px-4 overflow-hidden">
-        {/* Animated gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-accent to-secondary opacity-95" />
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
+      <section id="contato" className="py-32 relative overflow-hidden">
+        <div className="absolute inset-0 bg-primary/10" />
         
-        <div className="container mx-auto text-center relative z-10 animate-fade-in">
-          <h2 className="font-heading font-bold mb-6 text-white max-w-3xl mx-auto leading-tight">
-            Pronto para transformar sua gestão de obras?
-          </h2>
-          <p className="text-xl text-white/90 mb-12 max-w-2xl mx-auto leading-relaxed">
-            Junte-se a centenas de designers e arquitetos que confiam no Archestra — Não é necessário cartão de crédito
-          </p>
-          <Button size="lg" variant="secondary" asChild className="shadow-elegant scale-110">
-            <Link to="/auth?tab=signup">
-              Começar Grátis Agora <ArrowRight className="ml-2 w-5 h-5" />
-            </Link>
-          </Button>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <h2 className="text-4xl md:text-6xl font-heading font-bold text-foreground leading-tight">
+              Pronto para Transformar
+              <br />
+              <span className="text-primary">
+                Sua Gestão Arquitetônica?
+              </span>
+            </h2>
+            
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Junte-se a centenas de arquitetos que já elevaram sua produtividade
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+              <Link to="/auth">
+                <Button size="lg" className="group bg-primary hover:bg-primary/90 hover:shadow-glow transition-all duration-500 text-lg px-8 py-6">
+                  <span className="flex items-center gap-2">
+                    Criar Conta Gratuita
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                </Button>
+              </Link>
+            </div>
+
+            {/* Trust indicators */}
+            <div className="flex flex-wrap justify-center gap-8 pt-8 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                Sem cartão de crédito
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
+                Setup em 2 minutos
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-arch-gold rounded-full animate-pulse" />
+                Suporte em português
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -27,39 +27,27 @@ export function LandingNavbar() {
           </div>
         </Link>
 
-        <div className="hidden md:flex items-center gap-10">
-          <a
-            href="#recursos"
-            className="text-sm font-medium text-foreground hover:text-primary transition-colors duration-300 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
-            onClick={e => handleSmoothOrRedirect(e, "recursos")}
-          >
-            Recursos
-          </a>
-          <a
-            href="#beneficios"
-            className="text-sm font-medium text-foreground hover:text-primary transition-colors duration-300 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
-            onClick={e => handleSmoothOrRedirect(e, "beneficios")}
-          >
-            Benefícios
-          </a>
-          <a
-            href="#planos"
-            className="text-sm font-medium text-foreground hover:text-primary transition-colors duration-300 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
-            onClick={e => handleSmoothOrRedirect(e, "planos")}
-          >
-            Planos
-          </a>
-        </div>
+          <div className="hidden md:flex items-center gap-10">
+            <a href="#recursos" className="text-sm font-medium text-foreground hover:text-primary transition-colors duration-300 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full">
+              Recursos
+            </a>
+            <a href="#ferramentas" className="text-sm font-medium text-foreground hover:text-primary transition-colors duration-300 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full">
+              Benefícios
+            </a>
+            <a href="#planos" className="text-sm font-medium text-foreground hover:text-primary transition-colors duration-300 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full">
+              Planos
+            </a>
+          </div>
 
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" asChild>
-            <Link to="/auth">Entrar</Link>
-          </Button>
-          <Button asChild>
-            <Link to="/auth?tab=signup">Começar Grátis</Link>
-          </Button>
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" asChild className="backdrop-blur-sm">
+              <Link to="/auth">Entrar</Link>
+            </Button>
+            <Button asChild className="shadow-glow">
+              <Link to="/auth?tab=signup">Começar Grátis</Link>
+            </Button>
+          </div>
         </div>
-      </div>
     </nav>
   );
 }

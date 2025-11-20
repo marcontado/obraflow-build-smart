@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
@@ -24,6 +24,12 @@ import autoTable from "jspdf-autotable";
 
 // import { withWorkspaceGuard } from "@/hoc/withWorkspaceGuard";
 
+import { withWorkspaceGuard } from "@/hoc/withWorkspaceGuard";
+import { ChangeEvent } from "react";
+import { BrainCircuit } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+
 function Reports() {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspace();
@@ -41,25 +47,36 @@ function Reports() {
   });
   const [projectsByStatus, setProjectsByStatus] = useState<any[]>([]);
   const [tasksByStatus, setTasksByStatus] = useState<any[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [iaModalOpen, setIaModalOpen] = useState(false);
+  const [modalProjectId, setModalProjectId] = useState<string>("");
+  const [modalLoading, setModalLoading] = useState(false);
+  const modalFileInputRef = useRef<HTMLInputElement>(null);
+  const modalExpectedFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (currentWorkspace) {
+      if (currentWorkspace) {
       fetchProjectsList();
+    }
     }
   }, [currentWorkspace]);
 
   useEffect(() => {
-    if ((projects.length > 0 || selectedProjectId === "all") && currentWorkspace) {
+    if (((projects.length > 0 || selectedProjectId === "all") && currentWorkspace) && currentWorkspace) {
       fetchReportData(selectedProjectId);
     }
-  }, [selectedProjectId, currentWorkspace]);
+  }, [selectedProjectId, currentWorkspace, currentWorkspace]);
 
   const fetchProjectsList = async () => {
+    if (!currentWorkspace) return;
+
     if (!currentWorkspace) return;
 
     const { data } = await supabase
       .from("projects")
       .select("id, name")
+      .eq("workspace_id", currentWorkspace.id)
       .eq("workspace_id", currentWorkspace.id)
       .order("name");
     
@@ -74,9 +91,11 @@ function Reports() {
   const fetchReportData = async (projectId: string) => {
     if (!currentWorkspace) return;
 
+    if (!currentWorkspace) return;
+
     setLoading(true);
     try {
-      // Buscar projetos (filtrado ou todos) - SEMPRE filtrar por workspace
+      // Buscar projetos (filtrado ou todos) - SEMPRE filtrar por workspace - SEMPRE filtrar por workspace
       let projectsQuery = supabase
         .from("projects")
         .select("id, status, budget, spent")
@@ -86,10 +105,13 @@ function Reports() {
         projectsQuery = projectsQuery.eq("id", projectId);
       }
 
-      // Buscar tarefas (filtrado ou todas) - SEMPRE filtrar por workspace
+      // Buscar tarefas (filtrado ou todas) - SEMPRE filtrar por workspace - SEMPRE filtrar por workspace
       let tasksQuery = supabase
+        
         .from("tasks")
+        
         .select("id, status, project_id")
+        .eq("workspace_id", currentWorkspace.id)
         .eq("workspace_id", currentWorkspace.id);
       
       if (projectId !== "all") {
@@ -97,8 +119,9 @@ function Reports() {
       }
 
       // Buscar clientes - SEMPRE filtrar por workspace
+      // Buscar clientes - SEMPRE filtrar por workspace
       const clientsQuery = projectId === "all" 
-        ? supabase.from("clients").select("id").eq("workspace_id", currentWorkspace.id)
+        ? supabase.from("clients").select("id").eq("workspace_id", currentWorkspace.id).eq("workspace_id", currentWorkspace.id)
         : Promise.resolve({ data: [] });
 
       const [projectsRes, clientsRes, tasksRes] = await Promise.all([
@@ -173,6 +196,11 @@ function Reports() {
       setLoading(false);
     }
   };
+
+  // Guard adicional: não renderizar se não houver workspace
+  if (!currentWorkspace) {
+    return null;
+  }
 
   // Função para exportar PDF
   const handleExportPDF = () => {
@@ -260,6 +288,86 @@ function Reports() {
   }
 
 
+  async function handlePhotoUpload(event: ChangeEvent<HTMLInputElement>): Promise<void> {
+    const file = event.target.files?.[0];
+    if (!file || !currentWorkspace) return;
+
+    // Busca o projeto selecionado
+    const selectedProject = projects.find(p => p.id === selectedProjectId);
+
+    if (!selectedProject) {
+      alert("Selecione um projeto para análise.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Monta os dados para enviar ao n8n
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("project_id", selectedProject.id);
+      formData.append("project_name", selectedProject.name);
+      // Adicione outros campos relevantes do projeto se quiser
+      // formData.append("client_name", selectedProject.client_name);
+
+      // Envia para o webhook do n8n
+      await fetch("https://seu-webhook.com/analyze-photo", {
+        method: "POST",
+        body: formData,
+      });
+
+      alert("Foto enviada para análise por IA!");
+    } catch (error) {
+      alert("Erro ao enviar a foto.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  async function handleModalPhotoUpload() {
+    const file = modalFileInputRef.current?.files?.[0];
+    const expectedFile = modalExpectedFileInputRef.current?.files?.[0];
+    const formData = new FormData();
+    formData.append("real_photo", file);
+    formData.append("expected_photo", expectedFile);
+    if (!file || !expectedFile || !modalProjectId) {
+      alert("Selecione uma obra e as fotos necessárias.");
+      return;
+    }
+    const selectedProject = projects.find(p => p.id === modalProjectId);
+    if (!selectedProject) {
+      alert("Projeto inválido.");
+      return;
+    }
+    try {
+      setModalLoading(true);
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("project_id", selectedProject.id);
+      formData.append("project_name", selectedProject.name);
+      formData.append("expected_file", expectedFile);
+
+      await fetch("https://matweber.app.n8n.cloud/webhook/a92b9f7b-7db6-4971-96b6-43e9b079fb10", {
+        method: "POST",
+        body: formData,
+      });
+
+      alert("Fotos enviadas para análise por IA!");
+      setIaModalOpen(false);
+      setModalProjectId("");
+      if (modalFileInputRef.current) modalFileInputRef.current.value = "";
+      if (modalExpectedFileInputRef.current) modalExpectedFileInputRef.current.value = "";
+    } catch (error) {
+      alert("Erro ao enviar as fotos.");
+      console.error(error);
+    } finally {
+      setModalLoading(false);
+    }
+  }
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar />
@@ -288,6 +396,23 @@ function Reports() {
               >
                 Exportar PDF
               </button>
+              {/* Botão de upload de foto com IA */}
+              <button
+                className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 px-4 py-2 text-sm font-semibold text-white shadow hover:brightness-110 transition"
+                type="button"
+                onClick={() => setIaModalOpen(true)}
+                title="Envie uma foto da obra para análise automática por IA"
+              >
+                <BrainCircuit className="w-5 h-5" />
+                Analisar foto com IA
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handlePhotoUpload}
+              />
               <div className="w-64">
                 <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
                   <SelectTrigger>
@@ -438,8 +563,90 @@ function Reports() {
           )}
         </main>
       </div>
+      <Dialog open={iaModalOpen} onOpenChange={setIaModalOpen}>
+        <DialogContent className="max-w-md w-full">
+          <DialogHeader>
+            <DialogTitle>
+              <div className="flex items-center gap-2">
+                <BrainCircuit className="h-5 w-5 text-purple-600" />
+                Análise Inteligente de Foto da Obra
+              </div>
+            </DialogTitle>
+            <p className="text-muted-foreground text-sm mt-1">
+              Envie uma foto da obra para análise automática por IA. Escolha a obra e faça upload da imagem.
+            </p>
+          </DialogHeader>
+          <form
+            onSubmit={e => {
+              e.preventDefault();
+              handleModalPhotoUpload();
+            }}
+            className="space-y-6"
+          >
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-foreground" htmlFor="obra-select">
+                Obra
+              </label>
+              <Select
+                value={modalProjectId}
+                onValueChange={setModalProjectId}
+                required
+              >
+                <SelectTrigger id="obra-select" className="w-full">
+                  <SelectValue placeholder="Selecione a obra..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {projects.map((project) => (
+                    <SelectItem key={project.id} value={project.id}>
+                      {project.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-foreground" htmlFor="real-photo">
+                Foto real da obra
+              </label>
+              <input
+                id="real-photo"
+                ref={modalFileInputRef}
+                type="file"
+                accept="image/*"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-foreground" htmlFor="expected-photo">
+                Template/Imagem esperada
+              </label>
+              <input
+                id="expected-photo"
+                ref={modalExpectedFileInputRef}
+                type="file"
+                accept="image/*"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+                required
+              />
+            </div>
+            <DialogFooter className="mt-4">
+              <Button
+                type="submit"
+                disabled={modalLoading}
+                className="gap-2 bg-purple-600 text-white hover:bg-purple-700"
+              >
+                <BrainCircuit className="h-4 w-4" />
+                {modalLoading ? "Enviando..." : "Enviar para IA"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
 export default Reports;
+
+
