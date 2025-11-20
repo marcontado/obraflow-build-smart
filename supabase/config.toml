@@ -6,3 +6,18 @@ verify_jwt = false
 [functions.stripe-webhook]
 verify_jwt = false
 
+[functions.admin-auth]
+verify_jwt = false
+
+[functions.admin-stats]
+verify_jwt = false
+
+[functions.admin-users]
+verify_jwt = false
+
+[functions.admin-organizations]
+verify_jwt = false
+
+[functions.admin-actions]
+verify_jwt = false
+

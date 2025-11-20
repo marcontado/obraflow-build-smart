@@ -5,38 +5,50 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+function verifyAdminToken(token: string): { userId: string; email: string } | null {
+  try {
+    const payload = JSON.parse(atob(token));
+    if (payload.type !== 'admin' || payload.exp < Date.now()) {
+      return null;
+    }
+    return { userId: payload.userId, email: payload.email };
+  } catch {
+    return null;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
-        },
-      }
-    );
-
-    // Cliente com service role para operações administrativas (bypassa RLS)
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
-
-    // Verificar se é admin
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+    // Validate custom admin token
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized - Missing token' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const { data: adminRole } = await supabase.rpc('get_platform_admin_role', { _user_id: user.id });
+    const token = authHeader.replace('Bearer ', '');
+    const adminData = verifyAdminToken(token);
+    
+    if (!adminData) {
+      return new Response(JSON.stringify({ error: 'Unauthorized - Invalid token' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    // Verify admin status in database
+    const { data: adminRole } = await supabase.rpc('get_platform_admin_role', { _user_id: adminData.userId });
     if (!adminRole) {
       return new Response(JSON.stringify({ error: 'Forbidden - Admin access required' }), {
         status: 403,
@@ -58,8 +70,8 @@ Deno.serve(async (req) => {
           });
         }
 
-        // Usar supabaseAdmin (service role) para bypass do RLS de forma segura
-        const { error: updateError } = await supabaseAdmin
+        // Usar service role para bypass do RLS de forma segura
+        const { error: updateError } = await supabase
           .from('workspaces')
           .update({ subscription_plan: newPlan })
           .eq('id', workspaceId);
@@ -67,7 +79,7 @@ Deno.serve(async (req) => {
         if (updateError) throw updateError;
 
         result = { success: true, message: `Plan changed to ${newPlan}` };
-        console.log(`Admin ${user.email} changed workspace ${workspaceId} plan to ${newPlan}`);
+        console.log(`Admin ${adminData.email} changed workspace ${workspaceId} plan to ${newPlan}`);
         break;
 
       default:
