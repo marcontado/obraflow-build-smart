@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -64,6 +64,47 @@ export function PartnerFormDialog({ open, onOpenChange, onSubmit, partner }: Par
   const category = watch("category");
   const status = watch("status");
 
+  // Reset form quando partner mudar
+  useEffect(() => {
+    if (open) {
+      if (partner) {
+        reset({
+          name: partner.name,
+          category: partner.category,
+          tags: partner.tags || [],
+          status: partner.status as "ativo" | "inativo",
+          phone: partner.phone || "",
+          email: partner.email || "",
+          address: partner.address || "",
+          city: partner.city || "",
+          state: partner.state || "",
+          zip_code: partner.zip_code || "",
+          rating: partner.rating || 0,
+          logo_url: partner.logo_url || "",
+          diferencial: partner.diferencial || "",
+          notes: partner.notes || "",
+        });
+      } else {
+        reset({
+          name: "",
+          category: "",
+          tags: [],
+          status: "ativo",
+          phone: "",
+          email: "",
+          address: "",
+          city: "",
+          state: "",
+          zip_code: "",
+          rating: 0,
+          logo_url: "",
+          diferencial: "",
+          notes: "",
+        });
+      }
+    }
+  }, [partner, open, reset]);
+
   const handleAddTag = () => {
     if (tagInput.trim() && tags.length < 10) {
       setValue("tags", [...tags, tagInput.trim()]);
@@ -82,7 +123,6 @@ export function PartnerFormDialog({ open, onOpenChange, onSubmit, partner }: Par
     setSubmitting(true);
     try {
       await onSubmit(data);
-      reset();
       onOpenChange(false);
     } finally {
       setSubmitting(false);
