@@ -35,6 +35,8 @@ class DocumentsService {
       .from("generated_documents")
       .insert({
         ...document,
+        client_id: document.client_id || null,
+        project_id: document.project_id || null,
         workspace_id: workspaceId,
         created_by: user?.id,
       })
