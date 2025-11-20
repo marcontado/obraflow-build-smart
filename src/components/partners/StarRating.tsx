@@ -22,13 +22,11 @@ export function StarRating({ value, onChange, readonly = false, size = "md" }: S
   };
 
   const getStarColor = (index: number) => {
+    // Estrela cheia: se o valor é maior ou igual ao número da estrela
     if (value >= index + 1) {
-      // Estrela cheia
       return value >= 4 ? "fill-yellow-400 text-yellow-400" : "fill-yellow-300 text-yellow-300";
-    } else if (value > index && value < index + 1) {
-      // Meia estrela
-      return "text-yellow-300";
     }
+    // Estrela vazia
     return "text-muted-foreground/30";
   };
 
