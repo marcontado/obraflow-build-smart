@@ -54,7 +54,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     sessionStorage.removeItem('admin_session');
     sessionStorage.removeItem('admin_session_timestamp');
     toast.info("Você saiu do painel administrativo");
-    navigate("/admin/login");
+    // Usar window.location para forçar reload completo
+    window.location.href = "/admin/login";
   };
 
   return (
