@@ -39,6 +39,11 @@ const adminNavItems = [
     href: "/admin/subscriptions", 
     icon: CreditCard 
   },
+  { 
+    title: "Administradores", 
+    href: "/admin/admins", 
+    icon: Shield 
+  },
 ];
 
 export function AdminLayout({ children }: AdminLayoutProps) {
