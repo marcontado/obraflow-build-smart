@@ -30,10 +30,11 @@ export function useAdminInfo() {
         }
 
         // Buscar informações via edge function (que tem acesso service_role)
-        const { data, error } = await supabase.functions.invoke('admin-auth/verify', {
+        const { data, error } = await supabase.functions.invoke('admin-auth', {
           headers: {
             Authorization: `Bearer ${token}`
-          }
+          },
+          body: { action: 'verify' }
         });
 
         if (error) throw error;
