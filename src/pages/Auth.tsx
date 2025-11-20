@@ -24,9 +24,21 @@ export default function Auth() {
   const selectedPlan = searchParams.get("plan");
 
   useEffect(() => {
+    // Verificar se veio de um link de reset de senha
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = hashParams.get('access_token');
+    const type = hashParams.get('type');
+    
+    if (type === 'recovery' && accessToken) {
+      // É um link de reset de senha - mostrar formulário
+      setIsPasswordRecovery(true);
+      toast.info("Digite sua nova senha abaixo");
+      return; // Não fazer mais nada
+    }
+
     const checkSession = async () => {
       const { session } = await authService.getCurrentSession();
-      if (session) {
+      if (session && !isPasswordRecovery) {
         navigate("/app");
       }
     };
@@ -37,14 +49,14 @@ export default function Auth() {
         // Usuário clicou no link de reset de senha
         setIsPasswordRecovery(true);
         toast.info("Digite sua nova senha abaixo");
-      } else if (session && event === 'SIGNED_IN') {
-        // For sign in, go to /app (ProtectedRoute will handle workspace check)
+      } else if (session && event === 'SIGNED_IN' && !isPasswordRecovery) {
+        // For sign in normal, go to /app
         navigate("/app");
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, isPasswordRecovery]);
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,21 +76,26 @@ export default function Auth() {
     try {
       const { supabase } = await import("@/integrations/supabase/client");
       
-      // Durante PASSWORD_RECOVERY, o usuário já está autenticado temporariamente
+      // Atualizar senha durante o fluxo de recovery
       const { error } = await supabase.auth.updateUser({
         password: newPassword
       });
       
       if (error) throw error;
 
-      toast.success("Senha atualizada com sucesso!");
+      toast.success("Senha atualizada com sucesso! Faça login com a nova senha.");
+      
+      // IMPORTANTE: Fazer logout para forçar novo login
+      await authService.signOut();
+      
+      // Limpar estados
       setIsPasswordRecovery(false);
       setNewPassword("");
       setConfirmPassword("");
       
-      // Redirecionar para login
+      // Redirecionar para login após 1 segundo
       setTimeout(() => {
-        navigate("/app");
+        navigate("/auth");
       }, 1000);
     } catch (error: any) {
       console.error('Erro ao atualizar senha:', error);
