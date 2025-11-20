@@ -2,7 +2,6 @@ import { Bell, Search, LogOut, User, Shield } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,11 +55,10 @@ export function Header({ title, subtitle }: HeaderProps) {
           <WorkspaceSelector />
 
           {isAdmin && (
-            <Link to="/admin">
+            <Link to="/admin/dashboard">
               <Button variant="outline" size="sm">
                 <Shield className="mr-2 h-4 w-4" />
-                Admin
-                <Badge variant="secondary" className="ml-2">PRO</Badge>
+                Admin Panel
               </Button>
             </Link>
           )}

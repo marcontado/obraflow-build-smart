@@ -24,18 +24,7 @@ export function AdminRoute({ children }: AdminRouteProps) {
   }
 
   if (!isAdmin) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-background">
-        <div className="text-center space-y-4 p-6">
-          <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
-          <h1 className="text-2xl font-bold">Acesso Negado</h1>
-          <p className="text-muted-foreground">
-            Você não tem permissão para acessar esta área.
-          </p>
-          <Navigate to="/" replace />
-        </div>
-      </div>
-    );
+    return <Navigate to="/admin/login" replace />;
   }
 
   return <>{children}</>;
