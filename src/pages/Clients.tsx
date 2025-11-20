@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Search } from "lucide-react";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -18,7 +18,8 @@ function Clients() {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspace();
   const [clients, setClients] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const isFirstMount = useRef(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -40,8 +41,11 @@ function Clients() {
   const fetchClients = async () => {
     if (!currentWorkspace) return;
     
-    try {
+    if (isFirstMount.current) {
       setLoading(true);
+    }
+    
+    try {
       const { data, error } = searchQuery
         ? await clientsService.search(searchQuery, currentWorkspace.id)
         : await clientsService.getAll(currentWorkspace.id);
@@ -71,6 +75,9 @@ function Clients() {
       console.error(error);
     } finally {
       setLoading(false);
+      if (isFirstMount.current) {
+        isFirstMount.current = false;
+      }
     }
   };
 

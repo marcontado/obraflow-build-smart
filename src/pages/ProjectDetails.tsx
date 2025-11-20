@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Edit, Trash2, Plus, Calendar } from "lucide-react";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
@@ -56,7 +56,8 @@ function ProjectDetails() {
   const [project, setProject] = useState<any>(null);
   const [projectAreas, setProjectAreas] = useState<ProjectArea[]>([]);
   const [projectTasks, setProjectTasks] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const isFirstMount = useRef(true);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -75,8 +76,11 @@ function ProjectDetails() {
   const fetchProject = async () => {
     if (!id || !currentWorkspace) return;
     
-    try {
+    if (isFirstMount.current) {
       setLoading(true);
+    }
+    
+    try {
       const { data, error } = await projectsService.getById(id, currentWorkspace.id);
       if (error) throw error;
       setProject(data);
@@ -86,6 +90,9 @@ function ProjectDetails() {
       navigate("/app/projects");
     } finally {
       setLoading(false);
+      if (isFirstMount.current) {
+        isFirstMount.current = false;
+      }
     }
   };
 
