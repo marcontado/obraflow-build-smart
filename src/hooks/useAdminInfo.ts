@@ -29,26 +29,22 @@ export function useAdminInfo() {
           return;
         }
 
-        // Buscar informações do perfil
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("full_name, avatar_url")
-          .eq("id", tokenData.userId)
-          .single();
+        // Buscar informações via edge function (que tem acesso service_role)
+        const { data, error } = await supabase.functions.invoke('admin-auth/verify', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
 
-        // Buscar role do admin
-        const { data: adminData } = await supabase
-          .from("platform_admins")
-          .select("role")
-          .eq("user_id", tokenData.userId)
-          .single();
+        if (error) throw error;
+        if (data.error) throw new Error(data.error);
 
         setAdminInfo({
-          userId: tokenData.userId,
-          email: tokenData.email,
-          fullName: profile?.full_name || null,
-          role: adminData?.role || "analyst",
-          avatarUrl: profile?.avatar_url || null,
+          userId: data.userId,
+          email: data.email,
+          fullName: data.fullName,
+          role: data.role,
+          avatarUrl: data.avatarUrl,
         });
       } catch (error) {
         console.error("Erro ao carregar informações do admin:", error);
