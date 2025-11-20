@@ -23,7 +23,8 @@ import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
 import Clients from "./pages/Clients";
 import Reports from "./pages/Reports";
-// import Suporte from "./pages/Suporte";
+import Partners from "./pages/Partners";
+import Suporte from "./pages/Suporte";
 import NotFound from "./pages/NotFound";
 import WorkspaceSelect from "./pages/WorkspaceSelect";
 import WorkspaceNew from "./pages/WorkspaceNew";
@@ -73,9 +74,10 @@ const App = () => (
                 <Route path="/app/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
                 <Route path="/app/projects/:id" element={<ProtectedRoute><ProjectDetails /></ProtectedRoute>} />
                 <Route path="/app/clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
+                <Route path="/app/partners" element={<ProtectedRoute><Partners /></ProtectedRoute>} />
                 <Route path="/app/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+                <Route path="/app/suporte" element={<ProtectedRoute><Suporte /></ProtectedRoute>} />
                 <Route path="/app/plan-upgrade" element={<ProtectedRoute><PlanUpgrade /></ProtectedRoute>} />
-                {/* <Route path="/app/suporte" element={<ProtectedRoute><Suporte /></ProtectedRoute>} /> */}
                 
                 {/* Protected Routes - Subscription */}
                 <Route path="/subscription/success" element={<ProtectedRoute><SubscriptionSuccess /></ProtectedRoute>} />

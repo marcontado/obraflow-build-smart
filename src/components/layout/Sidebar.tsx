@@ -1,5 +1,5 @@
 import { Home, FolderKanban, Users, BarChart3, LogOut, Lock, Handshake, MessageCircle } from "lucide-react";
-import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { authService } from "@/services/auth.service";
 import { toast } from "sonner";
@@ -10,18 +10,14 @@ const navigation = [
   { name: "Dashboard", href: "/app", icon: Home },
   { name: "Projetos", href: "/app/projects", icon: FolderKanban },
   { name: "Clientes", href: "/app/clients", icon: Users },
-  { name: "Relatórios", href: "/app/reports", icon: BarChart3 },
-  { name: "Fornecedores", href: "/app?tab=partners", icon: Handshake },
-  { name: "Suporte", href: "/app?tab=suporte", icon: MessageCircle },
+  { name: "Fornecedores", href: "/app/partners", icon: Handshake },
+  { name: "Relatórios", href: "/app/reports", icon: BarChart3, feature: "reports" as const },
+  { name: "Suporte", href: "/app/suporte", icon: MessageCircle },
 ];
 
 export function Sidebar() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { hasFeature } = useFeatureAccess();
-  
-  const currentTab = new URLSearchParams(location.search).get("tab");
-  const currentPath = location.pathname;
 
   const handleLogout = async () => {
     const { error } = await authService.signOut();
@@ -42,8 +38,7 @@ export function Sidebar() {
       <nav className="flex-1 space-y-1 px-3 py-4">
         <TooltipProvider>
           {navigation.map((item) => {
-            const isReportsPage = item.href === "/app/reports";
-            const isLocked = isReportsPage && !hasFeature('reports');
+            const isLocked = item.feature && !hasFeature(item.feature);
 
             if (isLocked) {
               return (
@@ -67,35 +62,19 @@ export function Sidebar() {
               );
             }
 
-            // Determina se o item está ativo considerando pathname e query params
-            const isItemActive = () => {
-              // Para Fornecedores e Suporte, verificar se a tab está ativa
-              if (item.href.includes("?tab=partners")) {
-                return currentPath === "/app" && currentTab === "partners";
-              }
-              if (item.href.includes("?tab=suporte")) {
-                return currentPath === "/app" && currentTab === "suporte";
-              }
-              // Para Dashboard, verificar se está em /app sem tabs
-              if (item.href === "/app") {
-                return currentPath === "/app" && !currentTab;
-              }
-              // Para outras rotas, verificar se o pathname começa com o href
-              return currentPath.startsWith(item.href);
-            };
-
-            const isActive = isItemActive();
-
             return (
               <NavLink
                 key={item.name}
                 to={item.href}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}
+                end={item.href === "/app"}
+                className={({ isActive }) =>
+                  cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )
+                }
               >
                 <item.icon className="h-5 w-5" />
                 {item.name}

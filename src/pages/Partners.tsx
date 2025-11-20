@@ -17,6 +17,9 @@ import type { Database } from "@/integrations/supabase/types";
 
 type Partner = Database["public"]["Tables"]["partners"]["Row"];
 
+import { Sidebar } from "@/components/layout/Sidebar";
+import { Header } from "@/components/layout/Header";
+
 export default function Partners() {
   const { currentWorkspace } = useWorkspace();
   const [partners, setPartners] = useState<Partner[]>([]);
@@ -171,12 +174,17 @@ export default function Partners() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <div className="flex h-screen overflow-hidden bg-background">
+      <Sidebar />
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Header
+          title="Parceiros e Fornecedores"
+          subtitle="Gerencie seus parceiros e fornecedores"
+        />
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="font-heading text-3xl font-bold text-primary mb-6">
-          Parceiros e Fornecedores
-        </h1>
 
         {/* Filtros e Busca */}
         <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
@@ -268,6 +276,9 @@ export default function Partners() {
         title="Excluir Parceiro"
         description={`Tem certeza que deseja excluir ${partnerToDelete?.name}? Esta ação não pode ser desfeita.`}
       />
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
