@@ -75,9 +75,18 @@ export default function AdminLogin() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Link to="/" className="absolute top-4 left-4 text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
-        ← Voltar para home
-      </Link>
+      <div className="absolute top-4 left-4 flex gap-2">
+        <Link to="/">
+          <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+            ← Voltar para home
+          </Button>
+        </Link>
+        <Link to="/auth">
+          <Button variant="outline" size="sm">
+            Login Sistema
+          </Button>
+        </Link>
+      </div>
       
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
