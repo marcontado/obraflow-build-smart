@@ -6,7 +6,8 @@ type WorkspaceScopedTable =
   | "clients" 
   | "tasks" 
   | "project_areas" 
-  | "project_activities";
+  | "project_activities"
+  | "partners";
 
 /**
  * Hook para queries automaticamente vinculadas ao workspace atual.
