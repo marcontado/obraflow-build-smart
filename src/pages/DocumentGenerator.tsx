@@ -28,7 +28,7 @@ function DocumentGeneratorPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   
   const [selectedClientId, setSelectedClientId] = useState<string>("");
-  const [selectedProjectId, setSelectedProjectId] = useState<string>("");
+  const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(undefined);
   const [documentName, setDocumentName] = useState("");
   
   const [renderedContent, setRenderedContent] = useState<TemplateContent | null>(null);
@@ -99,8 +99,8 @@ function DocumentGeneratorPage() {
       const { error } = await documentsService.create(
         {
           template_id: template.id,
-          project_id: selectedProjectId || null,
-          client_id: selectedClientId || null,
+          project_id: selectedProjectId || undefined,
+          client_id: selectedClientId || undefined,
           name: documentName,
           content_rendered: renderedContent as any,
           pdf_url: null,
@@ -262,12 +262,12 @@ function DocumentGeneratorPage() {
 
               <div>
                 <Label htmlFor="project">Projeto (Opcional)</Label>
-                <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
+                <Select value={selectedProjectId || "none"} onValueChange={(value) => setSelectedProjectId(value === "none" ? undefined : value)}>
                   <SelectTrigger id="project" className="mt-1">
                     <SelectValue placeholder="Selecione um projeto" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Nenhum</SelectItem>
+                    <SelectItem value="none">Nenhum</SelectItem>
                     {projects.map((project) => (
                       <SelectItem key={project.id} value={project.id}>
                         {project.name}
