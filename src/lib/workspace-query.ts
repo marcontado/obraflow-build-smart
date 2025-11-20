@@ -6,7 +6,9 @@ type WorkspaceScopedTable =
   | "tasks" 
   | "project_areas" 
   | "project_activities"
-  | "partners";
+  | "partners"
+  | "document_templates"
+  | "generated_documents";
 
 /**
  * Helper de segurança para criar queries com isolamento de workspace garantido.
