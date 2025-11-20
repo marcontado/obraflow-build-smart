@@ -85,16 +85,21 @@ Deno.serve(async (req) => {
     // Coletar workspaces únicos e buscar seus nomes
     const wsIds = [...new Set((members || []).map((m: any) => m.workspace_id))];
     const { data: workspaces } = wsIds.length > 0
-      ? await supabase.from('workspaces').select('id, name').in('id', wsIds)
+      ? await supabase.from('workspaces').select('id, name, subscription_plan').in('id', wsIds)
       : { data: [] };
 
     // Montar mapas
-    const wsMap = new Map((workspaces || []).map((w: any) => [w.id, w.name]));
+    const wsMap = new Map((workspaces || []).map((w: any) => [w.id, { name: w.name, subscription_plan: w.subscription_plan }]));
     const userWsMap = new Map();
     
     for (const m of members || []) {
       const arr = userWsMap.get(m.user_id) || [];
-      arr.push({ id: m.workspace_id, name: wsMap.get(m.workspace_id) });
+      const wsInfo = wsMap.get(m.workspace_id);
+      arr.push({ 
+        id: m.workspace_id, 
+        name: wsInfo?.name,
+        subscription_plan: wsInfo?.subscription_plan || 'atelier'
+      });
       userWsMap.set(m.user_id, arr);
     }
 

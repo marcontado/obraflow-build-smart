@@ -14,15 +14,28 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, RefreshCw } from "lucide-react";
+import { Search, RefreshCw, Settings } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { ChangePlanDialog } from "@/components/admin/ChangePlanDialog";
+import { PLAN_NAMES } from "@/constants/plans";
 
 export default function AdminUsers() {
   const { toast } = useToast();
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [changePlanDialog, setChangePlanDialog] = useState<{
+    open: boolean;
+    workspaceId: string;
+    workspaceName: string;
+    currentPlan: string;
+  }>({
+    open: false,
+    workspaceId: "",
+    workspaceName: "",
+    currentPlan: "",
+  });
 
   useEffect(() => {
     loadUsers();
@@ -49,6 +62,38 @@ export default function AdminUsers() {
 
   const handleSearch = () => {
     loadUsers();
+  };
+
+  const handleChangePlan = (workspaceId: string, workspaceName: string, currentPlan: string) => {
+    setChangePlanDialog({
+      open: true,
+      workspaceId,
+      workspaceName,
+      currentPlan,
+    });
+  };
+
+  const handleClosePlanDialog = () => {
+    setChangePlanDialog({
+      open: false,
+      workspaceId: "",
+      workspaceName: "",
+      currentPlan: "",
+    });
+  };
+
+  const getPlanBadge = (plan: string) => {
+    const variants: Record<string, any> = {
+      atelier: "secondary",
+      studio: "default",
+      domus: "default",
+    };
+    
+    return (
+      <Badge variant={variants[plan] || "outline"}>
+        {PLAN_NAMES[plan as keyof typeof PLAN_NAMES] || plan}
+      </Badge>
+    );
   };
 
   return (
@@ -89,18 +134,19 @@ export default function AdminUsers() {
                 <TableHead>Role</TableHead>
                 <TableHead>Workspaces</TableHead>
                 <TableHead>Cadastro</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                     Carregando...
                   </TableCell>
                 </TableRow>
               ) : users.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                     Nenhum usuário encontrado
                   </TableCell>
                 </TableRow>
@@ -128,16 +174,36 @@ export default function AdminUsers() {
                       <Badge variant="outline">{user.role || "designer"}</Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex flex-col gap-1">
+                      <div className="flex flex-col gap-2">
                         {user.workspaces?.map((ws: any) => (
-                          <span key={ws.id} className="text-xs">
-                            {ws.name}
-                          </span>
+                          <div key={ws.id} className="flex items-center gap-2">
+                            <span className="text-xs flex-1">{ws.name}</span>
+                            {getPlanBadge(ws.subscription_plan)}
+                          </div>
                         )) || <span className="text-xs text-muted-foreground">Nenhum</span>}
                       </div>
                     </TableCell>
                     <TableCell>
                       {format(new Date(user.created_at), "dd/MM/yyyy", { locale: ptBR })}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {user.workspaces && user.workspaces.length > 0 ? (
+                        <div className="flex flex-col gap-1 items-end">
+                          {user.workspaces.map((ws: any) => (
+                            <Button
+                              key={ws.id}
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleChangePlan(ws.id, ws.name, ws.subscription_plan)}
+                            >
+                              <Settings className="h-4 w-4 mr-1" />
+                              Gerenciar
+                            </Button>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">-</span>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))
@@ -145,6 +211,15 @@ export default function AdminUsers() {
             </TableBody>
           </Table>
         </div>
+
+        <ChangePlanDialog
+          open={changePlanDialog.open}
+          onClose={handleClosePlanDialog}
+          onSuccess={loadUsers}
+          workspaceId={changePlanDialog.workspaceId}
+          workspaceName={changePlanDialog.workspaceName}
+          currentPlan={changePlanDialog.currentPlan}
+        />
       </div>
     </AdminLayout>
   );
