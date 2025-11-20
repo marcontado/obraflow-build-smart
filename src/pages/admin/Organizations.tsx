@@ -20,12 +20,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, RefreshCw, Settings } from "lucide-react";
+import { Search, RefreshCw, Settings, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ChangePlanDialog } from "@/components/admin/ChangePlanDialog";
+import { useNavigate } from "react-router-dom";
 
 export default function AdminOrganizations() {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [organizations, setOrganizations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -169,21 +171,31 @@ export default function AdminOrganizations() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() =>
-                          setChangePlanDialog({
-                            open: true,
-                            workspaceId: org.id,
-                            workspaceName: org.name,
-                            currentPlan: org.subscription_plan,
-                          })
-                        }
-                        title="Alterar plano"
-                      >
-                        <Settings className="h-4 w-4" />
-                      </Button>
+                      <div className="flex gap-2 justify-end">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => navigate(`/admin/organizations/${org.id}`)}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          Detalhes
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() =>
+                            setChangePlanDialog({
+                              open: true,
+                              workspaceId: org.id,
+                              workspaceName: org.name,
+                              currentPlan: org.subscription_plan,
+                            })
+                          }
+                          title="Alterar plano"
+                        >
+                          <Settings className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
