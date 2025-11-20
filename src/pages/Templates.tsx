@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { withWorkspaceGuard } from "@/hoc/withWorkspaceGuard";
 import { templatesService } from "@/services/templates.service";
+import { templateSeedingService } from "@/services/templateSeeding.service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Search, FileText } from "lucide-react";
@@ -9,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { TemplateCard } from "@/components/templates/TemplateCard";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { DefaultTemplatesBanner } from "@/components/templates/DefaultTemplatesBanner";
 import type { DocumentTemplate, TemplateCategory } from "@/types/template.types";
 import { TEMPLATE_CATEGORIES } from "@/types/template.types";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,10 +22,35 @@ function TemplatesPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<TemplateCategory | "all">("all");
+  const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
-    fetchTemplates();
+    initializeTemplates();
   }, [currentWorkspace, categoryFilter]);
+
+  const initializeTemplates = async () => {
+    if (!currentWorkspace) return;
+
+    try {
+      setLoading(true);
+      
+      // Verificar se precisa fazer seeding
+      const hasExisting = await templateSeedingService.hasTemplates(currentWorkspace.id);
+      
+      if (!hasExisting) {
+        // Criar templates padrão
+        await templateSeedingService.seedDefaultTemplates(currentWorkspace.id);
+        toast.success("Templates padrão criados! Você já pode começar a usar.");
+        setShowBanner(true);
+      }
+    } catch (error) {
+      console.error("Erro ao inicializar templates padrão:", error);
+      // Não mostrar erro ao usuário, continuar carregando templates existentes
+    } finally {
+      // Depois carregar todos os templates
+      await fetchTemplates();
+    }
+  };
 
   const fetchTemplates = async () => {
     if (!currentWorkspace) return;
@@ -122,6 +149,9 @@ function TemplatesPage() {
             </TabsList>
           </Tabs>
         </div>
+
+        {/* Banner informativo sobre templates padrão */}
+        {showBanner && templates.length > 0 && <DefaultTemplatesBanner />}
 
         {/* Templates Grid */}
         {loading ? (

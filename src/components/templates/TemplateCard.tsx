@@ -6,12 +6,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { FileText, MoreVertical, Edit, FileCheck, Copy, Trash2 } from "lucide-react";
+import { FileText, MoreVertical, Edit, FileCheck, Copy, Trash2, Star } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { DocumentTemplate } from "@/types/template.types";
 import { TEMPLATE_CATEGORIES } from "@/types/template.types";
 import { Badge } from "@/components/ui/badge";
+import { templateSeedingService } from "@/services/templateSeeding.service";
 
 interface TemplateCardProps {
   template: DocumentTemplate;
@@ -29,6 +30,7 @@ export function TemplateCard({
   onDelete,
 }: TemplateCardProps) {
   const category = TEMPLATE_CATEGORIES.find((c) => c.value === template.category);
+  const isDefault = templateSeedingService.isDefaultTemplate(template.name);
 
   return (
     <Card className="hover:shadow-lg transition-shadow">
@@ -38,8 +40,16 @@ export function TemplateCard({
             <div className="p-2 bg-primary/10 rounded-lg">
               <FileText className="h-5 w-5 text-primary" />
             </div>
-            <div>
-              <h3 className="font-semibold text-foreground">{template.name}</h3>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-foreground">{template.name}</h3>
+                {isDefault && (
+                  <Badge variant="outline" className="gap-1 border-amber-500/50 text-amber-700 dark:text-amber-400">
+                    <Star className="h-3 w-3 fill-current" />
+                    Padrão
+                  </Badge>
+                )}
+              </div>
               <Badge variant="secondary" className="mt-1">
                 {category?.label}
               </Badge>
