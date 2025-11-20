@@ -911,6 +911,14 @@ export type Database = {
         Args: { _user_id: string }
         Returns: undefined
       }
+      update_admin_password: {
+        Args: { _new_password: string; _user_id: string }
+        Returns: undefined
+      }
+      verify_admin_password: {
+        Args: { _admin_email: string; _password: string }
+        Returns: boolean
+      }
     }
     Enums: {
       platform_role: "super_admin" | "support" | "analyst"
