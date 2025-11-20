@@ -19,6 +19,9 @@ import { ProjectSchedule } from "@/components/projects/ProjectSchedule";
 import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
 import { KanbanBoard } from "@/components/tasks/KanbanBoard";
 import { ProjectDashboard } from "@/components/projects/ProjectDashboard";
+import { ProjectBriefingView } from "@/components/projects/ProjectBriefingView";
+import { ProjectMoodboardView } from "@/components/projects/ProjectMoodboardView";
+import { ProjectFilesView } from "@/components/projects/ProjectFilesView";
 import "@/components/projects/GanttChartStyles.css";
 import { supabase } from "@/integrations/supabase/client";
 import { projectsService } from "@/services/projects.service";
@@ -26,6 +29,7 @@ import { projectAreasService } from "@/services/project-areas.service";
 import { tasksService } from "@/services/tasks.service";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { projectTypes } from "@/types/project.types";
 import type { Database } from "@/integrations/supabase/types";
 
 type ProjectArea = Database["public"]["Tables"]["project_areas"]["Row"];
@@ -282,8 +286,34 @@ function ProjectDetails() {
                       </div>
                     </div>
                   )}
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {project.type && (
+                      <div>
+                        <h4 className="text-sm font-medium text-muted-foreground mb-1">Tipo de Projeto</h4>
+                        <p className="text-sm">{projectTypes.find(t => t.value === project.type)?.label || project.type}</p>
+                      </div>
+                    )}
+
+                    {project.location && (
+                      <div>
+                        <h4 className="text-sm font-medium text-muted-foreground mb-1">Localização</h4>
+                        <p className="text-sm">{project.location}</p>
+                      </div>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
+
+              {project.briefing && <ProjectBriefingView briefing={project.briefing} />}
+              
+              {project.moodboard && project.moodboard.length > 0 && (
+                <ProjectMoodboardView items={project.moodboard} />
+              )}
+              
+              {project.technical_files && project.technical_files.length > 0 && (
+                <ProjectFilesView files={project.technical_files} />
+              )}
             </TabsContent>
 
             <TabsContent value="areas" className="space-y-6">
