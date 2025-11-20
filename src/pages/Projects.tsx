@@ -4,7 +4,7 @@ import { Plus, Bot } from "lucide-react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { ProjectCard } from "@/components/projects/ProjectCard";
-import { ProjectFormDialog } from "@/components/projects/ProjectFormDialog";
+import { ProjectWizard } from "@/components/projects/wizard/ProjectWizard";
 import ContratoModal from "@/components/projects/ContratoModal";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -108,7 +108,7 @@ function Projects() {
         </main>
       </div>
 
-      <ProjectFormDialog
+      <ProjectWizard
         open={formOpen}
         onClose={() => setFormOpen(false)}
         onSuccess={fetchProjects}
