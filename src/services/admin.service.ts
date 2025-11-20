@@ -63,4 +63,66 @@ export const adminService = {
     if (error) throw error;
     return data;
   },
+
+  // Assinaturas
+  async getSubscriptions() {
+    const { data, error } = await supabase.functions.invoke('admin-subscriptions', {
+      headers: getAdminHeaders(),
+    });
+    
+    if (error) throw error;
+    return data;
+  },
+
+  // Administradores da Plataforma
+  async getPlatformAdmins() {
+    const { data, error } = await supabase.functions.invoke('admin-platform-admins', {
+      headers: getAdminHeaders(),
+      body: { action: 'list' },
+    });
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async addPlatformAdmin(userId: string, role: string) {
+    const { data, error } = await supabase.functions.invoke('admin-platform-admins', {
+      headers: getAdminHeaders(),
+      body: {
+        action: 'add',
+        userId,
+        role,
+      },
+    });
+
+    if (error) throw error;
+    return data;
+  },
+
+  async removePlatformAdmin(userId: string) {
+    const { data, error } = await supabase.functions.invoke('admin-platform-admins', {
+      headers: getAdminHeaders(),
+      body: {
+        action: 'remove',
+        userId,
+      },
+    });
+
+    if (error) throw error;
+    return data;
+  },
+
+  async updatePlatformAdminRole(userId: string, newRole: string) {
+    const { data, error } = await supabase.functions.invoke('admin-platform-admins', {
+      headers: getAdminHeaders(),
+      body: {
+        action: 'update_role',
+        userId,
+        newRole,
+      },
+    });
+
+    if (error) throw error;
+    return data;
+  },
 };

@@ -17,6 +17,8 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import AdminOrganizations from "./pages/admin/Organizations";
 import AdminUsers from "./pages/admin/Users";
 import AdminSubscriptions from "./pages/admin/Subscriptions";
+import AdminPlatformAdmins from "./pages/admin/PlatformAdmins";
+import OrganizationDetails from "./pages/admin/OrganizationDetails";
 import Auth from "./pages/Auth";
 import AdminLogin from "./pages/AdminLogin";
 import AdminResetPassword from "./pages/AdminResetPassword";
@@ -105,8 +107,9 @@ const App = () => (
                 <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
                 <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
                 <Route path="/admin/organizations" element={<AdminRoute><AdminOrganizations /></AdminRoute>} />
-                <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+                <Route path="/admin/organizations/:id" element={<AdminRoute><OrganizationDetails /></AdminRoute>} />
                 <Route path="/admin/subscriptions" element={<AdminRoute><AdminSubscriptions /></AdminRoute>} />
+                <Route path="/admin/platform-admins" element={<AdminRoute><AdminPlatformAdmins /></AdminRoute>} />
                 <Route path="/admin/admins" element={<AdminRoute><AdminManagement /></AdminRoute>} />
                 
                 {/* Legacy Route Redirects */}

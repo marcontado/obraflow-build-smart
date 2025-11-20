@@ -7,13 +7,13 @@ import { adminAuthService } from "@/services/admin-auth.service";
 import { 
   LayoutDashboard, 
   Building2, 
-  Users, 
   CreditCard,
   ArrowLeft,
   Shield,
   LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AdminHeader } from "./AdminHeader";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -31,18 +31,13 @@ const adminNavItems = [
     icon: Building2 
   },
   { 
-    title: "Usuários", 
-    href: "/admin/users", 
-    icon: Users 
-  },
-  { 
     title: "Assinaturas", 
     href: "/admin/subscriptions", 
     icon: CreditCard 
   },
   { 
     title: "Administradores", 
-    href: "/admin/admins", 
+    href: "/admin/platform-admins", 
     icon: Shield 
   },
 ];
@@ -64,18 +59,21 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   };
 
   return (
-    <div className="flex h-screen bg-background">
-      {/* Sidebar */}
-      <aside className="w-64 border-r bg-card flex flex-col">
-        <div className="p-6 border-b">
-          <div className="flex items-center gap-2 mb-4">
-            <Shield className="h-6 w-6 text-primary" />
-            <h2 className="text-xl font-bold">Admin Panel</h2>
+    <div className="flex h-screen flex-col bg-background">
+      <AdminHeader />
+      
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
+        <aside className="w-64 border-r bg-card flex flex-col">
+          <div className="p-6 border-b">
+            <div className="flex items-center gap-2 mb-4">
+              <Shield className="h-6 w-6 text-primary" />
+              <h2 className="text-xl font-bold">Admin Panel</h2>
+            </div>
+            <Badge variant="secondary" className="w-full justify-center">
+              Modo Administrador
+            </Badge>
           </div>
-          <Badge variant="secondary" className="w-full justify-center">
-            Modo Administrador
-          </Badge>
-        </div>
 
         <nav className="flex-1 p-4 space-y-2">
           {adminNavItems.map((item) => {
@@ -115,12 +113,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="container py-6 max-w-7xl">
-          {children}
-        </div>
-      </main>
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="container py-6 max-w-7xl">
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

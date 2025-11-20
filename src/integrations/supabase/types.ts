@@ -330,6 +330,7 @@ export type Database = {
           granted_at: string
           granted_by: string | null
           id: string
+          password_configured: boolean | null
           role: Database["public"]["Enums"]["platform_role"]
           user_id: string
         }
@@ -337,6 +338,7 @@ export type Database = {
           granted_at?: string
           granted_by?: string | null
           id?: string
+          password_configured?: boolean | null
           role?: Database["public"]["Enums"]["platform_role"]
           user_id: string
         }
@@ -344,6 +346,7 @@ export type Database = {
           granted_at?: string
           granted_by?: string | null
           id?: string
+          password_configured?: boolean | null
           role?: Database["public"]["Enums"]["platform_role"]
           user_id?: string
         }
@@ -857,6 +860,14 @@ export type Database = {
           workspace_name: string
         }[]
       }
+      add_platform_admin: {
+        Args: {
+          _granted_by?: string
+          _role: Database["public"]["Enums"]["platform_role"]
+          _user_id: string
+        }
+        Returns: string
+      }
       admin_needs_password_setup: {
         Args: { _user_id: string }
         Returns: boolean
@@ -911,8 +922,20 @@ export type Database = {
         Args: { _user_id: string }
         Returns: undefined
       }
+      remove_platform_admin: {
+        Args: { _removed_by?: string; _user_id: string }
+        Returns: undefined
+      }
       update_admin_password: {
         Args: { _new_password: string; _user_id: string }
+        Returns: undefined
+      }
+      update_platform_admin_role: {
+        Args: {
+          _new_role: Database["public"]["Enums"]["platform_role"]
+          _updated_by?: string
+          _user_id: string
+        }
         Returns: undefined
       }
       verify_admin_password: {
