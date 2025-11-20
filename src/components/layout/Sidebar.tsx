@@ -46,21 +46,17 @@ export function Sidebar() {
               return (
                 <Tooltip key={item.name}>
                   <TooltipTrigger asChild>
-                    <NavLink
-                      to={item.href}
-                      className={({ isActive }) =>
-                        cn(
-                          "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium",
-                          isActive
-                            ? "bg-primary/10 text-primary"
-                            : "text-muted-foreground/50"
-                        )
-                      }
+                    <div
+                      className={cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium cursor-pointer",
+                        "text-muted-foreground/50"
+                      )}
+                      onClick={() => navigate(item.href)}
                     >
-                      <item.icon className="h-5 w-5" />
-                      {item.name}
-                      <Lock className="h-3 w-3 ml-auto" />
-                    </NavLink>
+                      <item.icon className="h-5 w-5 flex-shrink-0" />
+                      <span className="flex-1">{item.name}</span>
+                      <Lock className="h-3 w-3 flex-shrink-0" />
+                    </div>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>
@@ -87,8 +83,8 @@ export function Sidebar() {
                   )
                 }
               >
-                <item.icon className="h-5 w-5" />
-                {item.name}
+                <item.icon className="h-5 w-5 flex-shrink-0" />
+                <span className="flex-1">{item.name}</span>
               </NavLink>
             );
           })}
