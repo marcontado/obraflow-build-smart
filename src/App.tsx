@@ -19,7 +19,7 @@ import AdminUsers from "./pages/admin/Users";
 import AdminSubscriptions from "./pages/admin/Subscriptions";
 import Auth from "./pages/Auth";
 import AdminLogin from "./pages/AdminLogin";
-import AdminSetup from "./pages/AdminSetup";
+import AdminManagement from "./pages/admin/AdminManagement";
 import ResetPassword from "./pages/ResetPassword";
 import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
@@ -65,8 +65,7 @@ const App = () => (
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/admin/setup" element={<AdminSetup />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/invite/accept" element={<InviteAccept />} />
                 
@@ -103,6 +102,7 @@ const App = () => (
                 <Route path="/admin/organizations" element={<AdminRoute><AdminOrganizations /></AdminRoute>} />
                 <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
                 <Route path="/admin/subscriptions" element={<AdminRoute><AdminSubscriptions /></AdminRoute>} />
+                <Route path="/admin/admins" element={<AdminRoute><AdminManagement /></AdminRoute>} />
                 
                 {/* Legacy Route Redirects */}
                 <Route path="/projects" element={<Navigate to="/app/projects" replace />} />
