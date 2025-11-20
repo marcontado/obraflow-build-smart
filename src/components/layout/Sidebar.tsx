@@ -1,4 +1,4 @@
-import { Home, FolderKanban, Users, BarChart3, LogOut, Lock, Handshake, MessageCircle, FileText } from "lucide-react";
+import { Home, FolderKanban, Users, BarChart3, LogOut, Lock, Handshake, MessageCircle, FileText, DollarSign } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { authService } from "@/services/auth.service";
@@ -10,9 +10,10 @@ const navigation = [
   { name: "Dashboard", href: "/app", icon: Home },
   { name: "Projetos", href: "/app/projects", icon: FolderKanban },
   { name: "Clientes", href: "/app/clients", icon: Users },
-  { name: "Fornecedores", href: "/app/partners", icon: Handshake },
+  { name: "Fornecedores", href: "/app/partners", icon: Handshake, feature: "partners" as const },
   { name: "Relatórios", href: "/app/reports", icon: BarChart3, feature: "reports" as const },
-  { name: "Templates de Documentos", href: "/app/templates", icon: FileText },
+  { name: "Financeiro", href: "/app/financeiro", icon: DollarSign, alwaysLocked: true },
+  { name: "Templates de Documentos", href: "/app/templates", icon: FileText, feature: "templates" as const },
   { name: "Suporte", href: "/app/suporte", icon: MessageCircle },
 ];
 
@@ -39,25 +40,34 @@ export function Sidebar() {
       <nav className="flex-1 space-y-1 px-3 py-4">
         <TooltipProvider>
           {navigation.map((item) => {
-            const isLocked = item.feature && !hasFeature(item.feature);
+            const isLocked = item.alwaysLocked || (item.feature && !hasFeature(item.feature));
 
             if (isLocked) {
               return (
                 <Tooltip key={item.name}>
                   <TooltipTrigger asChild>
-                    <div
-                      className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium",
-                        "text-muted-foreground/50"
-                      )}
+                    <NavLink
+                      to={item.href}
+                      className={({ isActive }) =>
+                        cn(
+                          "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium",
+                          isActive
+                            ? "bg-primary/10 text-primary"
+                            : "text-muted-foreground/50"
+                        )
+                      }
                     >
                       <item.icon className="h-5 w-5" />
                       {item.name}
                       <Lock className="h-3 w-3 ml-auto" />
-                    </div>
+                    </NavLink>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Disponível no plano Studio</p>
+                    <p>
+                      {item.alwaysLocked 
+                        ? "Em desenvolvimento" 
+                        : "Disponível nos planos Studio e Domus"}
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               );

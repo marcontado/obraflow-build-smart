@@ -24,8 +24,8 @@ export function useFeatureAccess() {
   };
 
   const getRequiredPlan = (feature: keyof PlanLimits['features']): 'studio' | 'domus' => {
-    // Gantt, Reports, Invites → Studio
-    if (['gantt', 'reports', 'invites'].includes(feature)) {
+    // Gantt, Reports, Invites, Templates, Partners → Studio
+    if (['gantt', 'reports', 'invites', 'templates', 'partners'].includes(feature)) {
       return 'studio';
     }
     // AI Assist, Client Portal, Customization → Domus
