@@ -21,3 +21,9 @@ verify_jwt = false
 [functions.admin-actions]
 verify_jwt = false
 
+[functions.admin-platform-admins]
+verify_jwt = false
+
+[functions.admin-subscriptions]
+verify_jwt = false
+
