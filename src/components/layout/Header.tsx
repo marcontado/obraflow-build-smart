@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { useMemo } from "react";
 
 interface HeaderProps {
   title: string;
@@ -35,7 +36,7 @@ export function Header({ title, subtitle }: HeaderProps) {
   const { role } = useUserRole();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
-  const { t } = useTranslation('navigation');
+  const { t, i18n } = useTranslation('navigation');
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -49,6 +50,22 @@ export function Header({ title, subtitle }: HeaderProps) {
       toast.error(t('header.signOutError'));
     }
   };
+
+  // Memoize translations to force re-render on language change
+  const translations = useMemo(() => {
+    console.log('🎨 Header re-rendering with language:', i18n.language);
+    return {
+      myAccount: t('header.myAccount'),
+      themeLight: t('header.themeLight'),
+      themeDark: t('header.themeDark'),
+      settings: t('menu.settings'),
+      workspace: t('workspace.title'),
+      signOut: t('header.signOut'),
+      roleOwner: t('roles.owner'),
+      roleAdmin: t('roles.admin'),
+      roleMember: t('roles.member')
+    };
+  }, [t, i18n.language]);
 
   return (
     <header className="border-b bg-card">
@@ -64,7 +81,7 @@ export function Header({ title, subtitle }: HeaderProps) {
             size="icon" 
             onClick={toggleTheme}
             className="relative"
-            title={theme === "dark" ? t('header.themeLight') : t('header.themeDark')}
+            title={theme === "dark" ? translations.themeLight : translations.themeDark}
           >
             {theme === "dark" ? (
               <Sun className="h-5 w-5" />
@@ -92,13 +109,13 @@ export function Header({ title, subtitle }: HeaderProps) {
             <DropdownMenuContent align="end" className="w-64">
               <DropdownMenuLabel>
                 <div className="flex flex-col space-y-2">
-                  <p className="text-sm font-medium">{t('header.myAccount')}</p>
+                  <p className="text-sm font-medium">{translations.myAccount}</p>
                   <p className="text-xs text-muted-foreground">{user?.email}</p>
                   {role && (
                     <Badge className={roleColors[role]} variant="secondary">
-                      {role === 'owner' && t('roles.owner')}
-                      {role === 'admin' && t('roles.admin')}
-                      {role === 'member' && t('roles.member')}
+                      {role === 'owner' && translations.roleOwner}
+                      {role === 'admin' && translations.roleAdmin}
+                      {role === 'member' && translations.roleMember}
                     </Badge>
                   )}
                 </div>
@@ -106,18 +123,18 @@ export function Header({ title, subtitle }: HeaderProps) {
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => navigate("/app/settings")} className="cursor-pointer">
                 <Settings className="mr-2 h-4 w-4" />
-                <span>{t('menu.settings')}</span>
+                <span>{translations.settings}</span>
               </DropdownMenuItem>
               {currentWorkspace && (
                 <DropdownMenuItem onClick={() => navigate(`/workspace/${currentWorkspace.id}/settings`)} className="cursor-pointer">
                   <Building2 className="mr-2 h-4 w-4" />
-                  <span>{t('workspace.title')}</span>
+                  <span>{translations.workspace}</span>
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive">
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>{t('header.signOut')}</span>
+                <span>{translations.signOut}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
