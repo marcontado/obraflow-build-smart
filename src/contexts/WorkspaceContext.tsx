@@ -96,8 +96,14 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
   const canCreateWorkspace = () => {
     if (!currentWorkspace) return true;
+    
+    // Check workspace limits based on plan
     const limits = PLAN_LIMITS[currentWorkspace.subscription_plan as SubscriptionPlan];
-    return workspaces.length < limits.workspaces;
+    const hasRoomForMore = workspaces.length < limits.workspaces;
+    
+    // User must have owner or admin role in at least one workspace to create new ones
+    // This will be validated through useUserRole in the UI
+    return hasRoomForMore;
   };
 
   const getWorkspaceLimits = () => {

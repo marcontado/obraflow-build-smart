@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { workspacesService } from "@/services/workspaces.service";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,7 +23,20 @@ export default function WorkspaceNew() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { refreshWorkspaces, canCreateWorkspace } = useWorkspace();
+  const { canCreateWorkspace: hasRolePermission } = useUserRole();
   const [submitting, setSubmitting] = useState(false);
+
+  // Redirect if user doesn't have permission
+  useEffect(() => {
+    if (!hasRolePermission) {
+      toast({
+        title: "Permissão negada",
+        description: "Apenas owners e admins podem criar novos workspaces.",
+        variant: "destructive",
+      });
+      navigate("/");
+    }
+  }, [hasRolePermission, navigate, toast]);
 
   const form = useForm<WorkspaceFormData>({
     resolver: zodResolver(workspaceSchema),
@@ -32,10 +46,12 @@ export default function WorkspaceNew() {
   });
 
   const onSubmit = async (data: WorkspaceFormData) => {
-    if (!canCreateWorkspace()) {
+    if (!canCreateWorkspace() || !hasRolePermission) {
       toast({
-        title: "Limite atingido",
-        description: "Você atingiu o limite de workspaces do seu plano atual.",
+        title: hasRolePermission ? "Limite atingido" : "Permissão negada",
+        description: hasRolePermission 
+          ? "Você atingiu o limite de workspaces do seu plano atual."
+          : "Apenas owners e admins podem criar novos workspaces.",
         variant: "destructive",
       });
       return;
