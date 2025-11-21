@@ -24,7 +24,18 @@ export function PrivacyTab() {
   const navigate = useNavigate();
   const [exporting, setExporting] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const { t } = useTranslation('settings');
+  const { t, ready } = useTranslation('settings');
+
+  if (!ready) {
+    return (
+      <div className="space-y-6 p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-muted rounded w-1/3" />
+          <div className="h-4 bg-muted rounded w-2/3" />
+        </div>
+      </div>
+    );
+  }
 
   const handleExportData = async () => {
     try {

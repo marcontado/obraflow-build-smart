@@ -151,8 +151,8 @@ export default function Auth() {
   };
 
   return (
-    <div className="flex min-h-screen">
-      <Link to="/" className="absolute top-4 left-4 z-10 text-sm text-black hover:text-primary flex items-center gap-1">
+    <div className="flex min-h-screen landing-bg">
+      <Link to="/" className="absolute top-4 left-4 z-10 text-sm landing-text-primary hover:opacity-70 flex items-center gap-1 transition-opacity">
         {t('welcome.backToHome')}
       </Link>
       <div className="hidden lg:block lg:w-1/2 relative">
@@ -175,7 +175,7 @@ export default function Auth() {
         </div>
       </div>
 
-      <div className="flex w-full lg:w-1/2 items-center justify-center p-8 bg-background">
+      <div className="flex w-full lg:w-1/2 items-center justify-center p-8">
         {isPasswordRecovery ? (
           <Card className="w-full max-w-md">
             <CardHeader className="space-y-1">

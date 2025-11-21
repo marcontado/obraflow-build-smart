@@ -40,7 +40,7 @@ export default function Landing() {
     return () => clearTimeout(timer);
   }, []);
   return (
-  <div className="min-h-screen bg-gradient-to-b from-background via-background to-card relative">
+  <div className="min-h-screen landing-bg relative">
   <LandingNavbar />
   {/* âncora invisível para scroll do botão Início */}
   <div id="hero" style={{ position: "relative", top: "-96px", height: 0 }} aria-hidden="true" />
@@ -70,31 +70,31 @@ export default function Landing() {
   <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-5xl mx-auto text-center space-y-8 animate-fade-in">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 dark:bg-card/60 backdrop-blur-glass border border-white/20 shadow-glass">
-              <Sparkles className="w-4 h-4 text-primary animate-pulse" />
-              <span className="text-sm font-medium text-foreground">Gestão Arquitetônica Inteligente</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full landing-accent-badge backdrop-blur-glass shadow-glass">
+              <Sparkles className="w-4 h-4 landing-primary-bg animate-pulse" />
+              <span className="text-sm font-medium landing-text-primary">Gestão Arquitetônica Inteligente</span>
             </div>
 
             {/* Main heading */}
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-heading font-bold leading-tight">
-              <span className="text-foreground">
+              <span className="landing-text-primary">
                 Projete o Futuro
               </span>
               <br />
-              <span className="text-primary animate-shimmer">
+              <span className="landing-primary-bg bg-clip-text text-transparent animate-shimmer">
                 da sua Arquitetura
               </span>
             </h1>
 
             {/* Description */}
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl landing-text-muted max-w-3xl mx-auto leading-relaxed">
               A plataforma completa que transforma a gestão de projetos arquitetônicos em uma experiência fluida, visual e colaborativa
             </p>
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
               <Link to="/auth">
-                <Button size="lg" className="group relative overflow-hidden bg-primary hover:bg-primary/90 hover:shadow-glow transition-all duration-500 text-lg px-8 py-6">
+                <Button size="lg" className="group relative overflow-hidden landing-primary-bg hover:landing-primary-hover text-white hover:shadow-glow transition-all duration-500 text-lg px-8 py-6">
                   <span className="relative z-10 flex items-center gap-2">
                     Começar Gratuitamente
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -102,7 +102,7 @@ export default function Landing() {
                 </Button>
               </Link>
               <Link to="/plans">
-                <Button size="lg" variant="outline" className="text-lg px-8 py-6 bg-white/50 dark:bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/50 hover:bg-primary/10 transition-all duration-500">
+                <Button size="lg" variant="outline" className="text-lg px-8 py-6 landing-card-bg landing-card-border landing-text-primary hover:opacity-90 transition-all duration-500">
                   Ver Planos
                 </Button>
               </Link>
@@ -126,13 +126,13 @@ export default function Landing() {
       </section>
 
       {/* Story Sections */}
-      <section id="recursos" className="py-20 bg-primary/5">
+      <section id="recursos" className="py-20 landing-gradient">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16 space-y-4">
-            <h2 className="text-4xl md:text-5xl font-heading font-bold text-foreground">
+            <h2 className="text-4xl md:text-5xl font-heading font-bold landing-text-primary">
               Como Transformamos Seu Trabalho
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl landing-text-muted max-w-2xl mx-auto">
               Uma jornada visual através das funcionalidades que fazem a diferença
             </p>
           </div>
@@ -175,16 +175,16 @@ export default function Landing() {
 
       {/* Features Section */}
       <section className="py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-accent/5" />
+        <div className="absolute inset-0 opacity-30 bg-gradient-to-b from-transparent to-blue-50" />
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-16 space-y-4">
             {/* âncora invisível para scroll com offset */}
             <div id="ferramentas" style={{ position: "relative", top: "-96px", height: 0 }} aria-hidden="true" />
-            <div className="inline-block px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4">
+            <div className="inline-block px-4 py-1.5 rounded-full landing-accent-badge text-sm font-medium mb-4">
               Recursos Completos
             </div>
-            <h2 className="text-4xl md:text-5xl font-heading font-bold text-foreground">
+            <h2 className="text-4xl md:text-5xl font-heading font-bold landing-text-primary">
               Ferramentas para Arquitetos Modernos
             </h2>
           </div>
@@ -225,13 +225,13 @@ export default function Landing() {
       </section>
 
       {/* Plans Section */}
-      <section id="planos" className="py-20 bg-primary/5">
+      <section id="planos" className="py-20 landing-gradient">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16 space-y-4">
-            <h2 className="text-4xl md:text-5xl font-heading font-bold text-foreground">
+            <h2 className="text-4xl md:text-5xl font-heading font-bold landing-text-primary">
               Planos para Cada Ateliê
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl landing-text-muted max-w-2xl mx-auto">
               Do freelancer ao grande escritório, temos o plano perfeito para você
             </p>
           </div>
@@ -284,11 +284,11 @@ export default function Landing() {
       </section>
 
   {/* Plans Preview Section */}
-  <section id="planos" className="py-24 px-4">
+  <section className="py-24 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-20 animate-fade-in">
-            <h2 className="font-heading font-bold mb-6 text-foreground">Escolha o plano ideal</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            <h2 className="font-heading font-bold mb-6 landing-text-primary text-4xl">Escolha o plano ideal</h2>
+            <p className="text-xl landing-text-muted max-w-2xl mx-auto leading-relaxed">
               Comece grátis e evolua conforme sua necessidade — sem compromisso
             </p>
           </div>
@@ -324,25 +324,25 @@ export default function Landing() {
 
       {/* Final CTA Section */}
       <section id="contato" className="py-32 relative overflow-hidden">
-        <div className="absolute inset-0 bg-primary/10" />
+        <div className="absolute inset-0 landing-gradient" />
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center space-y-8">
-            <h2 className="text-4xl md:text-6xl font-heading font-bold text-foreground leading-tight">
+            <h2 className="text-4xl md:text-6xl font-heading font-bold landing-text-primary leading-tight">
               Pronto para Transformar
               <br />
-              <span className="text-primary">
+              <span className="landing-primary-bg bg-clip-text text-transparent">
                 Sua Gestão Arquitetônica?
               </span>
             </h2>
             
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl landing-text-muted max-w-2xl mx-auto">
               Junte-se a centenas de arquitetos que já elevaram sua produtividade
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
               <Link to="/auth">
-                <Button size="lg" className="group bg-primary hover:bg-primary/90 hover:shadow-glow transition-all duration-500 text-lg px-8 py-6">
+                <Button size="lg" className="group landing-primary-bg hover:landing-primary-hover text-white hover:shadow-glow transition-all duration-500 text-lg px-8 py-6">
                   <span className="flex items-center gap-2">
                     Criar Conta Gratuita
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -352,17 +352,17 @@ export default function Landing() {
             </div>
 
             {/* Trust indicators */}
-            <div className="flex flex-wrap justify-center gap-8 pt-8 text-sm text-muted-foreground">
+            <div className="flex flex-wrap justify-center gap-8 pt-8 text-sm landing-text-muted">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                <div className="w-2 h-2 landing-primary-bg rounded-full animate-pulse" />
                 Sem cartão de crédito
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
+                <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse" />
                 Setup em 2 minutos
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-arch-gold rounded-full animate-pulse" />
+                <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
                 Suporte em português
               </div>
             </div>

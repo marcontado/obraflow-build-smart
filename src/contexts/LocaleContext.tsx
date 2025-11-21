@@ -93,18 +93,10 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
 
   const setLocale = async (newLocale: SupportedLocale) => {
     try {
-      console.log('🌍 Changing locale to:', newLocale);
-      console.log('🔍 Current i18n language:', i18n.language);
-      
       setLocaleState(newLocale);
       
       if (i18n.isInitialized) {
         await i18n.changeLanguage(newLocale);
-        console.log('✅ i18n language changed to:', i18n.language);
-        console.log('📦 Available namespaces:', i18n.options.ns);
-        console.log('🔑 Test translation:', i18n.t('menu.home', { ns: 'navigation' }));
-      } else {
-        console.warn('⚠️ i18n not initialized');
       }
       
       // Save to user profile
@@ -117,8 +109,6 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
         
         if (error) throw error;
         
-        console.log('💾 Language saved to profile:', newLocale);
-        
         toast.success(
           newLocale === 'pt' ? 'Idioma alterado com sucesso!' :
           newLocale === 'en' ? 'Language changed successfully!' :
@@ -126,7 +116,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
         );
       }
     } catch (error) {
-      console.error('❌ Error setting locale:', error);
+      console.error('Error setting locale:', error);
       toast.error(
         locale === 'pt' ? 'Erro ao alterar idioma' :
         locale === 'en' ? 'Error changing language' :
