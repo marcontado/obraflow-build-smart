@@ -67,13 +67,32 @@ export const workspacesService = {
   },
 
   async getMembers(workspaceId: string) {
-    const { data, error } = await supabase
+    // Buscar membros
+    const { data: members, error: membersError } = await supabase
       .from("workspace_members")
-      .select("*, profiles(id, email, full_name, avatar_url)")
+      .select("*")
       .eq("workspace_id", workspaceId)
       .order("joined_at", { ascending: true });
 
-    return { data, error };
+    if (membersError) return { data: null, error: membersError };
+    if (!members || members.length === 0) return { data: [], error: null };
+
+    // Buscar profiles dos membros
+    const userIds = members.map(m => m.user_id);
+    const { data: profiles, error: profilesError } = await supabase
+      .from("profiles")
+      .select("id, email, full_name, avatar_url")
+      .in("id", userIds);
+
+    if (profilesError) return { data: null, error: profilesError };
+
+    // Combinar dados
+    const membersWithProfiles = members.map(member => ({
+      ...member,
+      profiles: profiles?.find(p => p.id === member.user_id) || null,
+    }));
+
+    return { data: membersWithProfiles, error: null };
   },
 
   async inviteMember(workspaceId: string, email: string, role: string = "member") {
@@ -99,14 +118,33 @@ export const workspacesService = {
   },
 
   async getInvites(workspaceId: string) {
-    const { data, error } = await supabase
+    // Buscar convites
+    const { data: invites, error: invitesError } = await supabase
       .from("workspace_invites")
-      .select("*, profiles!workspace_invites_invited_by_fkey(full_name, email)")
+      .select("*")
       .eq("workspace_id", workspaceId)
       .is("accepted_at", null)
       .order("created_at", { ascending: false });
 
-    return { data, error };
+    if (invitesError) return { data: null, error: invitesError };
+    if (!invites || invites.length === 0) return { data: [], error: null };
+
+    // Buscar profiles dos criadores dos convites
+    const inviterIds = [...new Set(invites.map(i => i.invited_by))];
+    const { data: profiles, error: profilesError } = await supabase
+      .from("profiles")
+      .select("id, full_name, email")
+      .in("id", inviterIds);
+
+    if (profilesError) return { data: null, error: profilesError };
+
+    // Combinar dados
+    const invitesWithProfiles = invites.map(invite => ({
+      ...invite,
+      inviter_profile: profiles?.find(p => p.id === invite.invited_by) || null,
+    }));
+
+    return { data: invitesWithProfiles, error: null };
   },
 
   async acceptInvite(token: string) {
