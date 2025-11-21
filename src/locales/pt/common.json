@@ -44,6 +44,13 @@
     "invalidEmail": "Email inválido",
     "invalidPhone": "Telefone inválido"
   },
+  "validation": {
+    "passwordMinLength": "A senha deve ter no mínimo 8 caracteres",
+    "passwordUpperCase": "A senha deve conter pelo menos uma letra maiúscula",
+    "passwordLowerCase": "A senha deve conter pelo menos uma letra minúscula",
+    "passwordNumber": "A senha deve conter pelo menos um número",
+    "passwordSpecial": "A senha deve conter pelo menos um caractere especial"
+  },
   "time": {
     "today": "Hoje",
     "yesterday": "Ontem",

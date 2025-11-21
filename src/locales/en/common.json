@@ -44,6 +44,13 @@
     "invalidEmail": "Invalid email",
     "invalidPhone": "Invalid phone"
   },
+  "validation": {
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordUpperCase": "Password must contain at least one uppercase letter",
+    "passwordLowerCase": "Password must contain at least one lowercase letter",
+    "passwordNumber": "Password must contain at least one number",
+    "passwordSpecial": "Password must contain at least one special character"
+  },
   "time": {
     "today": "Today",
     "yesterday": "Yesterday",

@@ -32,6 +32,11 @@ import clientsES from '@/locales/es/clients.json';
 import errorsES from '@/locales/es/errors.json';
 import dashboardES from '@/locales/es/dashboard.json';
 
+// Import tasks translations
+import tasksPT from '@/locales/pt/tasks.json';
+import tasksEN from '@/locales/en/tasks.json';
+import tasksES from '@/locales/es/tasks.json';
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -46,6 +51,7 @@ i18n
         clients: clientsPT,
         errors: errorsPT,
         dashboard: dashboardPT,
+        tasks: tasksPT,
       },
       en: {
         common: commonEN,
@@ -56,6 +62,7 @@ i18n
         clients: clientsEN,
         errors: errorsEN,
         dashboard: dashboardEN,
+        tasks: tasksEN,
       },
       es: {
         common: commonES,
@@ -66,11 +73,12 @@ i18n
         clients: clientsES,
         errors: errorsES,
         dashboard: dashboardES,
+        tasks: tasksES,
       },
     },
     fallbackLng: 'pt',
     defaultNS: 'common',
-    ns: ['common', 'auth', 'navigation', 'settings', 'projects', 'clients', 'errors', 'dashboard'],
+    ns: ['common', 'auth', 'navigation', 'settings', 'projects', 'clients', 'errors', 'dashboard', 'tasks'],
     interpolation: {
       escapeValue: false,
     },

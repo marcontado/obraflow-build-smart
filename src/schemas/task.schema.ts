@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const taskSchema = z.object({
-  title: z.string().min(1, "Título é obrigatório"),
+  title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
   status: z.enum(["todo", "in_progress", "review", "done"]),
   priority: z.enum(["low", "medium", "high", "urgent"]),
@@ -19,7 +19,7 @@ export const taskSchema = z.object({
   }
   return true;
 }, {
-  message: "Data de vencimento deve estar dentro do período do projeto",
+  message: "Due date must be within project timeframe",
   path: ["due_date"],
 });
 
