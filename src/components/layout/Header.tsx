@@ -11,7 +11,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
-import { WorkspaceSelector } from "@/components/workspaces/WorkspaceSelector";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useNavigate } from "react-router-dom";
@@ -61,8 +60,6 @@ export function Header({ title, subtitle }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-4">
-          <WorkspaceSelector />
-
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />
             <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-accent" />
