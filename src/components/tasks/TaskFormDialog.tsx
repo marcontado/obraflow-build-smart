@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -41,20 +42,6 @@ interface TaskFormDialogProps {
   initialStatus?: string;
 }
 
-const statusLabels = {
-  todo: "A Fazer",
-  in_progress: "Em Progresso",
-  review: "Em Revisão",
-  done: "Concluído",
-};
-
-const priorityLabels = {
-  low: "Baixa",
-  medium: "Média",
-  high: "Alta",
-  urgent: "Urgente",
-};
-
 export function TaskFormDialog({
   open,
   onClose,
@@ -64,6 +51,7 @@ export function TaskFormDialog({
   initialData,
   initialStatus = "todo",
 }: TaskFormDialogProps) {
+  const { t } = useTranslation('tasks');
   const { currentWorkspace } = useWorkspace();
   const [submitting, setSubmitting] = useState(false);
   const [areas, setAreas] = useState<any[]>([]);
@@ -147,18 +135,17 @@ export function TaskFormDialog({
 
   const onSubmit = async (data: TaskFormData) => {
     if (!currentWorkspace) {
-      toast.error("Nenhum workspace selecionado");
+      toast.error(t('form.errorNoWorkspace'));
       return;
     }
 
     try {
       setSubmitting(true);
 
-      // Obter user_id diretamente aqui para evitar race condition
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user?.id) {
-        toast.error("Usuário não autenticado. Por favor, faça login novamente.");
+        toast.error(t('form.errorNoWorkspace'));
         return;
       }
 
@@ -177,18 +164,18 @@ export function TaskFormDialog({
       if (taskId) {
         const { error } = await tasksService.update(taskId, taskData, currentWorkspace.id);
         if (error) throw error;
-        toast.success("Tarefa atualizada com sucesso!");
+        toast.success(t('form.successUpdate'));
       } else {
         const { error } = await tasksService.create(taskData, currentWorkspace.id);
         if (error) throw error;
-        toast.success("Tarefa criada com sucesso!");
+        toast.success(t('form.successCreate'));
       }
 
       onSuccess();
       onClose();
       form.reset();
     } catch (error: any) {
-      toast.error(error.message || "Erro ao salvar tarefa");
+      toast.error(error.message || t('form.errorSave'));
     } finally {
       setSubmitting(false);
     }
@@ -198,7 +185,7 @@ export function TaskFormDialog({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{taskId ? "Editar" : "Nova"} Tarefa</DialogTitle>
+          <DialogTitle>{taskId ? t('form.titleEdit') : t('form.titleNew')}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -208,9 +195,9 @@ export function TaskFormDialog({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Título *</FormLabel>
+                  <FormLabel>{t('form.title')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ex: Comprar materiais" {...field} />
+                    <Input placeholder={t('form.titlePlaceholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -222,10 +209,10 @@ export function TaskFormDialog({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Descrição</FormLabel>
+                  <FormLabel>{t('form.description')}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Detalhes da tarefa..."
+                      placeholder={t('form.descriptionPlaceholder')}
                       rows={3}
                       {...field}
                     />
@@ -241,19 +228,18 @@ export function TaskFormDialog({
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Status</FormLabel>
+                    <FormLabel>{t('form.status')}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
+                          <SelectValue placeholder={t('form.select')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {Object.entries(statusLabels).map(([value, label]) => (
-                          <SelectItem key={value} value={value}>
-                            {label}
-                          </SelectItem>
-                        ))}
+                        <SelectItem value="todo">{t('status.todo')}</SelectItem>
+                        <SelectItem value="in_progress">{t('status.in_progress')}</SelectItem>
+                        <SelectItem value="review">{t('status.review')}</SelectItem>
+                        <SelectItem value="done">{t('status.done')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -266,19 +252,18 @@ export function TaskFormDialog({
                 name="priority"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Prioridade</FormLabel>
+                    <FormLabel>{t('form.priority')}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
+                          <SelectValue placeholder={t('form.select')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {Object.entries(priorityLabels).map(([value, label]) => (
-                          <SelectItem key={value} value={value}>
-                            {label}
-                          </SelectItem>
-                        ))}
+                        <SelectItem value="low">{t('priority.low')}</SelectItem>
+                        <SelectItem value="medium">{t('priority.medium')}</SelectItem>
+                        <SelectItem value="high">{t('priority.high')}</SelectItem>
+                        <SelectItem value="urgent">{t('priority.urgent')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -293,7 +278,7 @@ export function TaskFormDialog({
                 name="due_date"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Data de Vencimento</FormLabel>
+                    <FormLabel>{t('form.dueDate')}</FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -307,11 +292,11 @@ export function TaskFormDialog({
                 name="area_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Área do Projeto</FormLabel>
+                    <FormLabel>{t('form.area')}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value || ""}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Nenhuma área selecionada" />
+                          <SelectValue placeholder={t('form.areaPlaceholder')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -330,10 +315,10 @@ export function TaskFormDialog({
 
             <div className="flex justify-end gap-3 pt-4">
               <Button type="button" variant="outline" onClick={onClose}>
-                Cancelar
+                {t('form.cancel')}
               </Button>
               <Button type="submit" disabled={submitting}>
-                {submitting ? "Salvando..." : taskId ? "Atualizar" : "Criar"}
+                {submitting ? t('form.saving') : taskId ? t('form.update') : t('form.create')}
               </Button>
             </div>
           </form>
