@@ -1,4 +1,4 @@
-import { Bell, LogOut, Settings, Building2 } from "lucide-react";
+import { Bell, LogOut, Settings, Building2, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "next-themes";
 import { toast } from "sonner";
 
 interface HeaderProps {
@@ -37,7 +38,12 @@ export function Header({ title, subtitle }: HeaderProps) {
   const { user, signOut } = useAuth();
   const { currentWorkspace } = useWorkspace();
   const { role } = useUserRole();
+  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
 
   const handleSignOut = async () => {
     try {
@@ -57,6 +63,20 @@ export function Header({ title, subtitle }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-4">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={toggleTheme}
+            className="relative"
+            title={theme === "dark" ? "Mudar para tema claro" : "Mudar para tema escuro"}
+          >
+            {theme === "dark" ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
+          </Button>
+
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />
             <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-accent" />
