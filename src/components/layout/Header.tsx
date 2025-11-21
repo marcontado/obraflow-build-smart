@@ -17,7 +17,6 @@ import { useNavigate } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
-import { useMemo } from "react";
 
 interface HeaderProps {
   title: string;
@@ -36,7 +35,7 @@ export function Header({ title, subtitle }: HeaderProps) {
   const { role } = useUserRole();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
-  const { t, ready } = useTranslation('navigation');
+  const { t } = useTranslation('navigation');
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -50,19 +49,6 @@ export function Header({ title, subtitle }: HeaderProps) {
       toast.error(t('header.signOutError'));
     }
   };
-
-  // Memoize translations to force re-render on language change
-  const translations = useMemo(() => ({
-      myAccount: t('header.myAccount'),
-      themeLight: t('header.themeLight'),
-      themeDark: t('header.themeDark'),
-      settings: t('menu.settings'),
-      workspace: t('workspace.title'),
-      signOut: t('header.signOut'),
-      roleOwner: t('roles.owner'),
-      roleAdmin: t('roles.admin'),
-      roleMember: t('roles.member')
-    }), [t, ready]);
 
   return (
     <header className="border-b bg-card">
@@ -78,7 +64,7 @@ export function Header({ title, subtitle }: HeaderProps) {
             size="icon" 
             onClick={toggleTheme}
             className="relative"
-            title={theme === "dark" ? translations.themeLight : translations.themeDark}
+            title={theme === "dark" ? t('header.themeLight') : t('header.themeDark')}
           >
             {theme === "dark" ? (
               <Sun className="h-5 w-5" />
@@ -106,13 +92,13 @@ export function Header({ title, subtitle }: HeaderProps) {
             <DropdownMenuContent align="end" className="w-64">
               <DropdownMenuLabel>
                 <div className="flex flex-col space-y-2">
-                  <p className="text-sm font-medium">{translations.myAccount}</p>
+                  <p className="text-sm font-medium">{t('header.myAccount')}</p>
                   <p className="text-xs text-muted-foreground">{user?.email}</p>
                   {role && (
                     <Badge className={roleColors[role]} variant="secondary">
-                      {role === 'owner' && translations.roleOwner}
-                      {role === 'admin' && translations.roleAdmin}
-                      {role === 'member' && translations.roleMember}
+                      {role === 'owner' && t('roles.owner')}
+                      {role === 'admin' && t('roles.admin')}
+                      {role === 'member' && t('roles.member')}
                     </Badge>
                   )}
                 </div>
@@ -120,18 +106,18 @@ export function Header({ title, subtitle }: HeaderProps) {
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => navigate("/app/settings")} className="cursor-pointer">
                 <Settings className="mr-2 h-4 w-4" />
-                <span>{translations.settings}</span>
+                <span>{t('menu.settings')}</span>
               </DropdownMenuItem>
               {currentWorkspace && (
                 <DropdownMenuItem onClick={() => navigate(`/workspace/${currentWorkspace.id}/settings`)} className="cursor-pointer">
                   <Building2 className="mr-2 h-4 w-4" />
-                  <span>{translations.workspace}</span>
+                  <span>{t('workspace.title')}</span>
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive">
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>{translations.signOut}</span>
+                <span>{t('header.signOut')}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

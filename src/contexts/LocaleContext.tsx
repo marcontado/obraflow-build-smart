@@ -26,32 +26,9 @@ const localeMap = {
 export function LocaleProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<SupportedLocale>('pt');
   const [isLoading, setIsLoading] = useState(true);
-  const [isReady, setIsReady] = useState(false);
-
-  // Initialize i18n first
-  useEffect(() => {
-    const initI18n = async () => {
-      try {
-        // Ensure i18n is initialized
-        if (i18n.isInitialized) {
-          setIsReady(true);
-        } else {
-          // Wait for initialization
-          setTimeout(() => setIsReady(true), 100);
-        }
-      } catch (error) {
-        console.error('Error initializing i18n:', error);
-        setIsReady(true); // Proceed anyway
-      }
-    };
-    
-    initI18n();
-  }, []);
 
   // Load user locale preference from profile
   useEffect(() => {
-    if (!isReady) return;
-
     const loadUserLocale = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
@@ -82,7 +59,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     };
     
     loadUserLocale();
-  }, [isReady]);
+  }, []);
 
   // Sync i18n when locale changes
   useEffect(() => {
