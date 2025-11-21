@@ -96,7 +96,9 @@ export function Header({ title, subtitle }: HeaderProps) {
                   <p className="text-xs text-muted-foreground">{user?.email}</p>
                   {role && (
                     <Badge className={roleColors[role]} variant="secondary">
-                      {t(`roles.${role}`)}
+                      {role === 'owner' && t('roles.owner')}
+                      {role === 'admin' && t('roles.admin')}
+                      {role === 'member' && t('roles.member')}
                     </Badge>
                   )}
                 </div>
