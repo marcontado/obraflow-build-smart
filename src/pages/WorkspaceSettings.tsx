@@ -12,18 +12,22 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { useUserRole } from "@/hooks/useUserRole";
 import { PLAN_LIMITS } from "@/constants/plans";
+import { WorkspaceSelector } from "@/components/workspaces/WorkspaceSelector";
 
 export default function WorkspaceSettings() {
   const { workspaceId } = useParams();
   const navigate = useNavigate();
-  const { currentWorkspace } = useWorkspace();
+  const { currentWorkspace, switchWorkspace } = useWorkspace();
   const { canChangeSettings, canManageMembers, canManageBilling, loading } = useUserRole();
 
   useEffect(() => {
-    if (!currentWorkspace || currentWorkspace.id !== workspaceId) {
+    // If workspaceId in URL doesn't match current, switch to it
+    if (workspaceId && currentWorkspace && workspaceId !== currentWorkspace.id) {
+      switchWorkspace(workspaceId);
+    } else if (!workspaceId && !currentWorkspace) {
       navigate("/workspace/select");
     }
-  }, [currentWorkspace, workspaceId, navigate]);
+  }, [workspaceId, currentWorkspace, navigate, switchWorkspace]);
 
   useEffect(() => {
     if (!loading && !canChangeSettings) {
@@ -49,9 +53,12 @@ export default function WorkspaceSettings() {
         <main className="flex-1 overflow-y-auto">
           <div className="container mx-auto p-6">
             <div className="mx-auto max-w-5xl space-y-6">
-              <div>
-                <h1 className="text-3xl font-bold">Configurações do Workspace</h1>
-                <p className="text-muted-foreground">{currentWorkspace.name}</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold">Configurações do Workspace</h1>
+                  <p className="text-muted-foreground">{currentWorkspace.name}</p>
+                </div>
+                <WorkspaceSelector />
               </div>
 
               <Tabs defaultValue="general" className="space-y-6">
