@@ -39,7 +39,6 @@ i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    lng: 'pt',
     resources: {
       pt: {
         common: commonPT,
@@ -78,6 +77,7 @@ i18n
     fallbackLng: 'pt',
     defaultNS: 'common',
     ns: ['common', 'auth', 'navigation', 'settings', 'projects', 'clients', 'errors', 'dashboard', 'tasks'],
+    preload: ['pt', 'en', 'es'],
     interpolation: {
       escapeValue: false,
     },
@@ -86,7 +86,7 @@ i18n
       caches: ['localStorage'],
     },
     react: {
-      useSuspense: true,
+      useSuspense: false,
       bindI18n: 'languageChanged loaded',
       bindI18nStore: 'added removed',
       transEmptyNodeValue: '',
