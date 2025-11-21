@@ -36,7 +36,7 @@ export function Header({ title, subtitle }: HeaderProps) {
   const { role } = useUserRole();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation('navigation');
+  const { t, i18n, ready } = useTranslation('navigation');
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -53,7 +53,9 @@ export function Header({ title, subtitle }: HeaderProps) {
 
   // Memoize translations to force re-render on language change
   const translations = useMemo(() => {
-    console.log('🎨 Header re-rendering with language:', i18n.language);
+    console.log('🎨 Header i18n ready:', ready);
+    console.log('🎨 Header language:', i18n.language);
+    console.log('🎨 Header translation test:', t('header.myAccount'));
     return {
       myAccount: t('header.myAccount'),
       themeLight: t('header.themeLight'),
@@ -65,7 +67,7 @@ export function Header({ title, subtitle }: HeaderProps) {
       roleAdmin: t('roles.admin'),
       roleMember: t('roles.member')
     };
-  }, [t, i18n.language]);
+  }, [t, i18n.language, ready]);
 
   return (
     <header className="border-b bg-card">

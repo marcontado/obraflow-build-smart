@@ -40,7 +40,7 @@ export function ProjectCard({
   endDate,
   onClick,
 }: ProjectCardProps) {
-  const { t, i18n } = useTranslation('projects');
+  const { t, i18n, ready } = useTranslation('projects');
   const { currencySymbol, numberFormat, dateLocale } = useLocale();
   const budgetPercentage = budget && spent ? (spent / budget) * 100 : 0;
 
@@ -55,7 +55,9 @@ export function ProjectCard({
 
   // Memoize translations to force re-render on language change
   const translations = useMemo(() => {
-    console.log('🎨 ProjectCard re-rendering with language:', i18n.language);
+    console.log('🎨 ProjectCard i18n ready:', ready);
+    console.log('🎨 ProjectCard language:', i18n.language);
+    console.log('🎨 ProjectCard translation test:', t('card.progress'));
     return {
       status: t(`status.${status}`),
       progress: t('card.progress'),
@@ -63,7 +65,7 @@ export function ProjectCard({
       budgetUsed: t('card.budgetUsed', { percent: budgetPercentage.toFixed(0) }),
       until: t('card.until')
     };
-  }, [t, status, budgetPercentage, i18n.language]);
+  }, [t, status, budgetPercentage, i18n.language, ready]);
 
   return (
     <Card
