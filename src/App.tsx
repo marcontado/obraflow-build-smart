@@ -1,3 +1,4 @@
+import "@/lib/i18n";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,7 +9,6 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 import { LocaleProvider } from "@/contexts/LocaleContext";
 import { ErrorBoundary } from "@/components/errors/ErrorBoundary";
-import "@/lib/i18n";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/auth/AdminRoute";
 import Home from "./pages/Home";

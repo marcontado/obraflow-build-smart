@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { useTranslation } from 'react-i18next';
+import i18n from '@/lib/i18n';
 import { supabase } from "@/integrations/supabase/client";
 import { ptBR, enUS, es } from 'date-fns/locale';
 import type { Locale } from 'date-fns';
@@ -25,11 +25,33 @@ const localeMap = {
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<SupportedLocale>('pt');
-  const { i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
+  const [isReady, setIsReady] = useState(false);
+
+  // Initialize i18n first
+  useEffect(() => {
+    const initI18n = async () => {
+      try {
+        // Ensure i18n is initialized
+        if (i18n.isInitialized) {
+          setIsReady(true);
+        } else {
+          // Wait for initialization
+          setTimeout(() => setIsReady(true), 100);
+        }
+      } catch (error) {
+        console.error('Error initializing i18n:', error);
+        setIsReady(true); // Proceed anyway
+      }
+    };
+    
+    initI18n();
+  }, []);
 
   // Load user locale preference from profile
   useEffect(() => {
+    if (!isReady) return;
+
     const loadUserLocale = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
@@ -38,12 +60,14 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
             .from('profiles')
             .select('language')
             .eq('id', user.id)
-            .single();
+            .maybeSingle();
           
           if (profile?.language) {
             const userLocale = profile.language as SupportedLocale;
             setLocaleState(userLocale);
-            await i18n.changeLanguage(userLocale);
+            if (i18n.isInitialized) {
+              await i18n.changeLanguage(userLocale);
+            }
           }
         }
       } catch (error) {
@@ -54,12 +78,15 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     };
     
     loadUserLocale();
-  }, [i18n]);
+  }, [isReady]);
 
   const setLocale = async (newLocale: SupportedLocale) => {
     try {
       setLocaleState(newLocale);
-      await i18n.changeLanguage(newLocale);
+      
+      if (i18n.isInitialized) {
+        await i18n.changeLanguage(newLocale);
+      }
       
       // Save to user profile
       const { data: { user } } = await supabase.auth.getUser();
