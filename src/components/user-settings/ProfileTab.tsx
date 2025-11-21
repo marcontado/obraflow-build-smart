@@ -352,7 +352,13 @@ export function ProfileTab() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => switchWorkspace(workspace.id)}
+                        onClick={async () => {
+                          await switchWorkspace(workspace.id);
+                          toast.success("Workspace alterado", {
+                            description: `Agora você está trabalhando em: ${workspace.name}`,
+                          });
+                          navigate("/");
+                        }}
                         className="flex-1"
                       >
                         Selecionar
