@@ -8,6 +8,7 @@ import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 import { ErrorBoundary } from "@/components/errors/ErrorBoundary";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/auth/AdminRoute";
+import Home from "./pages/Home";
 import Landing from "./pages/Landing";
 import Plans from "./pages/Plans";
 import Terms from "./pages/Terms";
@@ -65,7 +66,8 @@ const App = () => (
             <WorkspaceProvider>
               <Routes>
                 {/* Public Routes */}
-                <Route path="/" element={<Landing />} />
+                <Route path="/" element={<Home />} />
+                <Route path="/landing" element={<Landing />} />
                 <Route path="/plans" element={<Plans />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy" element={<Privacy />} />
@@ -83,7 +85,7 @@ const App = () => (
                 {/* Protected Routes - Workspace */}
                 <Route path="/workspace/select" element={<ProtectedRoute><WorkspaceSelect /></ProtectedRoute>} />
                 <Route path="/workspace/new" element={<ProtectedRoute><WorkspaceNew /></ProtectedRoute>} />
-                <Route path="/workspace/:id/settings" element={<ProtectedRoute><WorkspaceSettings /></ProtectedRoute>} />
+                <Route path="/workspace/:workspaceId/settings" element={<ProtectedRoute><WorkspaceSettings /></ProtectedRoute>} />
                 
                 {/* Protected Routes - App */}
                 <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
