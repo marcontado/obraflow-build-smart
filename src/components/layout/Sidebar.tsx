@@ -6,13 +6,14 @@ import { toast } from "sonner";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from "react-i18next";
+import { useMemo } from "react";
 
 export function Sidebar() {
   const navigate = useNavigate();
   const { hasFeature } = useFeatureAccess();
   const { t } = useTranslation('navigation');
 
-  const navigation = [
+  const navigation = useMemo(() => [
     { name: t('menu.home'), href: "/app", icon: Home },
     { name: t('menu.projects'), href: "/app/projects", icon: FolderKanban },
     { name: t('menu.clients'), href: "/app/clients", icon: Users },
@@ -21,7 +22,7 @@ export function Sidebar() {
     { name: t('menu.financial'), href: "/app/financeiro", icon: DollarSign, alwaysLocked: true },
     { name: t('menu.templates'), href: "/app/templates", icon: FileText, feature: "templates" as const },
     { name: t('menu.support'), href: "/app/suporte", icon: MessageCircle },
-  ];
+  ], [t]);
 
   const handleLogout = async () => {
     const { error } = await authService.signOut();
