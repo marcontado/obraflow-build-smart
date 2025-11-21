@@ -28,13 +28,30 @@ export function SecurityTab() {
   const [newPassword, setNewPassword] = useState("");
   const { t, i18n } = useTranslation('settings');
 
-  // Debug logging
+  // Enhanced debug logging with deep store inspection
   useEffect(() => {
-    console.log('🔒 SecurityTab rendered');
+    const currentLang = i18n.language?.split('-')[0] || 'pt';
+    const settingsData = i18n.store?.data?.[currentLang]?.settings as any;
+    
+    console.log('🔍 SecurityTab Deep Debug:');
     console.log('  - Current language:', i18n.language);
     console.log('  - Has settings namespace:', i18n.hasLoadedNamespace('settings'));
-    console.log('  - Test translation:', t('security.title'));
-    console.log('  - Available namespaces:', i18n.options.ns);
+    console.log('  - Settings data exists in store:', !!settingsData);
+    
+    if (settingsData) {
+      console.log('  - Settings data structure:', Object.keys(settingsData));
+      console.log('  - security object:', settingsData.security);
+      console.log('  - security.changePassword:', settingsData.security?.changePassword);
+    }
+    
+    console.log('  - Direct store access (security.changePassword.title):', 
+      settingsData?.security?.changePassword?.title);
+    console.log('  - t() function (security.title):', t('security.title'));
+    console.log('  - t() function (security.changePassword.title):', t('security.changePassword.title'));
+    console.log('  - t() function (security.changePassword.button):', t('security.changePassword.button'));
+    
+    console.log('🔍 Full i18n store dump for', currentLang, ':', 
+      JSON.stringify(i18n.store?.data?.[currentLang], null, 2).substring(0, 1000));
   }, [i18n, t]);
 
   const {
