@@ -11,6 +11,16 @@ interface UserRoleData {
   isOwner: boolean;
   isAdmin: boolean;
   isMember: boolean;
+  
+  // Permission helpers
+  canManageMembers: boolean;
+  canDeleteWorkspace: boolean;
+  canManageBilling: boolean;
+  canChangeSettings: boolean;
+  canInviteMembers: boolean;
+  canRemoveMembers: boolean;
+  canChangeRoles: boolean;
+  canTransferOwnership: boolean;
 }
 
 export function useUserRole(): UserRoleData {
@@ -54,5 +64,15 @@ export function useUserRole(): UserRoleData {
     isOwner: role === "owner",
     isAdmin: role === "admin",
     isMember: role === "member",
+    
+    // Permission helpers
+    canManageMembers: role === "owner" || role === "admin",
+    canDeleteWorkspace: role === "owner",
+    canManageBilling: role === "owner",
+    canChangeSettings: role === "owner" || role === "admin",
+    canInviteMembers: role === "owner" || role === "admin",
+    canRemoveMembers: role === "owner" || role === "admin",
+    canChangeRoles: role === "owner", // Only owner can change admin roles
+    canTransferOwnership: role === "owner",
   };
 }

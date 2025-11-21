@@ -926,6 +926,10 @@ export type Database = {
         Args: { _removed_by?: string; _user_id: string }
         Returns: undefined
       }
+      transfer_workspace_ownership: {
+        Args: { _new_owner_user_id: string; _workspace_id: string }
+        Returns: undefined
+      }
       update_admin_password: {
         Args: { _new_password: string; _user_id: string }
         Returns: undefined
