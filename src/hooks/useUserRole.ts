@@ -21,6 +21,7 @@ interface UserRoleData {
   canRemoveMembers: boolean;
   canChangeRoles: boolean;
   canTransferOwnership: boolean;
+  canCreateWorkspace: boolean;
 }
 
 export function useUserRole(): UserRoleData {
@@ -74,5 +75,6 @@ export function useUserRole(): UserRoleData {
     canRemoveMembers: role === "owner" || role === "admin",
     canChangeRoles: role === "owner", // Only owner can change admin roles
     canTransferOwnership: role === "owner",
+    canCreateWorkspace: role === "owner" || role === "admin", // Only owners and admins can create workspaces
   };
 }

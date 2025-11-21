@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +17,7 @@ import { PLAN_NAMES } from "@/constants/plans";
 export function WorkspaceSelector() {
   const navigate = useNavigate();
   const { currentWorkspace, workspaces, switchWorkspace, canCreateWorkspace } = useWorkspace();
+  const { canCreateWorkspace: hasRolePermission } = useUserRole();
 
   if (!currentWorkspace) {
     return (
@@ -66,7 +68,7 @@ export function WorkspaceSelector() {
           </DropdownMenuItem>
         ))}
         <DropdownMenuSeparator />
-        {canCreateWorkspace() && (
+        {canCreateWorkspace() && hasRolePermission && (
           <DropdownMenuItem onClick={() => navigate("/workspace/new")}>
             <Plus className="mr-2 h-4 w-4" />
             Criar Workspace

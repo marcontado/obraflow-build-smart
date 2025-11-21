@@ -1,5 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Building2 } from "lucide-react";
@@ -7,7 +10,31 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function WorkspaceSelect() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { workspaces, loading, switchWorkspace, canCreateWorkspace } = useWorkspace();
+  const [hasAdminRole, setHasAdminRole] = useState(false);
+
+  // Check if user has owner or admin role in at least one workspace
+  useEffect(() => {
+    const checkAdminRole = async () => {
+      if (!user?.id || workspaces.length === 0) {
+        setHasAdminRole(false);
+        return;
+      }
+
+      const { data } = await supabase
+        .from("workspace_members")
+        .select("role")
+        .eq("user_id", user.id)
+        .in("role", ["owner", "admin"]);
+
+      setHasAdminRole((data?.length || 0) > 0);
+    };
+
+    checkAdminRole();
+  }, [user?.id, workspaces]);
+
+  const canCreateNewWorkspace = canCreateWorkspace() && hasAdminRole;
 
   const handleSelectWorkspace = async (workspaceId: string) => {
     await switchWorkspace(workspaceId);
@@ -61,7 +88,7 @@ export default function WorkspaceSelect() {
             </Card>
           ))}
 
-          {canCreateWorkspace() && (
+          {canCreateNewWorkspace && (
             <Card
               className="cursor-pointer border-dashed transition-colors hover:border-primary"
               onClick={() => navigate("/workspace/new")}

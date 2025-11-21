@@ -26,6 +26,12 @@ export function ProfileTab() {
   const [profile, setProfile] = useState<any>(null);
   const [workspaceRoles, setWorkspaceRoles] = useState<Record<string, string>>({});
 
+  // Check if user has owner or admin role in at least one workspace
+  const hasAdminRole = Object.values(workspaceRoles).some(
+    role => role === 'owner' || role === 'admin'
+  );
+  const canCreateNewWorkspace = canCreateWorkspace() && hasAdminRole;
+
   const {
     register,
     handleSubmit,
@@ -276,7 +282,7 @@ export function ProfileTab() {
           </div>
           <Button 
             onClick={() => navigate("/workspace/new")}
-            disabled={!canCreateWorkspace()}
+            disabled={!canCreateNewWorkspace}
             variant="default"
             size="sm"
           >
