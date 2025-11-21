@@ -1,4 +1,4 @@
-import { Bell, LogOut, Settings, Users, Building2 } from "lucide-react";
+import { Bell, LogOut, Settings, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -15,8 +15,6 @@ import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useState } from "react";
-import { InviteModal } from "@/components/workspaces/InviteModal";
 
 interface HeaderProps {
   title: string;
@@ -38,9 +36,8 @@ const roleLabels = {
 export function Header({ title, subtitle }: HeaderProps) {
   const { user, signOut } = useAuth();
   const { currentWorkspace } = useWorkspace();
-  const { role, isOwner, isAdmin } = useUserRole();
+  const { role } = useUserRole();
   const navigate = useNavigate();
-  const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
   const handleSignOut = async () => {
     try {
@@ -93,12 +90,6 @@ export function Header({ title, subtitle }: HeaderProps) {
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Configurações</span>
               </DropdownMenuItem>
-              {(isOwner || isAdmin) && (
-                <DropdownMenuItem onClick={() => setInviteModalOpen(true)} className="cursor-pointer">
-                  <Users className="mr-2 h-4 w-4" />
-                  <span>Convidar Membros</span>
-                </DropdownMenuItem>
-              )}
               {currentWorkspace && (
                 <DropdownMenuItem onClick={() => navigate(`/workspace/${currentWorkspace.id}/settings`)} className="cursor-pointer">
                   <Building2 className="mr-2 h-4 w-4" />
@@ -114,15 +105,6 @@ export function Header({ title, subtitle }: HeaderProps) {
           </DropdownMenu>
         </div>
       </div>
-
-      {currentWorkspace && (
-        <InviteModal
-          open={inviteModalOpen}
-          onClose={() => setInviteModalOpen(false)}
-          onSuccess={() => setInviteModalOpen(false)}
-          workspaceId={currentWorkspace.id}
-        />
-      )}
     </header>
   );
 }
