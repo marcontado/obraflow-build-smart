@@ -1,4 +1,5 @@
 import "@/lib/i18n";
+import { Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +10,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 import { LocaleProvider } from "@/contexts/LocaleContext";
 import { ErrorBoundary } from "@/components/errors/ErrorBoundary";
+import { I18nLoader } from "@/components/providers/I18nLoader";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/auth/AdminRoute";
 import Home from "./pages/Home";
@@ -58,15 +60,26 @@ const LegacyProjectRedirect = () => {
   return <Navigate to={`/app/projects/${id}`} replace />;
 };
 
+const LoadingFallback = () => (
+  <div className="flex h-screen w-screen items-center justify-center bg-background">
+    <div className="text-center space-y-4">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+      <p className="text-sm text-muted-foreground">Carregando...</p>
+    </div>
+  </div>
+);
+
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <LocaleProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+        <Suspense fallback={<LoadingFallback />}>
+          <I18nLoader>
+            <LocaleProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
               <AuthProvider>
                 <WorkspaceProvider>
                 <Routes>
@@ -135,6 +148,8 @@ const App = () => (
           </BrowserRouter>
         </TooltipProvider>
       </LocaleProvider>
+    </I18nLoader>
+  </Suspense>
     </ThemeProvider>
     </QueryClientProvider>
   </ErrorBoundary>
