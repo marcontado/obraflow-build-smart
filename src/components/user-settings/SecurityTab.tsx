@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -26,7 +26,16 @@ type ChangePasswordData = z.infer<typeof changePasswordSchema>;
 export function SecurityTab() {
   const [loading, setLoading] = useState(false);
   const [newPassword, setNewPassword] = useState("");
-  const { t } = useTranslation('settings');
+  const { t, i18n } = useTranslation('settings');
+
+  // Debug logging
+  useEffect(() => {
+    console.log('🔒 SecurityTab rendered');
+    console.log('  - Current language:', i18n.language);
+    console.log('  - Has settings namespace:', i18n.hasLoadedNamespace('settings'));
+    console.log('  - Test translation:', t('security.title'));
+    console.log('  - Available namespaces:', i18n.options.ns);
+  }, [i18n, t]);
 
   const {
     register,
@@ -62,6 +71,18 @@ export function SecurityTab() {
 
   return (
     <div className="space-y-6 p-6">
+      {/* Debug Info - TEMPORARY */}
+      <div className="rounded-lg border-2 border-yellow-500 bg-yellow-50 dark:bg-yellow-950 p-4 mb-4">
+        <h4 className="font-bold text-yellow-800 dark:text-yellow-200 mb-2">🔍 DEBUG INFO (temporário)</h4>
+        <div className="text-xs space-y-1 font-mono">
+          <div>Language: {i18n.language}</div>
+          <div>Namespace loaded: {i18n.hasLoadedNamespace('settings') ? '✅' : '❌'}</div>
+          <div>Translation test: "{t('security.title')}"</div>
+          <div>Raw key test: "security.changePassword.title" → "{t('security.changePassword.title')}"</div>
+          <div>Available namespaces: {JSON.stringify(i18n.options.ns)}</div>
+        </div>
+      </div>
+
       <div>
         <h3 className="text-lg font-semibold text-foreground">{t('security.title')}</h3>
         <p className="text-sm text-muted-foreground">

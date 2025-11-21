@@ -75,8 +75,8 @@ const App = () => (
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <Suspense fallback={<LoadingFallback />}>
           <I18nLoader>
-            <LocaleProvider>
-              <TooltipProvider>
+            <TooltipProvider>
+              <LocaleProvider>
                 <Toaster />
                 <Sonner />
                 <BrowserRouter>
@@ -146,8 +146,8 @@ const App = () => (
               </WorkspaceProvider>
             </AuthProvider>
           </BrowserRouter>
-        </TooltipProvider>
-      </LocaleProvider>
+        </LocaleProvider>
+      </TooltipProvider>
     </I18nLoader>
   </Suspense>
     </ThemeProvider>

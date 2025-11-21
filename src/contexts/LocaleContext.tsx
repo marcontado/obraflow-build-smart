@@ -24,56 +24,89 @@ const localeMap = {
 };
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<SupportedLocale>('pt');
+  const [locale, setLocaleState] = useState<SupportedLocale>(() => {
+    // Initialize with i18n's current language if available
+    const currentLang = i18n.language?.split('-')[0] as SupportedLocale;
+    return ['pt', 'en', 'es'].includes(currentLang) ? currentLang : 'pt';
+  });
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load user locale preference from profile
+  // Wait for i18n to be ready before loading user locale
   useEffect(() => {
-    const loadUserLocale = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('language')
-            .eq('id', user.id)
-            .maybeSingle();
-          
-          if (profile?.language) {
-            const userLocale = profile.language as SupportedLocale;
-            setLocaleState(userLocale);
-            if (i18n.isInitialized) {
-              await i18n.changeLanguage(userLocale);
-            }
-          } else {
-            // Set default language if no preference
-            setLocaleState('pt');
+    const waitForI18n = async () => {
+      // Ensure i18n is fully initialized
+      if (!i18n.isInitialized) {
+        console.log('LocaleProvider: Waiting for i18n initialization...');
+        await new Promise(resolve => setTimeout(resolve, 100));
+        return waitForI18n();
+      }
+      return true;
+    };
+
+    waitForI18n().then(() => {
+      console.log('LocaleProvider: i18n is ready, loading user locale');
+      loadUserLocale();
+    });
+  }, []);
+
+  // Load user locale preference from profile
+  const loadUserLocale = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('language')
+          .eq('id', user.id)
+          .maybeSingle();
+        
+        if (profile?.language) {
+          const userLocale = profile.language as SupportedLocale;
+          console.log('LocaleProvider: Setting user locale to', userLocale);
+          setLocaleState(userLocale);
+          if (i18n.isInitialized) {
+            await i18n.changeLanguage(userLocale);
+            console.log('LocaleProvider: Changed i18n language to', userLocale);
+          }
+        } else {
+          // Set default language if no preference
+          console.log('LocaleProvider: No user preference, using default pt');
+          setLocaleState('pt');
+          if (i18n.isInitialized) {
             await i18n.changeLanguage('pt');
           }
         }
-      } catch (error) {
-        console.error('Error loading user locale:', error);
-      } finally {
-        setIsLoading(false);
+      } else {
+        // No user logged in, use default
+        console.log('LocaleProvider: No user, using default pt');
+        setLocaleState('pt');
+        if (i18n.isInitialized) {
+          await i18n.changeLanguage('pt');
+        }
       }
-    };
-    
-    loadUserLocale();
-  }, []);
+    } catch (error) {
+      console.error('LocaleProvider: Error loading user locale:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Sync i18n when locale changes
   useEffect(() => {
     if (i18n.isInitialized && i18n.language !== locale) {
+      console.log('LocaleProvider: Syncing i18n language from', i18n.language, 'to', locale);
       i18n.changeLanguage(locale);
     }
   }, [locale]);
 
   const setLocale = async (newLocale: SupportedLocale) => {
     try {
+      console.log('LocaleProvider: Setting locale to', newLocale);
       setLocaleState(newLocale);
       
       if (i18n.isInitialized) {
         await i18n.changeLanguage(newLocale);
+        console.log('LocaleProvider: Changed i18n language to', newLocale);
       }
       
       // Save to user profile
@@ -93,7 +126,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
         );
       }
     } catch (error) {
-      console.error('Error setting locale:', error);
+      console.error('LocaleProvider: Error setting locale:', error);
       toast.error(
         locale === 'pt' ? 'Erro ao alterar idioma' :
         locale === 'en' ? 'Error changing language' :
@@ -113,10 +146,17 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     })
   };
 
-  // Don't render children until locale is loaded
+  // Show loading state while initializing
   if (isLoading) {
-    return null;
+    console.log('LocaleProvider: Still loading...');
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
+
+  console.log('LocaleProvider: Ready, rendering children with locale:', locale);
 
   return (
     <LocaleContext.Provider value={value} key={locale}>
