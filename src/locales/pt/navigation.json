@@ -5,7 +5,9 @@
     "clients": "Clientes",
     "partners": "Parceiros",
     "reports": "Relatórios",
-    "templates": "Modelos",
+    "financial": "Financeiro",
+    "templates": "Templates de Documentos",
+    "support": "Suporte",
     "documents": "Documentos",
     "settings": "Configurações",
     "admin": "Administração",
@@ -24,5 +26,22 @@
     "create": "Criar Workspace",
     "settings": "Configurações do Workspace",
     "switch": "Trocar Workspace"
+  },
+  "header": {
+    "myAccount": "Minha Conta",
+    "themeLight": "Mudar para tema claro",
+    "themeDark": "Mudar para tema escuro",
+    "signOut": "Sair",
+    "signOutSuccess": "Sessão encerrada com sucesso",
+    "signOutError": "Erro ao sair"
+  },
+  "roles": {
+    "owner": "Proprietário",
+    "admin": "Administrador",
+    "member": "Membro"
+  },
+  "locked": {
+    "development": "Em desenvolvimento",
+    "upgradeRequired": "Disponível nos planos Studio e Domus"
   }
 }

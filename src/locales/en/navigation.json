@@ -5,7 +5,9 @@
     "clients": "Clients",
     "partners": "Partners",
     "reports": "Reports",
-    "templates": "Templates",
+    "financial": "Financial",
+    "templates": "Document Templates",
+    "support": "Support",
     "documents": "Documents",
     "settings": "Settings",
     "admin": "Administration",
@@ -24,5 +26,22 @@
     "create": "Create Workspace",
     "settings": "Workspace Settings",
     "switch": "Switch Workspace"
+  },
+  "header": {
+    "myAccount": "My Account",
+    "themeLight": "Switch to light theme",
+    "themeDark": "Switch to dark theme",
+    "signOut": "Sign Out",
+    "signOutSuccess": "Signed out successfully",
+    "signOutError": "Error signing out"
+  },
+  "roles": {
+    "owner": "Owner",
+    "admin": "Administrator",
+    "member": "Member"
+  },
+  "locked": {
+    "development": "In development",
+    "upgradeRequired": "Available in Studio and Domus plans"
   }
 }
