@@ -6,7 +6,9 @@ import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
+import { LocaleProvider } from "@/contexts/LocaleContext";
 import { ErrorBoundary } from "@/components/errors/ErrorBoundary";
+import "@/lib/i18n";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/auth/AdminRoute";
 import Home from "./pages/Home";
@@ -60,13 +62,14 @@ const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AuthProvider>
-              <WorkspaceProvider>
-              <Routes>
+        <LocaleProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AuthProvider>
+                <WorkspaceProvider>
+                <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<Home />} />
                 <Route path="/landing" element={<Landing />} />
@@ -126,11 +129,12 @@ const App = () => (
                 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
-              </Routes>
-            </WorkspaceProvider>
-          </AuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
+                </Routes>
+              </WorkspaceProvider>
+            </AuthProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </LocaleProvider>
     </ThemeProvider>
     </QueryClientProvider>
   </ErrorBoundary>
