@@ -11,7 +11,7 @@ export default function WorkspaceSelect() {
 
   const handleSelectWorkspace = async (workspaceId: string) => {
     await switchWorkspace(workspaceId);
-    navigate(`/workspace/${workspaceId}/settings`);
+    navigate("/");
   };
 
   if (loading) {
