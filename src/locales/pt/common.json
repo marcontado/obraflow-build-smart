@@ -1,0 +1,65 @@
+{
+  "buttons": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "create": "Criar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "previous": "Anterior",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar",
+    "add": "Adicionar",
+    "remove": "Remover",
+    "close": "Fechar",
+    "confirm": "Confirmar",
+    "yes": "Sim",
+    "no": "Não",
+    "view": "Visualizar",
+    "download": "Baixar",
+    "upload": "Enviar",
+    "update": "Atualizar"
+  },
+  "status": {
+    "active": "Ativo",
+    "inactive": "Inativo",
+    "pending": "Pendente",
+    "completed": "Concluído",
+    "cancelled": "Cancelado"
+  },
+  "messages": {
+    "loading": "Carregando...",
+    "saving": "Salvando...",
+    "deleting": "Excluindo...",
+    "success": "Sucesso!",
+    "error": "Erro",
+    "noData": "Nenhum dado disponível",
+    "noResults": "Nenhum resultado encontrado",
+    "confirmDelete": "Tem certeza que deseja excluir?",
+    "unsavedChanges": "Você tem alterações não salvas",
+    "required": "Campo obrigatório",
+    "invalidEmail": "Email inválido",
+    "invalidPhone": "Telefone inválido"
+  },
+  "time": {
+    "today": "Hoje",
+    "yesterday": "Ontem",
+    "tomorrow": "Amanhã",
+    "week": "Semana",
+    "month": "Mês",
+    "year": "Ano",
+    "date": "Data",
+    "time": "Hora"
+  },
+  "currency": "R$",
+  "pagination": {
+    "showing": "Mostrando",
+    "of": "de",
+    "results": "resultados",
+    "page": "Página",
+    "perPage": "Por página"
+  }
+}

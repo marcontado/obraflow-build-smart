@@ -1,0 +1,68 @@
+{
+  "title": "Settings",
+  "tabs": {
+    "profile": "Profile",
+    "security": "Security",
+    "workspace": "Workspace",
+    "notifications": "Notifications",
+    "appearance": "Appearance",
+    "activity": "Activity",
+    "privacy": "Privacy"
+  },
+  "profile": {
+    "title": "Profile Information",
+    "fullName": "Full name",
+    "email": "Email",
+    "phone": "Phone",
+    "avatar": "Profile picture",
+    "changeAvatar": "Change picture",
+    "save": "Save changes",
+    "success": "Profile updated successfully!",
+    "error": "Error updating profile"
+  },
+  "appearance": {
+    "title": "Appearance",
+    "theme": {
+      "title": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System",
+      "description": {
+        "light": "Light theme for better daytime viewing",
+        "dark": "Dark theme to reduce eye strain",
+        "system": "Automatically syncs with system settings"
+      }
+    },
+    "language": {
+      "title": "Language",
+      "pt": "Português",
+      "en": "English",
+      "es": "Español",
+      "description": {
+        "pt": "Portuguese (Brazil)",
+        "en": "English (US)",
+        "es": "Spanish"
+      }
+    }
+  },
+  "security": {
+    "title": "Security",
+    "changePassword": "Change password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm new password",
+    "twoFactor": "Two-factor authentication",
+    "sessions": "Active sessions",
+    "success": "Password changed successfully!",
+    "error": "Error changing password"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "email": "Email notifications",
+    "push": "Push notifications",
+    "projectUpdates": "Project updates",
+    "taskAssignments": "Task assignments",
+    "comments": "Comments",
+    "mentions": "Mentions"
+  }
+}

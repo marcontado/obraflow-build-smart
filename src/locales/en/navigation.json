@@ -1,0 +1,28 @@
+{
+  "menu": {
+    "home": "Home",
+    "projects": "Projects",
+    "clients": "Clients",
+    "partners": "Partners",
+    "reports": "Reports",
+    "templates": "Templates",
+    "documents": "Documents",
+    "settings": "Settings",
+    "admin": "Administration",
+    "logout": "Sign Out"
+  },
+  "breadcrumb": {
+    "home": "Home",
+    "projects": "Projects",
+    "projectDetails": "Project Details",
+    "clients": "Clients",
+    "settings": "Settings"
+  },
+  "workspace": {
+    "title": "Workspace",
+    "select": "Select Workspace",
+    "create": "Create Workspace",
+    "settings": "Workspace Settings",
+    "switch": "Switch Workspace"
+  }
+}
