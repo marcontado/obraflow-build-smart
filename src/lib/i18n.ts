@@ -38,55 +38,94 @@ import dashboardES from '@/locales/es/dashboard.json';
 import tasksES from '@/locales/es/tasks.json';
 import partnersES from '@/locales/es/partners.json';
 
-// Configure i18n with proper error handling
+/**
+ * Helper function to safely access nested keys in translation objects
+ */
+function deepGet(obj: any, path: string): any {
+  const keys = path.split('.');
+  let current = obj;
+  for (const key of keys) {
+    if (current && typeof current === 'object' && key in current) {
+      current = current[key];
+    } else {
+      return undefined;
+    }
+  }
+  return current;
+}
+
+/**
+ * Verify that critical nested keys exist in translation data
+ */
+function verifyCriticalKeys(lng: string, namespace: string, keys: string[]): boolean {
+  const data = i18n.store?.data?.[lng]?.[namespace];
+  if (!data) {
+    console.error(`❌ Namespace ${namespace} not found for language ${lng}`);
+    return false;
+  }
+
+  for (const key of keys) {
+    const value = deepGet(data, key);
+    if (!value || typeof value !== 'string') {
+      console.error(`❌ Critical key missing: ${lng}.${namespace}.${key}`, { value, fullData: data });
+      return false;
+    }
+    console.log(`✅ Critical key verified: ${lng}.${namespace}.${key} = "${value}"`);
+  }
+  return true;
+}
+
+// Configure i18n with proper error handling and deep verification
 const initI18n = async () => {
+  console.log('🔄 Initializing i18n...');
+  
   await i18n
     .use(LanguageDetector)
     .use(initReactI18next)
     .init({
       resources: {
-      pt: {
-        common: commonPT,
-        auth: authPT,
-        navigation: navigationPT,
-        settings: settingsPT,
-        projects: projectsPT,
-        clients: clientsPT,
-        errors: errorsPT,
-        dashboard: dashboardPT,
-        tasks: tasksPT,
-        partners: partnersPT,
+        pt: {
+          common: commonPT,
+          auth: authPT,
+          navigation: navigationPT,
+          settings: settingsPT,
+          projects: projectsPT,
+          clients: clientsPT,
+          errors: errorsPT,
+          dashboard: dashboardPT,
+          tasks: tasksPT,
+          partners: partnersPT,
+        },
+        en: {
+          common: commonEN,
+          auth: authEN,
+          navigation: navigationEN,
+          settings: settingsEN,
+          projects: projectsEN,
+          clients: clientsEN,
+          errors: errorsEN,
+          dashboard: dashboardEN,
+          tasks: tasksEN,
+          partners: partnersEN,
+        },
+        es: {
+          common: commonES,
+          auth: authES,
+          navigation: navigationES,
+          settings: settingsES,
+          projects: projectsES,
+          clients: clientsES,
+          errors: errorsES,
+          dashboard: dashboardES,
+          tasks: tasksES,
+          partners: partnersES,
+        },
       },
-      en: {
-        common: commonEN,
-        auth: authEN,
-        navigation: navigationEN,
-        settings: settingsEN,
-        projects: projectsEN,
-        clients: clientsEN,
-        errors: errorsEN,
-        dashboard: dashboardEN,
-        tasks: tasksEN,
-        partners: partnersEN,
-      },
-      es: {
-        common: commonES,
-        auth: authES,
-        navigation: navigationES,
-        settings: settingsES,
-        projects: projectsES,
-        clients: clientsES,
-        errors: errorsES,
-        dashboard: dashboardES,
-        tasks: tasksES,
-        partners: partnersES,
-      },
-    },
       fallbackLng: 'pt',
       defaultNS: 'common',
       ns: ['common', 'auth', 'navigation', 'settings', 'projects', 'clients', 'errors', 'dashboard', 'tasks', 'partners'],
       preload: ['pt', 'en', 'es'],
-      load: 'languageOnly', // Load only 'pt', not 'pt-BR'
+      load: 'languageOnly',
       interpolation: {
         escapeValue: false,
       },
@@ -103,24 +142,51 @@ const initI18n = async () => {
         transSupportBasicHtmlNodes: true,
         transKeepBasicHtmlNodesFor: ['br', 'strong', 'i', 'p'],
       },
-      // Debug missing keys
       saveMissing: true,
       missingKeyHandler: (lngs, ns, key, fallbackValue) => {
-        console.warn(`🔴 Missing translation key: [${ns}] ${key} for languages:`, lngs);
+        console.error(`❌ Missing translation key: [${lngs}] ${ns}:${key}`, { fallbackValue });
       },
-      // Ensure all namespaces are loaded
       partialBundledLanguages: false,
     });
 
-  // Ensure all namespaces are loaded for all languages
-  await Promise.all([
-    i18n.loadNamespaces(['common', 'auth', 'navigation', 'settings', 'projects', 'clients', 'errors', 'dashboard', 'tasks', 'partners']),
-  ]);
-
-  console.log('✅ i18n fully initialized with all namespaces');
-  console.log('Available namespaces:', i18n.options.ns);
+  console.log('✅ i18n initialized');
   console.log('Current language:', i18n.language);
-  console.log('Loaded resources:', Object.keys(i18n.store.data));
+  console.log('Available languages:', i18n.languages);
+  console.log('Loaded namespaces:', Object.keys(i18n.store?.data?.[i18n.language] || {}));
+
+  // Load all namespaces for all languages
+  const namespaces = ['common', 'auth', 'navigation', 'settings', 'projects', 'clients', 'errors', 'dashboard', 'tasks', 'partners'];
+  const languages = ['pt', 'en', 'es'];
+  
+  console.log('📦 Loading all namespaces for all languages...');
+  for (const lang of languages) {
+    await i18n.loadNamespaces(namespaces);
+  }
+  
+  // CRITICAL: Wait for store synchronization
+  await new Promise(resolve => setTimeout(resolve, 500));
+  console.log('✅ All namespaces loaded, store synchronized');
+  
+  // Verify critical nested keys
+  const currentLang = i18n.language?.split('-')[0] || 'pt';
+  const criticalKeysTests = [
+    { ns: 'settings', keys: ['security.title', 'security.changePassword.title', 'security.changePassword.button'] },
+    { ns: 'navigation', keys: ['menu.support', 'menu.financial', 'roles.owner'] },
+    { ns: 'projects', keys: ['card.progress', 'card.until', 'card.budgetUsed'] },
+  ];
+  
+  console.log('🔍 Verifying critical nested keys...');
+  for (const test of criticalKeysTests) {
+    const verified = verifyCriticalKeys(currentLang, test.ns, test.keys);
+    if (!verified) {
+      console.error(`❌ Critical key verification failed for ${test.ns}`);
+    }
+  }
+  
+  console.log('🔍 Testing t() function with nested keys...');
+  console.log('  - t("security.changePassword.title", { ns: "settings" }):', i18n.t('security.changePassword.title', { ns: 'settings' }));
+  console.log('  - t("menu.support", { ns: "navigation" }):', i18n.t('menu.support', { ns: 'navigation' }));
+  console.log('  - t("card.progress", { ns: "projects" }):', i18n.t('card.progress', { ns: 'projects' }));
   
   return i18n;
 };
