@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Phone, MapPin } from "lucide-react";
 import { StarRating } from "./StarRating";
 import type { Database } from "@/integrations/supabase/types";
+import { useTranslation } from "react-i18next";
 
 type Partner = Database["public"]["Tables"]["partners"]["Row"];
 
@@ -12,6 +13,8 @@ interface PartnerCardProps {
 }
 
 export function PartnerCard({ partner, onViewDetails }: PartnerCardProps) {
+  const { t } = useTranslation('partners');
+  
   return (
     <div className="group flex gap-4 items-start p-5 bg-card rounded-xl shadow-sm border border-border hover:shadow-elegant hover:-translate-y-1 transition-all duration-300">
       <div className="flex-shrink-0">
@@ -41,12 +44,12 @@ export function PartnerCard({ partner, onViewDetails }: PartnerCardProps) {
                 : "bg-muted text-muted-foreground"
             }
           >
-            {partner.status}
+            {partner.status === "ativo" ? t('status.active') : t('status.inactive')}
           </Badge>
         </div>
 
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-          <span className="font-medium">{partner.category}</span>
+          <span className="font-medium">{t(`categories.${partner.category}`)}</span>
           {partner.city && (
             <>
               <span>•</span>
@@ -79,7 +82,7 @@ export function PartnerCard({ partner, onViewDetails }: PartnerCardProps) {
         onClick={() => onViewDetails(partner)}
         className="flex-shrink-0 font-semibold"
       >
-        Ver detalhes
+        {t('actions.viewDetails')}
       </Button>
     </div>
   );

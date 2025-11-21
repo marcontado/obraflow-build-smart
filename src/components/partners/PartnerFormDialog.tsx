@@ -12,6 +12,7 @@ import { X } from "lucide-react";
 import { StarRating } from "./StarRating";
 import { partnerSchema, PARTNER_CATEGORIES, type PartnerFormData } from "@/schemas/partner.schema";
 import type { Database } from "@/integrations/supabase/types";
+import { useTranslation } from "react-i18next";
 
 type Partner = Database["public"]["Tables"]["partners"]["Row"];
 
@@ -23,6 +24,7 @@ interface PartnerFormDialogProps {
 }
 
 export function PartnerFormDialog({ open, onOpenChange, onSubmit, partner }: PartnerFormDialogProps) {
+  const { t } = useTranslation('partners');
   const [tagInput, setTagInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -134,14 +136,14 @@ export function PartnerFormDialog({ open, onOpenChange, onSubmit, partner }: Par
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-heading text-2xl">
-            {partner ? "Editar Parceiro" : "Adicionar Parceiro"}
+            {partner ? t('form.titleEdit') : t('form.titleAdd')}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-6">
           {/* Nome */}
           <div>
-            <Label htmlFor="name">Nome da Empresa ou Profissional *</Label>
+            <Label htmlFor="name">{t('form.name')} *</Label>
             <Input id="name" {...register("name")} className="mt-1" />
             {errors.name && (
               <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
@@ -151,15 +153,15 @@ export function PartnerFormDialog({ open, onOpenChange, onSubmit, partner }: Par
           {/* Categoria e Status */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="category">Categoria *</Label>
+              <Label htmlFor="category">{t('form.category')} *</Label>
               <Select value={category} onValueChange={(value) => setValue("category", value)}>
                 <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Selecione..." />
+                  <SelectValue placeholder={t('form.select')} />
                 </SelectTrigger>
                 <SelectContent>
                   {PARTNER_CATEGORIES.map((cat) => (
                     <SelectItem key={cat} value={cat}>
-                      {cat}
+                      {t(`categories.${cat}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -170,14 +172,14 @@ export function PartnerFormDialog({ open, onOpenChange, onSubmit, partner }: Par
             </div>
 
             <div>
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="status">{t('form.status')}</Label>
               <Select value={status} onValueChange={(value) => setValue("status", value as "ativo" | "inativo")}>
                 <SelectTrigger className="mt-1">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ativo">Ativo</SelectItem>
-                  <SelectItem value="inativo">Inativo</SelectItem>
+                  <SelectItem value="ativo">{t('status.active')}</SelectItem>
+                  <SelectItem value="inativo">{t('status.inactive')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -185,7 +187,7 @@ export function PartnerFormDialog({ open, onOpenChange, onSubmit, partner }: Par
 
           {/* Tags */}
           <div>
-            <Label htmlFor="tags">Etiquetas (especialidades)</Label>
+            <Label htmlFor="tags">{t('form.tags')}</Label>
             <div className="flex gap-2 mt-1">
               <Input
                 value={tagInput}
@@ -196,11 +198,11 @@ export function PartnerFormDialog({ open, onOpenChange, onSubmit, partner }: Par
                     handleAddTag();
                   }
                 }}
-                placeholder="Digite e pressione Enter"
+                placeholder={t('form.tagsPlaceholder')}
                 disabled={tags.length >= 10}
               />
               <Button type="button" onClick={handleAddTag} disabled={!tagInput.trim() || tags.length >= 10}>
-                Adicionar
+                {t('form.tagsAdd')}
               </Button>
             </div>
             {tags.length > 0 && (
@@ -220,18 +222,18 @@ export function PartnerFormDialog({ open, onOpenChange, onSubmit, partner }: Par
               </div>
             )}
             <p className="text-xs text-muted-foreground mt-1">
-              Máximo de 10 etiquetas ({tags.length}/10)
+              {t('form.tagsLimit')} ({tags.length}/10)
             </p>
           </div>
 
           {/* Contato */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="phone">Telefone</Label>
-              <Input id="phone" {...register("phone")} className="mt-1" placeholder="(11) 99999-9999" />
+              <Label htmlFor="phone">{t('form.phone')}</Label>
+              <Input id="phone" {...register("phone")} className="mt-1" placeholder={t('form.phonePlaceholder')} />
             </div>
             <div>
-              <Label htmlFor="email">E-mail</Label>
+              <Label htmlFor="email">{t('form.email')}</Label>
               <Input id="email" type="email" {...register("email")} className="mt-1" />
               {errors.email && (
                 <p className="text-sm text-destructive mt-1">{errors.email.message}</p>
@@ -241,28 +243,28 @@ export function PartnerFormDialog({ open, onOpenChange, onSubmit, partner }: Par
 
           {/* Endereço */}
           <div>
-            <Label htmlFor="address">Endereço</Label>
+            <Label htmlFor="address">{t('form.address')}</Label>
             <Input id="address" {...register("address")} className="mt-1" />
           </div>
 
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <Label htmlFor="city">Cidade</Label>
+              <Label htmlFor="city">{t('form.city')}</Label>
               <Input id="city" {...register("city")} className="mt-1" />
             </div>
             <div>
-              <Label htmlFor="state">Estado</Label>
-              <Input id="state" {...register("state")} className="mt-1" placeholder="SP" maxLength={2} />
+              <Label htmlFor="state">{t('form.state')}</Label>
+              <Input id="state" {...register("state")} className="mt-1" placeholder={t('form.statePlaceholder')} maxLength={2} />
             </div>
             <div>
-              <Label htmlFor="zip_code">CEP</Label>
-              <Input id="zip_code" {...register("zip_code")} className="mt-1" placeholder="00000-000" />
+              <Label htmlFor="zip_code">{t('form.zipCode')}</Label>
+              <Input id="zip_code" {...register("zip_code")} className="mt-1" placeholder={t('form.zipCodePlaceholder')} />
             </div>
           </div>
 
           {/* Avaliação */}
           <div>
-            <Label>Avaliação</Label>
+            <Label>{t('form.rating')}</Label>
             <div className="mt-2">
               <StarRating value={rating} onChange={(value) => setValue("rating", value)} size="lg" />
             </div>
@@ -270,39 +272,39 @@ export function PartnerFormDialog({ open, onOpenChange, onSubmit, partner }: Par
 
           {/* Diferencial */}
           <div>
-            <Label htmlFor="diferencial">Diferencial / Experiência</Label>
+            <Label htmlFor="diferencial">{t('form.differential')}</Label>
             <Textarea
               id="diferencial"
               {...register("diferencial")}
               className="mt-1"
               rows={2}
               maxLength={200}
-              placeholder="Ex: Especialista em obras residenciais de alto padrão"
+              placeholder={t('form.differentialPlaceholder')}
             />
             <p className="text-xs text-muted-foreground mt-1">
-              {(watch("diferencial") || "").length}/200 caracteres
+              {(watch("diferencial") || "").length}/200 {t('form.differentialLimit')}
             </p>
           </div>
 
           {/* Notas */}
           <div>
-            <Label htmlFor="notes">Notas Internas</Label>
+            <Label htmlFor="notes">{t('form.notes')}</Label>
             <Textarea
               id="notes"
               {...register("notes")}
               className="mt-1"
               rows={3}
-              placeholder="Observações internas sobre o parceiro..."
+              placeholder={t('form.notesPlaceholder')}
             />
           </div>
 
           {/* Botões */}
           <div className="flex justify-end gap-3 pt-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
+              {t('actions.cancel')}
             </Button>
             <Button type="submit" disabled={submitting}>
-              {submitting ? "Salvando..." : "Salvar"}
+              {submitting ? t('actions.saving') : t('actions.save')}
             </Button>
           </div>
         </form>

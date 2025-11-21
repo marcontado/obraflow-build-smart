@@ -15,7 +15,8 @@ const REQUIRED_NAMESPACES = [
   'clients',
   'dashboard',
   'tasks',
-  'errors'
+  'errors',
+  'partners'
 ];
 
 export function I18nLoader({ children }: I18nLoaderProps) {
