@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { useLocale } from "@/contexts/LocaleContext";
 import { format } from "date-fns";
+import { useMemo } from "react";
 
 interface ProjectCardProps {
   id: string;
@@ -39,7 +40,7 @@ export function ProjectCard({
   endDate,
   onClick,
 }: ProjectCardProps) {
-  const { t } = useTranslation('projects');
+  const { t, i18n } = useTranslation('projects');
   const { currencySymbol, numberFormat, dateLocale } = useLocale();
   const budgetPercentage = budget && spent ? (spent / budget) * 100 : 0;
 
@@ -51,6 +52,18 @@ export function ProjectCard({
       return dateStr;
     }
   };
+
+  // Memoize translations to force re-render on language change
+  const translations = useMemo(() => {
+    console.log('🎨 ProjectCard re-rendering with language:', i18n.language);
+    return {
+      status: t(`status.${status}`),
+      progress: t('card.progress'),
+      budget: t('card.budget'),
+      budgetUsed: t('card.budgetUsed', { percent: budgetPercentage.toFixed(0) }),
+      until: t('card.until')
+    };
+  }, [t, status, budgetPercentage, i18n.language]);
 
   return (
     <Card
@@ -64,7 +77,7 @@ export function ProjectCard({
             variant="outline"
             className={cn("border", statusColors[status as keyof typeof statusColors])}
           >
-            {t(`status.${status}`)}
+            {translations.status}
           </Badge>
         </div>
         {client && <p className="text-sm text-muted-foreground">{client}</p>}
@@ -73,7 +86,7 @@ export function ProjectCard({
       <CardContent className="space-y-4">
         <div>
           <div className="mb-2 flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">{t('card.progress')}</span>
+            <span className="text-muted-foreground">{translations.progress}</span>
             <span className="font-medium">{progress}%</span>
           </div>
           <Progress value={progress} className="h-2" />
@@ -83,13 +96,13 @@ export function ProjectCard({
           <div className="flex items-center justify-between rounded-lg bg-muted/50 p-3">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">{t('card.budget')}</span>
+              <span className="text-sm text-muted-foreground">{translations.budget}</span>
             </div>
             <div className="text-right">
               <p className="text-sm font-medium">
                 {currencySymbol} {numberFormat.format(spent)} / {currencySymbol} {numberFormat.format(budget)}
               </p>
-              <p className="text-xs text-muted-foreground">{t('card.budgetUsed', { percent: budgetPercentage.toFixed(0) })}</p>
+              <p className="text-xs text-muted-foreground">{translations.budgetUsed}</p>
             </div>
           </div>
         )}
@@ -103,7 +116,7 @@ export function ProjectCard({
           )}
           {endDate && (
             <div className="flex items-center gap-1">
-              <span>{t('card.until')} {formatDate(endDate)}</span>
+              <span>{translations.until} {formatDate(endDate)}</span>
             </div>
           )}
         </div>
