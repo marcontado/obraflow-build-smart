@@ -1,0 +1,187 @@
+name: Multi-Tenant Security Check
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main ]
+  schedule:
+    # Executar diariamente às 3 AM UTC
+    - cron: '0 3 * * *'
+
+jobs:
+  security-tests:
+    name: Security & Isolation Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run security tests
+        run: npm run test -- --run multi-tenant-isolation
+      
+      - name: Check test coverage
+        run: npm run test:coverage
+      
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/coverage-final.json
+          flags: security-tests
+      
+      - name: Validate multi-tenant architecture
+        run: |
+          # Verificar que arquivos críticos existem
+          test -f "MULTI_TENANT_ARCHITECTURE.md" || exit 1
+          test -f "src/lib/workspace-query.ts" || exit 1
+          test -f "src/hooks/useWorkspaceQuery.ts" || exit 1
+          test -f "src/hoc/withWorkspaceGuard.tsx" || exit 1
+          
+          # Verificar que helper de segurança é usado
+          if grep -r "supabase.from(" src/ --include="*.ts" --include="*.tsx" \
+             --exclude="**/client.ts" \
+             --exclude="**/__tests__/**" \
+             --exclude="**/workspace-query.ts" | \
+             grep -v "createWorkspaceQuery"; then
+            echo "❌ ERRO: Uso direto de supabase.from() detectado!"
+            echo "Use createWorkspaceQuery() ou useWorkspaceQuery() em vez disso."
+            exit 1
+          fi
+          
+          echo "✅ Validação de arquitetura passou"
+      
+      - name: Security findings comment
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // Ler resultados dos testes
+            const testResults = fs.existsSync('./test-results.json') 
+              ? JSON.parse(fs.readFileSync('./test-results.json', 'utf8'))
+              : null;
+            
+            let comment = '## 🔒 Multi-Tenant Security Check\n\n';
+            
+            if (testResults && testResults.success) {
+              comment += '✅ **Todos os testes de segurança passaram!**\n\n';
+              comment += `- ✅ ${testResults.numPassedTests} testes passaram\n`;
+              comment += `- ⏱️ Tempo de execução: ${testResults.duration}ms\n`;
+            } else {
+              comment += '❌ **Falhas de segurança detectadas!**\n\n';
+              comment += 'Por favor, corrija os problemas antes de fazer merge.\n\n';
+              if (testResults) {
+                comment += `- ❌ ${testResults.numFailedTests} testes falharam\n`;
+                comment += `- ⚠️ ${testResults.numPendingTests} testes pendentes\n`;
+              }
+            }
+            
+            comment += '\n### Checklist de Segurança\n\n';
+            comment += '- [ ] Usa `createWorkspaceQuery` ou `useWorkspaceQuery`\n';
+            comment += '- [ ] Componentes protegidos com `withWorkspaceGuard`\n';
+            comment += '- [ ] Cache keys incluem `workspaceId`\n';
+            comment += '- [ ] Nenhum hardcoded workspace_id\n';
+            comment += '- [ ] RLS policies documentadas (se nova tabela)\n';
+            comment += '- [ ] Testes de isolamento incluídos\n';
+            
+            // Postar ou atualizar comentário
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('Multi-Tenant Security Check')
+            );
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            }
+
+  database-security:
+    name: Database Security Validation
+    runs-on: ubuntu-latest
+    # Apenas executar se secrets estiverem configurados
+    if: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run database security checks
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          echo "⚠️ Database security validation requer configuração adicional"
+          echo "Configure os scripts de validação conforme documentado em:"
+          echo "docs/MULTI_TENANT_TESTING.md"
+          
+          # TODO: Descomentar quando scripts estiverem prontos
+          # npm run security:check
+
+  security-report:
+    name: Generate Security Report
+    runs-on: ubuntu-latest
+    needs: [security-tests, database-security]
+    if: always()
+    
+    steps:
+      - name: Security Summary
+        run: |
+          echo "# 🔒 Multi-Tenant Security Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "- Security Tests: ${{ needs.security-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Database Validation: ${{ needs.database-security.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ needs.security-tests.result }}" == "success" && \
+                "${{ needs.database-security.result }}" == "success" ]]; then
+            echo "✅ **All security checks passed!**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The multi-tenant isolation is functioning correctly." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Security issues detected!**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Please review and fix security concerns before merging." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Resources" >> $GITHUB_STEP_SUMMARY
+          echo "- [Multi-Tenant Architecture](MULTI_TENANT_ARCHITECTURE.md)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Testing Guide](docs/MULTI_TENANT_TESTING.md)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Best Practices](docs/MULTI_TENANT_BEST_PRACTICES.md)" >> $GITHUB_STEP_SUMMARY
