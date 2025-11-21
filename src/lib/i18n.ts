@@ -11,6 +11,7 @@ import projectsPT from '@/locales/pt/projects.json';
 import clientsPT from '@/locales/pt/clients.json';
 import errorsPT from '@/locales/pt/errors.json';
 import dashboardPT from '@/locales/pt/dashboard.json';
+import tasksPT from '@/locales/pt/tasks.json';
 
 // Import EN translations
 import commonEN from '@/locales/en/common.json';
@@ -21,6 +22,7 @@ import projectsEN from '@/locales/en/projects.json';
 import clientsEN from '@/locales/en/clients.json';
 import errorsEN from '@/locales/en/errors.json';
 import dashboardEN from '@/locales/en/dashboard.json';
+import tasksEN from '@/locales/en/tasks.json';
 
 // Import ES translations
 import commonES from '@/locales/es/common.json';
@@ -31,10 +33,6 @@ import projectsES from '@/locales/es/projects.json';
 import clientsES from '@/locales/es/clients.json';
 import errorsES from '@/locales/es/errors.json';
 import dashboardES from '@/locales/es/dashboard.json';
-
-// Import tasks translations
-import tasksPT from '@/locales/pt/tasks.json';
-import tasksEN from '@/locales/en/tasks.json';
 import tasksES from '@/locales/es/tasks.json';
 
 i18n
@@ -85,6 +83,14 @@ i18n
     detection: {
       order: ['localStorage', 'navigator'],
       caches: ['localStorage'],
+    },
+    react: {
+      useSuspense: false,
+      bindI18n: 'languageChanged loaded',
+      bindI18nStore: 'added removed',
+      transEmptyNodeValue: '',
+      transSupportBasicHtmlNodes: true,
+      transKeepBasicHtmlNodesFor: ['br', 'strong', 'i', 'p'],
     },
   });
 

@@ -68,6 +68,10 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
             if (i18n.isInitialized) {
               await i18n.changeLanguage(userLocale);
             }
+          } else {
+            // Set default language if no preference
+            setLocaleState('pt');
+            await i18n.changeLanguage('pt');
           }
         }
       } catch (error) {
@@ -80,14 +84,25 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     loadUserLocale();
   }, [isReady]);
 
+  // Sync i18n when locale changes
+  useEffect(() => {
+    if (i18n.isInitialized && i18n.language !== locale) {
+      i18n.changeLanguage(locale);
+    }
+  }, [locale]);
+
   const setLocale = async (newLocale: SupportedLocale) => {
     try {
       console.log('🌍 Changing locale to:', newLocale);
+      console.log('🔍 Current i18n language:', i18n.language);
+      
       setLocaleState(newLocale);
       
       if (i18n.isInitialized) {
         await i18n.changeLanguage(newLocale);
         console.log('✅ i18n language changed to:', i18n.language);
+        console.log('📦 Available namespaces:', i18n.options.ns);
+        console.log('🔑 Test translation:', i18n.t('menu.home', { ns: 'navigation' }));
       } else {
         console.warn('⚠️ i18n not initialized');
       }
@@ -137,7 +152,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <LocaleContext.Provider value={value}>
+    <LocaleContext.Provider value={value} key={locale}>
       {children}
     </LocaleContext.Provider>
   );
