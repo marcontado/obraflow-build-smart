@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
+import { PasswordStrength } from "@/components/ui/password-strength";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Lock, ArrowLeft } from "lucide-react";
+import { passwordSchema } from "@/schemas/password.schema";
+import { ArrowLeft } from "lucide-react";
 
 export default function AdminResetPasswordConfirm() {
   const [searchParams] = useSearchParams();
@@ -34,13 +36,15 @@ export default function AdminResetPasswordConfirm() {
       return;
     }
 
-    if (newPassword.length < 8) {
-      toast.error("A senha deve ter no mínimo 8 caracteres");
+    if (newPassword !== confirmPassword) {
+      toast.error("As senhas não coincidem");
       return;
     }
 
-    if (newPassword !== confirmPassword) {
-      toast.error("As senhas não coincidem");
+    // Validar senha com schema
+    const validation = passwordSchema.safeParse(newPassword);
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
       return;
     }
 
@@ -81,48 +85,27 @@ export default function AdminResetPasswordConfirm() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="newPassword">Nova Senha</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="newPassword"
-                  type="password"
-                  placeholder="Mínimo 8 caracteres"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  disabled={loading}
-                  className="pl-10"
-                  required
-                  minLength={8}
-                />
-              </div>
+              <PasswordInput
+                id="newPassword"
+                placeholder="Mínimo 8 caracteres"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                disabled={loading}
+                required
+              />
+              <PasswordStrength password={newPassword} />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="Repita a senha"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  disabled={loading}
-                  className="pl-10"
-                  required
-                  minLength={8}
-                />
-              </div>
-            </div>
-
-            <div className="bg-muted/50 rounded-lg p-3">
-              <p className="text-xs text-muted-foreground">
-                <strong>Requisitos da senha:</strong>
-              </p>
-              <ul className="text-xs text-muted-foreground mt-1 space-y-1">
-                <li>• Mínimo de 8 caracteres</li>
-                <li>• Use uma combinação forte de letras e números</li>
-              </ul>
+              <PasswordInput
+                id="confirmPassword"
+                placeholder="Repita a senha"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                disabled={loading}
+                required
+              />
             </div>
 
             <Button 
