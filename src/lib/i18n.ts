@@ -12,6 +12,7 @@ import clientsPT from '@/locales/pt/clients.json';
 import errorsPT from '@/locales/pt/errors.json';
 import dashboardPT from '@/locales/pt/dashboard.json';
 import tasksPT from '@/locales/pt/tasks.json';
+import partnersPT from '@/locales/pt/partners.json';
 
 // Import EN translations
 import commonEN from '@/locales/en/common.json';
@@ -23,6 +24,7 @@ import clientsEN from '@/locales/en/clients.json';
 import errorsEN from '@/locales/en/errors.json';
 import dashboardEN from '@/locales/en/dashboard.json';
 import tasksEN from '@/locales/en/tasks.json';
+import partnersEN from '@/locales/en/partners.json';
 
 // Import ES translations
 import commonES from '@/locales/es/common.json';
@@ -34,6 +36,7 @@ import clientsES from '@/locales/es/clients.json';
 import errorsES from '@/locales/es/errors.json';
 import dashboardES from '@/locales/es/dashboard.json';
 import tasksES from '@/locales/es/tasks.json';
+import partnersES from '@/locales/es/partners.json';
 
 i18n
   .use(LanguageDetector)
@@ -50,6 +53,7 @@ i18n
         errors: errorsPT,
         dashboard: dashboardPT,
         tasks: tasksPT,
+        partners: partnersPT,
       },
       en: {
         common: commonEN,
@@ -61,6 +65,7 @@ i18n
         errors: errorsEN,
         dashboard: dashboardEN,
         tasks: tasksEN,
+        partners: partnersEN,
       },
       es: {
         common: commonES,
@@ -72,11 +77,12 @@ i18n
         errors: errorsES,
         dashboard: dashboardES,
         tasks: tasksES,
+        partners: partnersES,
       },
     },
     fallbackLng: 'pt',
     defaultNS: 'common',
-    ns: ['common', 'auth', 'navigation', 'settings', 'projects', 'clients', 'errors', 'dashboard', 'tasks'],
+    ns: ['common', 'auth', 'navigation', 'settings', 'projects', 'clients', 'errors', 'dashboard', 'tasks', 'partners'],
     preload: ['pt', 'en', 'es'],
     interpolation: {
       escapeValue: false,

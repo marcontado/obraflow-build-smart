@@ -1,0 +1,101 @@
+{
+  "title": "Parceiros e Fornecedores",
+  "subtitle": "Gerencie seus parceiros e fornecedores",
+  "search": {
+    "placeholder": "Buscar por nome ou categoria...",
+    "noResults": "Nenhum parceiro encontrado",
+    "tryOtherTerms": "Tente buscar com outros termos"
+  },
+  "filters": {
+    "allCategories": "Todas as categorias"
+  },
+  "actions": {
+    "add": "Adicionar Parceiro",
+    "viewDetails": "Ver detalhes",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "save": "Salvar",
+    "saving": "Salvando...",
+    "cancel": "Cancelar",
+    "close": "Fechar"
+  },
+  "form": {
+    "titleAdd": "Adicionar Parceiro",
+    "titleEdit": "Editar Parceiro",
+    "name": "Nome da Empresa ou Profissional",
+    "category": "Categoria",
+    "status": "Status",
+    "tags": "Etiquetas (especialidades)",
+    "tagsPlaceholder": "Digite e pressione Enter",
+    "tagsAdd": "Adicionar",
+    "tagsLimit": "Máximo de 10 etiquetas",
+    "phone": "Telefone",
+    "phonePlaceholder": "(11) 99999-9999",
+    "email": "E-mail",
+    "address": "Endereço",
+    "city": "Cidade",
+    "state": "Estado",
+    "statePlaceholder": "SP",
+    "zipCode": "CEP",
+    "zipCodePlaceholder": "00000-000",
+    "rating": "Avaliação",
+    "differential": "Diferencial / Experiência",
+    "differentialPlaceholder": "Ex: Especialista em obras residenciais de alto padrão",
+    "differentialLimit": "caracteres",
+    "notes": "Notas Internas",
+    "notesPlaceholder": "Observações internas sobre o parceiro...",
+    "select": "Selecione..."
+  },
+  "status": {
+    "active": "Ativo",
+    "inactive": "Inativo"
+  },
+  "details": {
+    "contact": "Contato",
+    "about": "Sobre",
+    "category": "Categoria",
+    "specialties": "Especialidades",
+    "differential": "Diferencial",
+    "internalNotes": "Notas Internas",
+    "noNotes": "Nenhuma nota adicionada ainda.",
+    "editNotes": "Editar"
+  },
+  "empty": {
+    "title": "Nenhum parceiro cadastrado",
+    "description": "Adicione parceiros e fornecedores para gerenciar seus contatos profissionais"
+  },
+  "toast": {
+    "loadError": "Erro ao carregar parceiros",
+    "createSuccess": "Parceiro adicionado com sucesso",
+    "createError": "Erro ao criar parceiro",
+    "updateSuccess": "Parceiro atualizado com sucesso",
+    "updateError": "Erro ao atualizar parceiro",
+    "deleteSuccess": "Parceiro excluído com sucesso",
+    "deleteError": "Erro ao excluir parceiro",
+    "notesSuccess": "Notas atualizadas com sucesso",
+    "notesError": "Erro ao atualizar notas"
+  },
+  "delete": {
+    "title": "Excluir Parceiro",
+    "description": "Tem certeza que deseja excluir {{name}}? Esta ação não pode ser desfeita."
+  },
+  "categories": {
+    "Arquiteto": "Arquiteto",
+    "Engenheiro": "Engenheiro",
+    "Designer de Interiores": "Designer de Interiores",
+    "Marceneiro": "Marceneiro",
+    "Eletricista": "Eletricista",
+    "Encanador": "Encanador",
+    "Pedreiro": "Pedreiro",
+    "Pintor": "Pintor",
+    "Serralheiro": "Serralheiro",
+    "Vidraceiro": "Vidraceiro",
+    "Paisagista": "Paisagista",
+    "Decorador": "Decorador",
+    "Iluminador": "Iluminador",
+    "Fornecedor de Materiais": "Fornecedor de Materiais",
+    "Loja de Móveis": "Loja de Móveis",
+    "Loja de Revestimentos": "Loja de Revestimentos",
+    "Outro": "Outro"
+  }
+}
