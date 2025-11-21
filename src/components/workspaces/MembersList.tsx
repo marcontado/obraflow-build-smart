@@ -8,9 +8,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Trash2, Users } from "lucide-react";
+import { Trash2, Users, Crown, Shield, User, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { PLAN_LIMITS } from "@/constants/plans";
+import { InviteModal } from "@/components/workspaces/InviteModal";
+import { format } from "date-fns";
 
 interface MembersListProps {
   workspaceId: string;
@@ -18,9 +22,11 @@ interface MembersListProps {
 
 export function MembersList({ workspaceId }: MembersListProps) {
   const { toast } = useToast();
+  const { currentWorkspace } = useWorkspace();
   const [members, setMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [showInviteModal, setShowInviteModal] = useState(false);
 
   useEffect(() => {
     fetchMembers();
@@ -102,30 +108,108 @@ export function MembersList({ workspaceId }: MembersListProps) {
 
   const currentUserMember = members.find(m => m.user_id === currentUserId);
   const canManageMembers = currentUserMember?.role === "owner" || currentUserMember?.role === "admin";
+  const maxMembers = currentWorkspace ? PLAN_LIMITS[currentWorkspace.subscription_plan].membersPerWorkspace : Infinity;
+  const canInvite = canManageMembers && members.length < maxMembers;
+
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case "owner":
+        return <Crown className="h-4 w-4" />;
+      case "admin":
+        return <Shield className="h-4 w-4" />;
+      default:
+        return <User className="h-4 w-4" />;
+    }
+  };
+
+  const getRoleVariant = (role: string) => {
+    switch (role) {
+      case "owner":
+        return "default";
+      case "admin":
+        return "secondary";
+      default:
+        return "outline";
+    }
+  };
 
   if (loading) {
     return (
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-32" />
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <div className="p-6">
+        <div className="space-y-4">
           <Skeleton className="h-16" />
           <Skeleton className="h-16" />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Membros do Workspace</CardTitle>
-        <CardDescription>
-          {members.length} {members.length === 1 ? "membro" : "membros"}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <div className="space-y-6">
+      {/* Role Legend */}
+      <Card className="mx-6 mt-6">
+        <CardHeader>
+          <CardTitle className="text-base">Permissões por Role</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="space-y-2">
+              <Badge variant="default" className="gap-1">
+                <Crown className="h-3 w-3" /> Owner
+              </Badge>
+              <ul className="space-y-1 text-xs text-muted-foreground">
+                <li>✓ Deletar workspace</li>
+                <li>✓ Transferir ownership</li>
+                <li>✓ Gerenciar plano e billing</li>
+                <li>✓ Todas as permissões</li>
+              </ul>
+            </div>
+            
+            <div className="space-y-2">
+              <Badge variant="secondary" className="gap-1">
+                <Shield className="h-3 w-3" /> Admin
+              </Badge>
+              <ul className="space-y-1 text-xs text-muted-foreground">
+                <li>✓ Gerenciar membros</li>
+                <li>✓ Gerenciar projetos</li>
+                <li>✓ Configurações gerais</li>
+                <li>✗ Não pode remover owners</li>
+              </ul>
+            </div>
+            
+            <div className="space-y-2">
+              <Badge variant="outline" className="gap-1">
+                <User className="h-3 w-3" /> Member
+              </Badge>
+              <ul className="space-y-1 text-xs text-muted-foreground">
+                <li>✓ Ver projetos</li>
+                <li>✓ Editar tarefas atribuídas</li>
+                <li>✗ Sem acesso a configurações</li>
+                <li>✗ Não pode gerenciar membros</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Members Header */}
+      <div className="flex items-center justify-between px-6">
+        <div>
+          <h3 className="text-lg font-semibold">Membros do Workspace</h3>
+          <p className="text-sm text-muted-foreground">
+            {members.length} de {maxMembers === Infinity ? '∞' : maxMembers} membros
+          </p>
+        </div>
+        {canManageMembers && (
+          <Button onClick={() => setShowInviteModal(true)} disabled={!canInvite}>
+            <UserPlus className="mr-2 h-4 w-4" />
+            Convidar Membro
+          </Button>
+        )}
+      </div>
+
+      {/* Members List */}
+      <div className="px-6 pb-6">
         {members.length === 0 ? (
           <EmptyState
             icon={Users}
@@ -133,24 +217,30 @@ export function MembersList({ workspaceId }: MembersListProps) {
             description="Este workspace ainda não possui membros. Convide pessoas para colaborar."
           />
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {members.map((member: any) => (
-              <div key={member.id} className="flex items-center justify-between gap-4 p-4 rounded-lg border">
-                <div className="flex items-center gap-3 flex-1">
-                  <Avatar>
+              <div key={member.id} className="flex items-center justify-between gap-4 rounded-lg border p-4">
+                <div className="flex flex-1 items-center gap-3">
+                  <Avatar className="h-10 w-10">
                     <AvatarImage src={member.profiles?.avatar_url} />
                     <AvatarFallback>
                       {member.profiles?.full_name?.[0]?.toUpperCase() || "?"}
                     </AvatarFallback>
                   </Avatar>
-                  <div>
-                    <p className="font-medium">
-                      {member.profiles?.full_name || "Usuário"}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium">
+                        {member.profiles?.full_name || "Usuário"}
+                      </p>
                       {member.user_id === currentUserId && (
-                        <Badge variant="outline" className="ml-2">Você</Badge>
+                        <Badge variant="outline" className="text-xs">Você</Badge>
                       )}
-                    </p>
-                    <p className="text-sm text-muted-foreground">{member.profiles?.email}</p>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>{member.profiles?.email}</span>
+                      <span>•</span>
+                      <span>Entrou em {format(new Date(member.joined_at), "dd/MM/yyyy")}</span>
+                    </div>
                   </div>
                 </div>
 
@@ -165,9 +255,24 @@ export function MembersList({ workspaceId }: MembersListProps) {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="member">Membro</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
-                          <SelectItem value="owner">Owner</SelectItem>
+                          <SelectItem value="member">
+                            <div className="flex items-center gap-2">
+                              <User className="h-3 w-3" />
+                              Membro
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="admin">
+                            <div className="flex items-center gap-2">
+                              <Shield className="h-3 w-3" />
+                              Admin
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="owner">
+                            <div className="flex items-center gap-2">
+                              <Crown className="h-3 w-3" />
+                              Owner
+                            </div>
+                          </SelectItem>
                         </SelectContent>
                       </Select>
 
@@ -198,7 +303,8 @@ export function MembersList({ workspaceId }: MembersListProps) {
                       </AlertDialog>
                     </>
                   ) : (
-                    <Badge variant={member.role === "owner" ? "default" : "secondary"}>
+                    <Badge variant={getRoleVariant(member.role)} className="gap-1">
+                      {getRoleIcon(member.role)}
                       {member.role}
                     </Badge>
                   )}
@@ -207,7 +313,16 @@ export function MembersList({ workspaceId }: MembersListProps) {
             ))}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+
+      {canManageMembers && (
+        <InviteModal
+          open={showInviteModal}
+          onClose={() => setShowInviteModal(false)}
+          onSuccess={fetchMembers}
+          workspaceId={workspaceId}
+        />
+      )}
+    </div>
   );
 }

@@ -70,35 +70,18 @@ export function InvitesList({ workspaceId }: InvitesListProps) {
 
   if (loading) {
     return (
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-32" />
-        </CardHeader>
-        <CardContent>
+      <div className="p-6">
+        <div className="space-y-4">
           <Skeleton className="h-16" />
-        </CardContent>
-      </Card>
+          <Skeleton className="h-16" />
+        </div>
+      </div>
     );
   }
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Convites Pendentes</CardTitle>
-              <CardDescription>
-                {invites.length} {invites.length === 1 ? "convite" : "convites"}
-              </CardDescription>
-            </div>
-            <Button onClick={() => setShowModal(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Novo Convite
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
+      <div className="space-y-4 p-6">
           {invites.length === 0 ? (
             <EmptyState
               icon={Mail}
@@ -143,8 +126,7 @@ export function InvitesList({ workspaceId }: InvitesListProps) {
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+      </div>
 
       <InviteModal
         open={showModal}
