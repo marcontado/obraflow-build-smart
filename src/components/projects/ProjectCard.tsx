@@ -1,15 +1,11 @@
-// Utilitário para formatar data YYYY-MM-DD para DD/MM/AAAA
-function formatDateBR(dateStr?: string) {
-  if (!dateStr) return '';
-  const [year, month, day] = dateStr.split('-');
-  if (!year || !month || !day) return dateStr;
-  return `${day}/${month}/${year}`;
-}
-import { Calendar, TrendingUp, Users } from "lucide-react";
+import { Calendar, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
+import { useLocale } from "@/contexts/LocaleContext";
+import { format } from "date-fns";
 
 interface ProjectCardProps {
   id: string;
@@ -32,14 +28,6 @@ const statusColors = {
   on_hold: "bg-gray-500/10 text-gray-600 border-gray-200",
 };
 
-const statusLabels = {
-  planning: "Planejamento",
-  in_progress: "Em Andamento",
-  review: "Revisão",
-  completed: "Concluído",
-  on_hold: "Em Espera",
-};
-
 export function ProjectCard({
   name,
   client,
@@ -51,7 +39,18 @@ export function ProjectCard({
   endDate,
   onClick,
 }: ProjectCardProps) {
+  const { t } = useTranslation('projects');
+  const { currencySymbol, numberFormat, dateLocale } = useLocale();
   const budgetPercentage = budget && spent ? (spent / budget) * 100 : 0;
+
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return '';
+    try {
+      return format(new Date(dateStr), 'P', { locale: dateLocale as any });
+    } catch (e) {
+      return dateStr;
+    }
+  };
 
   return (
     <Card
@@ -65,7 +64,7 @@ export function ProjectCard({
             variant="outline"
             className={cn("border", statusColors[status as keyof typeof statusColors])}
           >
-            {statusLabels[status as keyof typeof statusLabels]}
+            {t(`status.${status}`)}
           </Badge>
         </div>
         {client && <p className="text-sm text-muted-foreground">{client}</p>}
@@ -74,7 +73,7 @@ export function ProjectCard({
       <CardContent className="space-y-4">
         <div>
           <div className="mb-2 flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Progresso</span>
+            <span className="text-muted-foreground">{t('card.progress')}</span>
             <span className="font-medium">{progress}%</span>
           </div>
           <Progress value={progress} className="h-2" />
@@ -84,13 +83,13 @@ export function ProjectCard({
           <div className="flex items-center justify-between rounded-lg bg-muted/50 p-3">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Orçamento</span>
+              <span className="text-sm text-muted-foreground">{t('card.budget')}</span>
             </div>
             <div className="text-right">
               <p className="text-sm font-medium">
-                R$ {spent.toLocaleString()} / R$ {budget.toLocaleString()}
+                {currencySymbol} {numberFormat.format(spent)} / {currencySymbol} {numberFormat.format(budget)}
               </p>
-              <p className="text-xs text-muted-foreground">{budgetPercentage.toFixed(0)}% usado</p>
+              <p className="text-xs text-muted-foreground">{t('card.budgetUsed', { percent: budgetPercentage.toFixed(0) })}</p>
             </div>
           </div>
         )}
@@ -99,12 +98,12 @@ export function ProjectCard({
           {startDate && (
             <div className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              <span>{formatDateBR(startDate)}</span>
+              <span>{formatDate(startDate)}</span>
             </div>
           )}
           {endDate && (
             <div className="flex items-center gap-1">
-              <span>até {formatDateBR(endDate)}</span>
+              <span>{t('card.until')} {formatDate(endDate)}</span>
             </div>
           )}
         </div>

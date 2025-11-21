@@ -8,12 +8,16 @@ import { ProjectCard } from "@/components/projects/ProjectCard";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import { useLocale } from "@/contexts/LocaleContext";
 
 const Index = () => {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspace();
   const [loading, setLoading] = useState(true);
   const isFirstMount = useRef(true);
+  const { t } = useTranslation('dashboard');
+  const { currencySymbol, numberFormat } = useLocale();
   const [stats, setStats] = useState({
     totalProjects: 0,
     inProgress: 0,
@@ -56,7 +60,7 @@ const Index = () => {
       setStats({ totalProjects, inProgress, completed, totalBudget });
       setRecentProjects(projects || []);
     } catch (error: any) {
-      toast.error("Erro ao carregar dados do dashboard");
+      toast.error(t('error'));
       console.error(error);
     } finally {
       setLoading(false);
@@ -71,46 +75,46 @@ const Index = () => {
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header
-          title="Dashboard"
-          subtitle="Visão geral dos seus projetos e métricas"
+          title={t('title')}
+          subtitle={t('subtitle')}
         />
         <main className="flex-1 overflow-y-auto p-6">
           <div className="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                <StatsCard
-                  title="Total de Projetos"
-                  value={stats.totalProjects}
-                  icon={FolderKanban}
-                  description="Todos os seus projetos"
-                />
-                <StatsCard
-                  title="Em Andamento"
-                  value={stats.inProgress}
-                  icon={Clock}
-                  description="Projetos ativos"
-                />
-                <StatsCard
-                  title="Concluídos"
-                  value={stats.completed}
-                  icon={CheckCircle2}
-                  description="Projetos finalizados"
-                />
-                <StatsCard
-                  title="Orçamento Total"
-                  value={`R$ ${stats.totalBudget.toLocaleString()}`}
-                  icon={TrendingUp}
-                  description="Soma de todos os orçamentos"
-                />
-            </div>
+            <StatsCard
+              title={t('stats.totalProjects.title')}
+              value={stats.totalProjects}
+              icon={FolderKanban}
+              description={t('stats.totalProjects.description')}
+            />
+            <StatsCard
+              title={t('stats.inProgress.title')}
+              value={stats.inProgress}
+              icon={Clock}
+              description={t('stats.inProgress.description')}
+            />
+            <StatsCard
+              title={t('stats.completed.title')}
+              value={stats.completed}
+              icon={CheckCircle2}
+              description={t('stats.completed.description')}
+            />
+            <StatsCard
+              title={t('stats.totalBudget.title')}
+              value={`${currencySymbol} ${numberFormat.format(stats.totalBudget)}`}
+              icon={TrendingUp}
+              description={t('stats.totalBudget.description')}
+            />
+          </div>
 
-            <div className="mb-6 flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Projetos Recentes</h3>
-                <button
-                  onClick={() => navigate("/app/projects")}
-                  className="text-sm text-primary hover:underline"
-                >
-                  Ver todos
-                </button>
-              </div>
+          <div className="mb-6 flex items-center justify-between">
+            <h3 className="text-lg font-semibold">{t('recentProjects.title')}</h3>
+            <button
+              onClick={() => navigate("/app/projects")}
+              className="text-sm text-primary hover:underline"
+            >
+              {t('recentProjects.viewAll')}
+            </button>
+          </div>
 
           {loading ? (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -121,15 +125,15 @@ const Index = () => {
           ) : recentProjects.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-12 text-center">
               <FolderKanban className="mb-4 h-12 w-12 text-muted-foreground" />
-              <h3 className="mb-2 text-lg font-semibold">Nenhum projeto ainda</h3>
+              <h3 className="mb-2 text-lg font-semibold">{t('recentProjects.empty.title')}</h3>
               <p className="mb-4 text-sm text-muted-foreground">
-                Comece criando seu primeiro projeto
+                {t('recentProjects.empty.description')}
               </p>
               <button
                 onClick={() => navigate("/app/projects")}
                 className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
               >
-                Criar Projeto
+                {t('recentProjects.empty.button')}
               </button>
             </div>
           ) : (

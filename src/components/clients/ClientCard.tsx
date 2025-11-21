@@ -2,6 +2,7 @@ import { Mail, Phone, MapPin, Edit, Trash2, FolderOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
 
 interface ActiveProject {
   id: string;
@@ -33,6 +34,8 @@ export function ClientCard({
   onEdit,
   onDelete,
 }: ClientCardProps) {
+  const { t } = useTranslation('clients');
+
   return (
     <Card className="transition-all hover:shadow-md">
       <CardHeader className="pb-3">
@@ -102,7 +105,7 @@ export function ClientCard({
           <div className="flex items-center gap-2 mb-2">
             <FolderOpen className="h-4 w-4 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">
-              {projectCount} projeto{projectCount !== 1 ? "s" : ""} ativo{projectCount !== 1 ? "s" : ""}
+              {t('card.projectCount', { count: projectCount })}
             </p>
           </div>
           

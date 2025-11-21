@@ -1,9 +1,60 @@
 {
   "title": "Projetos",
+  "subtitle": "Gerencie todos os seus projetos de design de interiores",
+  "myProjects": "Meus Projetos",
+  "totalCount": "{{count}} projeto(s) no total",
   "create": "Criar Projeto",
   "edit": "Editar Projeto",
   "delete": "Excluir Projeto",
   "details": "Detalhes do Projeto",
+  "actions": {
+    "new": "Novo Projeto",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "view": "Ver Detalhes"
+  },
+  "tabs": {
+    "active": "Projetos Ativos",
+    "completed": "Concluídos",
+    "overview": "Visão Geral",
+    "tasks": "Tarefas",
+    "files": "Arquivos",
+    "briefing": "Briefing",
+    "moodboard": "Moodboard",
+    "schedule": "Cronograma",
+    "budget": "Orçamento"
+  },
+  "filters": {
+    "all": "Todos",
+    "planning": "Planejamento",
+    "inProgress": "Em Andamento",
+    "onHold": "Em Pausa"
+  },
+  "status": {
+    "planning": "Planejamento",
+    "in_progress": "Em Andamento",
+    "inProgress": "Em Andamento",
+    "review": "Em Revisão",
+    "completed": "Concluído",
+    "on_hold": "Pausado",
+    "onHold": "Em Pausa"
+  },
+  "card": {
+    "progress": "Progresso",
+    "budget": "Orçamento",
+    "budgetUsed": "{{percent}}% usado",
+    "until": "até"
+  },
+  "empty": {
+    "noActive": "Nenhum projeto ativo encontrado",
+    "noCompleted": "Nenhum projeto concluído ainda",
+    "noFiltered": "Nenhum projeto {{status}} encontrado",
+    "createFirst": "Criar Primeiro Projeto",
+    "completedWillAppear": "Os projetos marcados como concluídos aparecerão aqui",
+    "title": "Nenhum projeto encontrado",
+    "description": "Comece criando seu primeiro projeto",
+    "action": "Criar Projeto"
+  },
   "fields": {
     "name": "Nome do Projeto",
     "description": "Descrição",
@@ -20,31 +71,16 @@
     "moodboard": "Moodboard",
     "technicalFiles": "Arquivos Técnicos"
   },
-  "status": {
-    "planning": "Planejamento",
-    "in_progress": "Em Progresso",
-    "review": "Em Revisão",
-    "completed": "Concluído",
-    "on_hold": "Pausado"
-  },
-  "tabs": {
-    "overview": "Visão Geral",
-    "tasks": "Tarefas",
-    "files": "Arquivos",
-    "briefing": "Briefing",
-    "moodboard": "Moodboard",
-    "schedule": "Cronograma",
-    "budget": "Orçamento"
-  },
   "messages": {
     "createSuccess": "Projeto criado com sucesso!",
     "updateSuccess": "Projeto atualizado com sucesso!",
     "deleteSuccess": "Projeto excluído com sucesso!",
     "error": "Erro ao processar projeto"
   },
-  "empty": {
-    "title": "Nenhum projeto encontrado",
-    "description": "Comece criando seu primeiro projeto",
-    "action": "Criar Projeto"
+  "errors": {
+    "loadError": "Erro ao carregar projetos",
+    "createError": "Erro ao criar projeto",
+    "updateError": "Erro ao atualizar projeto",
+    "deleteError": "Erro ao excluir projeto"
   }
 }

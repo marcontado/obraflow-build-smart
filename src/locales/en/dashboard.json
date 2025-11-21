@@ -1,0 +1,33 @@
+{
+  "title": "Dashboard",
+  "subtitle": "Overview of your projects and metrics",
+  "stats": {
+    "totalProjects": {
+      "title": "Total Projects",
+      "description": "All your projects"
+    },
+    "inProgress": {
+      "title": "In Progress",
+      "description": "Active projects"
+    },
+    "completed": {
+      "title": "Completed",
+      "description": "Finished projects"
+    },
+    "totalBudget": {
+      "title": "Total Budget",
+      "description": "Sum of all budgets"
+    }
+  },
+  "recentProjects": {
+    "title": "Recent Projects",
+    "viewAll": "View all",
+    "empty": {
+      "title": "No projects yet",
+      "description": "Start by creating your first project",
+      "button": "Create Project"
+    }
+  },
+  "loading": "Loading...",
+  "error": "Error loading dashboard data"
+}
