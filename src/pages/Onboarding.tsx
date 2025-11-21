@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslation } from "react-i18next";
 import * as z from "zod";
 import { workspacesService } from "@/services/workspaces.service";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
@@ -13,18 +12,17 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Sparkles } from "lucide-react";
 
+const workspaceSchema = z.object({
+  name: z.string().min(1, "Nome é obrigatório").max(100, "Nome muito longo"),
+});
+
+type WorkspaceFormData = z.infer<typeof workspaceSchema>;
+
 export default function Onboarding() {
-  const { t } = useTranslation('auth');
   const navigate = useNavigate();
   const { toast } = useToast();
   const { refreshWorkspaces, hasWorkspaces } = useWorkspace();
   const [submitting, setSubmitting] = useState(false);
-
-  const workspaceSchema = z.object({
-    name: z.string().min(1, t('onboarding.workspaceNameRequired')).max(100, t('onboarding.workspaceNameTooLong')),
-  });
-
-  type WorkspaceFormData = z.infer<typeof workspaceSchema>;
 
   // Guard: Se já tem workspace, redirecionar para /app (movido para useEffect)
   useEffect(() => {
@@ -47,7 +45,7 @@ export default function Onboarding() {
 
     if (error) {
       toast({
-        title: t('onboarding.errorTitle'),
+        title: "Erro ao criar workspace",
         description: error.message,
         variant: "destructive",
       });
@@ -56,12 +54,14 @@ export default function Onboarding() {
     }
 
     toast({
-      title: t('onboarding.successTitle'),
-      description: t('onboarding.successDescription'),
+      title: "Bem-vindo ao Archestra!",
+      description: "Seu workspace foi criado com sucesso.",
     });
 
+    // Aguardar refresh completar para garantir que workspace está setado
     await refreshWorkspaces();
     
+    // Redirecionar para settings do novo workspace ou /app
     if (workspace) {
       navigate(`/workspace/${workspace.id}/settings`);
     } else {
@@ -79,9 +79,9 @@ export default function Onboarding() {
             </div>
           </div>
           <div>
-            <CardTitle className="text-3xl">{t('onboarding.title')}</CardTitle>
+            <CardTitle className="text-3xl">Bem-vindo ao Archestra!</CardTitle>
             <CardDescription className="text-base mt-2">
-              {t('onboarding.subtitle')}
+              Vamos criar seu primeiro workspace para começar a gerenciar seus projetos
             </CardDescription>
           </div>
         </CardHeader>
@@ -93,10 +93,10 @@ export default function Onboarding() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('onboarding.workspaceName')}</FormLabel>
+                    <FormLabel>Nome do seu Workspace</FormLabel>
                     <FormControl>
                       <Input 
-                        placeholder={t('onboarding.workspaceNamePlaceholder')}
+                        placeholder="Ex: Meu Escritório, Studio Design, etc." 
                         {...field}
                         className="text-base"
                       />
@@ -107,13 +107,15 @@ export default function Onboarding() {
               />
 
               <Button type="submit" disabled={submitting} className="w-full h-11">
-                {submitting ? t('onboarding.creatingButton') : t('onboarding.createButton')}
+                {submitting ? "Criando seu workspace..." : "Criar Workspace e Começar"}
               </Button>
             </form>
           </Form>
 
           <div className="mt-6 p-4 bg-accent/50 rounded-lg">
-            <p className="text-sm text-muted-foreground text-center" dangerouslySetInnerHTML={{ __html: t('onboarding.planInfo') }} />
+            <p className="text-sm text-muted-foreground text-center">
+              Você está no <strong>Plano Gratuito</strong>. Pode fazer upgrade a qualquer momento!
+            </p>
           </div>
         </CardContent>
       </Card>

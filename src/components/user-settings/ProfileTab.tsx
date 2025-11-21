@@ -15,21 +15,18 @@ import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { useNavigate } from "react-router-dom";
 import { profileUpdateSchema, ProfileUpdateData } from "@/schemas/profile.schema";
 import { PLAN_LIMITS } from "@/constants/plans";
-import { useTranslation } from "react-i18next";
-import { useLocale } from "@/contexts/LocaleContext";
 
 export function ProfileTab() {
   const { user } = useAuth();
   const { currentWorkspace, workspaces, switchWorkspace, canCreateWorkspace } = useWorkspace();
   const navigate = useNavigate();
-  const { t } = useTranslation('settings');
-  const { dateLocale } = useLocale();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [profile, setProfile] = useState<any>(null);
   const [workspaceRoles, setWorkspaceRoles] = useState<Record<string, string>>({});
 
+  // Check if user has owner or admin role in at least one workspace
   const hasAdminRole = Object.values(workspaceRoles).some(
     role => role === 'owner' || role === 'admin'
   );
@@ -105,13 +102,15 @@ export function ProfileTab() {
       const fileExt = file.name.split('.').pop();
       const filePath = `${user?.id}/${Math.random()}.${fileExt}`;
 
+      // Validate file size (max 2MB)
       if (file.size > 2 * 1024 * 1024) {
-        toast.error(t('profile.avatarTooBig'));
+        toast.error("Imagem muito grande. Tamanho máximo: 2MB");
         return;
       }
 
+      // Validate file type
       if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-        toast.error(t('profile.avatarInvalidFormat'));
+        toast.error("Formato não suportado. Use JPG, PNG ou WEBP");
         return;
       }
 
@@ -133,9 +132,9 @@ export function ProfileTab() {
       if (updateError) throw updateError;
 
       setAvatarUrl(publicUrl);
-      toast.success(t('profile.avatarSuccess'));
+      toast.success("Avatar atualizado com sucesso!");
     } catch (error: any) {
-      toast.error(error.message || t('profile.avatarError'));
+      toast.error(error.message || "Erro ao fazer upload do avatar");
     } finally {
       setUploading(false);
     }
@@ -155,34 +154,23 @@ export function ProfileTab() {
 
       if (error) throw error;
 
-      toast.success(t('profile.success'));
+      toast.success("Perfil atualizado com sucesso!");
       fetchProfile();
     } catch (error: any) {
-      toast.error(error.message || t('profile.error'));
+      toast.error(error.message || "Erro ao atualizar perfil");
     } finally {
       setLoading(false);
     }
   };
 
-  const planNames = {
-    atelier: "Atelier",
-    studio: "Studio",
-    domus: "Domus"
-  };
-
-  const roleConfig = {
-    owner: { icon: Crown, label: t('workspace.role.owner'), color: "text-yellow-600 bg-yellow-50" },
-    admin: { icon: Shield, label: t('workspace.role.admin'), color: "text-blue-600 bg-blue-50" },
-    member: { icon: UserCircle, label: t('workspace.role.member'), color: "text-gray-600 bg-gray-50" }
-  };
-
   return (
     <div className="space-y-8 p-6">
+      {/* Seção: Informações Pessoais */}
       <div className="space-y-6">
         <div>
-          <h3 className="text-lg font-semibold text-foreground">{t('profile.title')}</h3>
+          <h3 className="text-lg font-semibold text-foreground">Informações Pessoais</h3>
           <p className="text-sm text-muted-foreground">
-            {t('profile.description')}
+            Atualize suas informações pessoais e foto de perfil
           </p>
         </div>
 
@@ -200,12 +188,12 @@ export function ProfileTab() {
                 {uploading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    {t('profile.uploading')}
+                    Enviando...
                   </>
                 ) : (
                   <>
                     <Upload className="h-4 w-4" />
-                    {t('profile.changeAvatar')}
+                    Alterar Avatar
                   </>
                 )}
               </div>
@@ -219,14 +207,14 @@ export function ProfileTab() {
               disabled={uploading}
             />
             <p className="text-xs text-muted-foreground">
-              {t('profile.avatarInfo')}
+              JPG, PNG ou WEBP. Máximo 2MB.
             </p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">{t('profile.email')}</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
@@ -235,16 +223,16 @@ export function ProfileTab() {
               className="bg-muted"
             />
             <p className="text-xs text-muted-foreground">
-              {t('profile.emailCannotChange')}
+              O email não pode ser alterado
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="full_name">{t('profile.fullName')}</Label>
+            <Label htmlFor="full_name">Nome Completo</Label>
             <Input
               id="full_name"
               {...register("full_name")}
-              placeholder={t('profile.fullNamePlaceholder')}
+              placeholder="Seu nome completo"
             />
             {errors.full_name && (
               <p className="text-sm text-destructive">{errors.full_name.message}</p>
@@ -252,11 +240,11 @@ export function ProfileTab() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone">{t('profile.phone')}</Label>
+            <Label htmlFor="phone">Telefone</Label>
             <Input
               id="phone"
               {...register("phone")}
-              placeholder={t('profile.phonePlaceholder')}
+              placeholder="(00) 00000-0000"
             />
             {errors.phone && (
               <p className="text-sm text-destructive">{errors.phone.message}</p>
@@ -265,9 +253,9 @@ export function ProfileTab() {
 
           {profile && (
             <div className="space-y-2">
-              <Label>{t('profile.memberSince')}</Label>
+              <Label>Membro desde</Label>
               <Input
-                value={new Date(profile.created_at).toLocaleDateString(dateLocale as any)}
+                value={new Date(profile.created_at).toLocaleDateString('pt-BR')}
                 disabled
                 className="bg-muted"
               />
@@ -277,18 +265,19 @@ export function ProfileTab() {
           <div className="flex justify-end">
             <Button type="submit" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {t('profile.save')}
+              Salvar Alterações
             </Button>
           </div>
         </form>
       </div>
 
+      {/* Seção: Minhas Organizações */}
       <div className="space-y-6 pt-6 border-t">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-foreground">{t('profile.organizations.title')}</h3>
+            <h3 className="text-lg font-semibold text-foreground">Minhas Organizações</h3>
             <p className="text-sm text-muted-foreground">
-              {t('profile.organizations.description')}
+              Gerencie seus workspaces e acesse configurações
             </p>
           </div>
           <Button 
@@ -298,7 +287,7 @@ export function ProfileTab() {
             size="sm"
           >
             <Plus className="h-4 w-4 mr-2" />
-            {t('profile.organizations.newOrganization')}
+            Nova Organização
           </Button>
         </div>
 
@@ -306,6 +295,19 @@ export function ProfileTab() {
           {workspaces.map((workspace) => {
             const role = workspaceRoles[workspace.id];
             const isActive = currentWorkspace?.id === workspace.id;
+            const planInfo = PLAN_LIMITS[workspace.subscription_plan as keyof typeof PLAN_LIMITS];
+
+            const planNames = {
+              atelier: "Atelier",
+              studio: "Studio",
+              domus: "Domus"
+            };
+
+            const roleConfig = {
+              owner: { icon: Crown, label: "Proprietário", color: "text-yellow-600 bg-yellow-50" },
+              admin: { icon: Shield, label: "Administrador", color: "text-blue-600 bg-blue-50" },
+              member: { icon: UserCircle, label: "Membro", color: "text-gray-600 bg-gray-50" }
+            };
 
             const currentRoleConfig = roleConfig[role as keyof typeof roleConfig] || roleConfig.member;
             const RoleIcon = currentRoleConfig.icon;
@@ -335,7 +337,7 @@ export function ProfileTab() {
                     </div>
                     {isActive && (
                       <Badge variant="default" className="text-xs">
-                        {t('profile.organizations.current')}
+                        Atual
                       </Badge>
                     )}
                   </div>
@@ -358,14 +360,14 @@ export function ProfileTab() {
                         size="sm"
                         onClick={async () => {
                           await switchWorkspace(workspace.id);
-                          toast.success(t('profile.organizations.switchSuccess'), {
-                            description: t('profile.organizations.switchDescription', { name: workspace.name }),
+                          toast.success("Workspace alterado", {
+                            description: `Agora você está trabalhando em: ${workspace.name}`,
                           });
                           navigate("/");
                         }}
                         className="flex-1"
                       >
-                        {t('profile.organizations.select')}
+                        Selecionar
                       </Button>
                     )}
                     {(role === 'owner' || role === 'admin') && (
@@ -376,7 +378,7 @@ export function ProfileTab() {
                         className="flex-1"
                       >
                         <Settings className="h-4 w-4 mr-1" />
-                        {t('profile.organizations.manage')}
+                        Gerenciar
                       </Button>
                     )}
                   </div>
@@ -390,13 +392,13 @@ export function ProfileTab() {
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">{t('profile.organizations.emptyTitle')}</h3>
+              <h3 className="text-lg font-semibold mb-2">Nenhuma organização encontrada</h3>
               <p className="text-sm text-muted-foreground mb-4 text-center">
-                {t('profile.organizations.emptyDescription')}
+                Crie sua primeira organização para começar a gerenciar seus projetos
               </p>
               <Button onClick={() => navigate("/workspace/new")}>
                 <Plus className="h-4 w-4 mr-2" />
-                {t('profile.organizations.createFirst')}
+                Criar Primeira Organização
               </Button>
             </CardContent>
           </Card>

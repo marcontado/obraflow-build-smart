@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import { authService } from "@/services/auth.service";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -15,7 +14,6 @@ import { passwordSchema } from "@/schemas/password.schema";
 import heroImage from "@/assets/hero-workspace.jpg";
 
 export default function Auth() {
-  const { t } = useTranslation('auth');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
@@ -36,9 +34,10 @@ export default function Auth() {
     const type = hashParams.get('type');
     
     if (type === 'recovery' && accessToken) {
+      // É um link de reset de senha - mostrar formulário
       setIsPasswordRecovery(true);
-      toast.info(t('resetPassword.info'));
-      return;
+      toast.info("Digite sua nova senha abaixo");
+      return; // Não fazer mais nada
     }
 
     const checkSession = async () => {
@@ -51,9 +50,11 @@ export default function Auth() {
 
     const { data: { subscription } } = authService.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
+        // Usuário clicou no link de reset de senha
         setIsPasswordRecovery(true);
-        toast.info(t('resetPassword.info'));
+        toast.info("Digite sua nova senha abaixo");
       } else if (session && event === 'SIGNED_IN' && !isPasswordRecovery) {
+        // For sign in normal, go to /app
         navigate("/app");
       }
     });
@@ -65,10 +66,11 @@ export default function Auth() {
     e.preventDefault();
     
     if (newPassword !== confirmPassword) {
-      toast.error(t('resetPassword.passwordMismatch'));
+      toast.error("As senhas não coincidem");
       return;
     }
 
+    // Validar senha com schema
     const validation = passwordSchema.safeParse(newPassword);
     if (!validation.success) {
       toast.error(validation.error.errors[0].message);
@@ -78,30 +80,34 @@ export default function Auth() {
     setLoading(true);
 
     try {
+      // Atualizar senha durante o fluxo de recovery
       const { error } = await supabase.auth.updateUser({
         password: newPassword
       });
       
       if (error) {
         console.error('Erro ao atualizar senha:', error);
-        toast.error(error.message || t('resetPassword.updateError'));
+        toast.error(error.message || "Erro ao atualizar senha");
         return;
       }
 
-      toast.success(t('resetPassword.success'));
+      toast.success("Senha atualizada com sucesso! Faça login com a nova senha.");
       
+      // Limpar estados
       setIsPasswordRecovery(false);
       setNewPassword("");
       setConfirmPassword("");
       
+      // IMPORTANTE: Fazer logout para forçar novo login
       await supabase.auth.signOut();
       
+      // Redirecionar para login após breve delay
       setTimeout(() => {
         navigate("/auth", { replace: true });
       }, 1500);
     } catch (error: any) {
       console.error('Erro inesperado ao atualizar senha:', error);
-      toast.error(t('resetPassword.unexpectedError'));
+      toast.error("Erro inesperado ao atualizar senha. Tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -110,6 +116,7 @@ export default function Auth() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validar senha com schema
     const validation = passwordSchema.safeParse(password);
     if (!validation.success) {
       toast.error(validation.error.errors[0].message);
@@ -118,6 +125,7 @@ export default function Auth() {
 
     setLoading(true);
 
+    // Save selected plan if present in URL
     if (selectedPlan) {
       localStorage.setItem("pending_plan_selection", selectedPlan);
     }
@@ -129,7 +137,8 @@ export default function Auth() {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success(t('register.success'));
+      toast.success("Conta criada com sucesso! Redirecionando...");
+      // Redirect to onboarding for new users
       setTimeout(() => navigate("/onboarding"), 1000);
     }
   };
@@ -145,15 +154,15 @@ export default function Auth() {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success(t('login.success'));
+      toast.success("Login realizado com sucesso!");
       navigate("/app");
     }
   };
 
   return (
-    <div className="flex min-h-screen landing-bg">
-      <Link to="/" className="absolute top-4 left-4 z-10 text-sm landing-text-primary hover:opacity-70 flex items-center gap-1 transition-opacity">
-        {t('welcome.backToHome')}
+    <div className="flex min-h-screen">
+      <Link to="/" className="absolute top-4 left-4 z-10 text-sm text-black hover:text-primary flex items-center gap-1">
+        ← Voltar para home
       </Link>
       <div className="hidden lg:block lg:w-1/2 relative">
         <img
@@ -163,34 +172,34 @@ export default function Auth() {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-primary/60 flex items-center justify-center p-12">
           <div className="text-white">
-            <h1 className="text-5xl font-bold mb-4">{t('hero.title')}</h1>
-            <p className="text-xl mb-6">{t('hero.subtitle')}</p>
+            <h1 className="text-5xl font-bold mb-4">Archestra</h1>
+            <p className="text-xl mb-6">Gestão profissional de obras para designers de interiores</p>
             <ul className="space-y-3 text-lg">
-              <li>{t('hero.feature1')}</li>
-              <li>{t('hero.feature2')}</li>
-              <li>{t('hero.feature3')}</li>
-              <li>{t('hero.feature4')}</li>
+              <li>✓ Organize todos os seus projetos em um só lugar</li>
+              <li>✓ Acompanhe orçamentos e prazos em tempo real</li>
+              <li>✓ Colabore com clientes e fornecedores</li>
+              <li>✓ Relatórios e análises completas</li>
             </ul>
           </div>
         </div>
       </div>
 
-      <div className="flex w-full lg:w-1/2 items-center justify-center p-8">
+      <div className="flex w-full lg:w-1/2 items-center justify-center p-8 bg-background">
         {isPasswordRecovery ? (
           <Card className="w-full max-w-md">
             <CardHeader className="space-y-1">
-              <CardTitle className="text-3xl font-bold text-center">{t('resetPassword.title')}</CardTitle>
+              <CardTitle className="text-3xl font-bold text-center">Redefinir Senha</CardTitle>
               <CardDescription className="text-center">
-                {t('resetPassword.subtitle')}
+                Digite sua nova senha abaixo
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handlePasswordReset} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="new-password">{t('resetPassword.newPassword')}</Label>
+                  <Label htmlFor="new-password">Nova Senha</Label>
                   <PasswordInput
                     id="new-password"
-                    placeholder={t('resetPassword.newPasswordPlaceholder')}
+                    placeholder="Mínimo 8 caracteres"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     required
@@ -198,17 +207,17 @@ export default function Auth() {
                   <PasswordStrength password={newPassword} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirm-password">{t('resetPassword.confirmPassword')}</Label>
+                  <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
                   <PasswordInput
                     id="confirm-password"
-                    placeholder={t('resetPassword.confirmPasswordPlaceholder')}
+                    placeholder="Digite a senha novamente"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? t('resetPassword.updatingButton') : t('resetPassword.updateButton')}
+                  {loading ? "Atualizando..." : "Atualizar Senha"}
                 </Button>
               </form>
             </CardContent>
@@ -216,25 +225,27 @@ export default function Auth() {
         ) : (
           <Card className="w-full max-w-md">
             <CardHeader className="space-y-1">
-              <CardTitle className="text-3xl font-bold text-center">{t('welcome.title')}</CardTitle>
+              <CardTitle className="text-3xl font-bold text-center">Bem-vindo</CardTitle>
               <CardDescription className="text-center">
-                {t('welcome.subtitle')}
+                Entre ou crie uma conta para começar
               </CardDescription>
             </CardHeader>
             <CardContent>
             {selectedPlan && (
-              <div className="mb-4 p-3 bg-accent/10 rounded-md text-sm text-center" dangerouslySetInnerHTML={{ __html: t('welcome.selectedPlan', { plan: selectedPlan }) }} />
+              <div className="mb-4 p-3 bg-accent/10 rounded-md text-sm text-center">
+                Você selecionou o plano <strong>{selectedPlan}</strong>
+              </div>
             )}
             <Tabs defaultValue={defaultTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-4">
-                <TabsTrigger value="signin">{t('login.signIn')}</TabsTrigger>
-                <TabsTrigger value="signup">{t('register.signUp')}</TabsTrigger>
+                <TabsTrigger value="signin">Entrar</TabsTrigger>
+                <TabsTrigger value="signup">Criar Conta</TabsTrigger>
               </TabsList>
 
               <TabsContent value="signin">
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email-signin">{t('login.email')}</Label>
+                    <Label htmlFor="email-signin">Email</Label>
                     <Input
                       id="email-signin"
                       type="email"
@@ -245,7 +256,7 @@ export default function Auth() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="password-signin">{t('login.password')}</Label>
+                    <Label htmlFor="password-signin">Senha</Label>
                     <PasswordInput
                       id="password-signin"
                       placeholder="••••••••"
@@ -255,7 +266,7 @@ export default function Auth() {
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? t('login.signInLoading') : t('login.signIn')}
+                    {loading ? "Entrando..." : "Entrar"}
                   </Button>
 
                   <div className="text-center">
@@ -264,7 +275,7 @@ export default function Auth() {
                       onClick={() => navigate("/reset-password")}
                       className="text-sm text-primary hover:underline"
                     >
-                      {t('login.forgotPassword')}
+                      Esqueceu sua senha?
                     </button>
                   </div>
                 </form>
@@ -273,18 +284,18 @@ export default function Auth() {
               <TabsContent value="signup">
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">{t('register.fullName')}</Label>
+                    <Label htmlFor="name">Nome Completo</Label>
                     <Input
                       id="name"
                       type="text"
-                      placeholder={t('register.fullName')}
+                      placeholder="Seu nome"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email-signup">{t('register.email')}</Label>
+                    <Label htmlFor="email-signup">Email</Label>
                     <Input
                       id="email-signup"
                       type="email"
@@ -295,7 +306,7 @@ export default function Auth() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="password-signup">{t('register.password')}</Label>
+                    <Label htmlFor="password-signup">Senha</Label>
                     <PasswordInput
                       id="password-signup"
                       placeholder="••••••••"
@@ -306,7 +317,7 @@ export default function Auth() {
                     <PasswordStrength password={password} />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? t('register.signUpLoading') : t('register.signUp')}
+                    {loading ? "Criando conta..." : "Criar Conta"}
                   </Button>
                 </form>
               </TabsContent>

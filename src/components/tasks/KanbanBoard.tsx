@@ -8,7 +8,6 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { useTranslation } from "react-i18next";
 import { TaskColumn } from "./TaskColumn";
 import { TaskFormDialog } from "./TaskFormDialog";
 import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
@@ -22,8 +21,14 @@ interface KanbanBoardProps {
   projectId: string;
 }
 
+const columns = [
+  { id: TASK_STATUS.TODO, title: "A Fazer", color: "bg-slate-500" },
+  { id: TASK_STATUS.IN_PROGRESS, title: "Em Progresso", color: "bg-blue-500" },
+  { id: TASK_STATUS.REVIEW, title: "Em Revisão", color: "bg-yellow-500" },
+  { id: TASK_STATUS.DONE, title: "Concluído", color: "bg-green-500" },
+];
+
 export function KanbanBoard({ projectId }: KanbanBoardProps) {
-  const { t } = useTranslation('tasks');
   const { currentWorkspace } = useWorkspace();
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,13 +38,6 @@ export function KanbanBoard({ projectId }: KanbanBoardProps) {
   const [selectedStatus, setSelectedStatus] = useState<string>("todo");
   const [activeTask, setActiveTask] = useState<any>(null);
   const [deleting, setDeleting] = useState(false);
-
-  const columns = [
-    { id: TASK_STATUS.TODO, title: t('columns.todo'), color: "bg-slate-500" },
-    { id: TASK_STATUS.IN_PROGRESS, title: t('columns.inProgress'), color: "bg-blue-500" },
-    { id: TASK_STATUS.REVIEW, title: t('columns.review'), color: "bg-yellow-500" },
-    { id: TASK_STATUS.DONE, title: t('columns.done'), color: "bg-green-500" },
-  ];
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -62,7 +60,7 @@ export function KanbanBoard({ projectId }: KanbanBoardProps) {
       if (error) throw error;
       setTasks(data || []);
     } catch (error: any) {
-      toast.error(t('board.loadingError'));
+      toast.error("Erro ao carregar tarefas");
       console.error(error);
     } finally {
       setLoading(false);
@@ -97,14 +95,16 @@ export function KanbanBoard({ projectId }: KanbanBoardProps) {
       const { error } = await tasksService.updateStatus(taskId, newStatus, currentWorkspace.id);
       if (error) throw error;
       
+      // Recalculate project progress after status change
       if (currentWorkspace) {
         const { projectsService } = await import("@/services/projects.service");
         await projectsService.calculateProjectProgress(projectId, currentWorkspace.id);
       }
       
-      toast.success(t('statusUpdate.success'));
+      toast.success("Status atualizado!");
     } catch (error: any) {
-      toast.error(t('statusUpdate.error'));
+      toast.error("Erro ao atualizar status");
+      // Revert on error
       setTasks(tasks);
     }
   };
@@ -133,12 +133,12 @@ export function KanbanBoard({ projectId }: KanbanBoardProps) {
       const { error } = await tasksService.delete(selectedTask.id, currentWorkspace.id);
       if (error) throw error;
 
-      toast.success(t('delete.success'));
+      toast.success("Tarefa excluída com sucesso!");
       fetchTasks();
       setDeleteDialogOpen(false);
       setSelectedTask(null);
     } catch (error: any) {
-      toast.error(error.message || t('delete.error'));
+      toast.error(error.message || "Erro ao excluir tarefa");
     } finally {
       setDeleting(false);
     }
@@ -212,8 +212,8 @@ export function KanbanBoard({ projectId }: KanbanBoardProps) {
         }}
         onConfirm={confirmDelete}
         isLoading={deleting}
-        title={t('delete.title')}
-        description={t('delete.description', { title: selectedTask?.title || '' })}
+        title="Excluir Tarefa"
+        description={`Tem certeza que deseja excluir a tarefa "${selectedTask?.title}"? Esta ação não pode ser desfeita.`}
       />
     </>
   );

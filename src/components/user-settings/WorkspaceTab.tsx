@@ -7,40 +7,38 @@ import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { InviteModal } from "@/components/workspaces/InviteModal";
 import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+
+const roleInfo = {
+  owner: {
+    label: "Proprietário",
+    description: "Acesso completo, incluindo gerenciamento de membros, projetos e configurações. Pode deletar o workspace.",
+    icon: Crown,
+    color: "bg-primary text-primary-foreground",
+  },
+  admin: {
+    label: "Administrador",
+    description: "Pode gerenciar membros, projetos e a maioria das configurações do workspace.",
+    icon: Shield,
+    color: "bg-accent text-accent-foreground",
+  },
+  member: {
+    label: "Membro",
+    description: "Pode visualizar e editar projetos, mas não pode gerenciar configurações ou membros.",
+    icon: UserIcon,
+    color: "bg-secondary text-secondary-foreground",
+  },
+};
 
 export function WorkspaceTab() {
   const { currentWorkspace } = useWorkspace();
   const { role, loading, isOwner, isAdmin } = useUserRole();
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const navigate = useNavigate();
-  const { t } = useTranslation('settings');
-
-  const roleInfo = {
-    owner: {
-      label: t('workspace.role.owner'),
-      description: t('workspace.role.ownerDescription'),
-      icon: Crown,
-      color: "bg-primary text-primary-foreground",
-    },
-    admin: {
-      label: t('workspace.role.admin'),
-      description: t('workspace.role.adminDescription'),
-      icon: Shield,
-      color: "bg-accent text-accent-foreground",
-    },
-    member: {
-      label: t('workspace.role.member'),
-      description: t('workspace.role.memberDescription'),
-      icon: UserIcon,
-      color: "bg-secondary text-secondary-foreground",
-    },
-  };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center p-12">
-        <div className="text-center text-muted-foreground">{t('common:messages.loading')}</div>
+        <div className="text-center text-muted-foreground">Carregando...</div>
       </div>
     );
   }
@@ -50,13 +48,13 @@ export function WorkspaceTab() {
       <div className="flex flex-col items-center justify-center p-12 text-center">
         <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
         <h3 className="text-lg font-semibold text-foreground mb-2">
-          {t('workspace.noWorkspace.title')}
+          Nenhum Workspace Selecionado
         </h3>
         <p className="text-sm text-muted-foreground mb-4">
-          {t('workspace.noWorkspace.description')}
+          Selecione ou crie um workspace para continuar
         </p>
         <Button onClick={() => navigate("/workspace/select")}>
-          {t('workspace.noWorkspace.button')}
+          Selecionar Workspace
         </Button>
       </div>
     );
@@ -68,12 +66,13 @@ export function WorkspaceTab() {
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h3 className="text-lg font-semibold text-foreground">{t('workspace.title')}</h3>
+        <h3 className="text-lg font-semibold text-foreground">Workspace Atual</h3>
         <p className="text-sm text-muted-foreground">
-          {t('workspace.description')}
+          Informações sobre seu workspace e permissões
         </p>
       </div>
 
+      {/* Workspace Info */}
       <div className="rounded-lg border border-border bg-card p-6">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
@@ -87,7 +86,7 @@ export function WorkspaceTab() {
               <h4 className="text-xl font-semibold text-foreground">{currentWorkspace.name}</h4>
               <p className="text-sm text-muted-foreground">@{currentWorkspace.slug}</p>
               <Badge variant="secondary" className="mt-2">
-                {t('workspace.plan')}: {currentWorkspace.subscription_plan}
+                Plano: {currentWorkspace.subscription_plan}
               </Badge>
             </div>
           </div>
@@ -96,12 +95,13 @@ export function WorkspaceTab() {
               variant="outline"
               onClick={() => navigate(`/workspace/${currentWorkspace.id}/settings`)}
             >
-              {t('workspace.actions.settings')}
+              Configurações
             </Button>
           )}
         </div>
       </div>
 
+      {/* User Role Info */}
       {currentRole && (
         <div className="rounded-lg border border-border bg-muted/30 p-6">
           <div className="flex items-start gap-4">
@@ -110,7 +110,7 @@ export function WorkspaceTab() {
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <h4 className="font-semibold text-foreground">{t('workspace.role.title')}</h4>
+                <h4 className="font-semibold text-foreground">Sua Função</h4>
                 <Badge className={currentRole.color}>
                   {currentRole.label}
                 </Badge>
@@ -123,6 +123,7 @@ export function WorkspaceTab() {
         </div>
       )}
 
+      {/* Actions */}
       <div className="space-y-3">
         {(isOwner || isAdmin) && (
           <Button
@@ -131,7 +132,7 @@ export function WorkspaceTab() {
             variant="default"
           >
             <Users className="mr-2 h-4 w-4" />
-            {t('workspace.actions.inviteMembers')}
+            Convidar Membros para o Workspace
           </Button>
         )}
         
@@ -141,7 +142,7 @@ export function WorkspaceTab() {
           variant="outline"
         >
           <Building2 className="mr-2 h-4 w-4" />
-          {t('workspace.actions.switchWorkspace')}
+          Trocar de Workspace
         </Button>
       </div>
 

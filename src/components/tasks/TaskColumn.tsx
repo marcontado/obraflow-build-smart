@@ -1,6 +1,5 @@
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TaskCard } from "./TaskCard";
 import { Plus } from "lucide-react";
@@ -27,7 +26,6 @@ export function TaskColumn({
   onDeleteTask,
   color,
 }: TaskColumnProps) {
-  const { t } = useTranslation('tasks');
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
   return (
@@ -46,7 +44,6 @@ export function TaskColumn({
             size="icon"
             className="h-7 w-7"
             onClick={onAddTask}
-            aria-label={t('column.addTask')}
           >
             <Plus className="h-4 w-4" />
           </Button>

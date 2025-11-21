@@ -11,17 +11,15 @@ import { ActivityTab } from "@/components/user-settings/ActivityTab";
 import { PrivacyTab } from "@/components/user-settings/PrivacyTab";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
-import { useTranslation } from "react-i18next";
 
 export default function UserSettings() {
   const [activeTab, setActiveTab] = useState("profile");
-  const { t } = useTranslation('settings');
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <Header title={t('title')} subtitle={t('profile.description')} />
+        <Header title="Configurações" subtitle="Gerencie suas preferências e informações pessoais" />
         
         <main className="flex-1 overflow-y-auto p-6">
           <div className="mx-auto max-w-5xl">
@@ -29,31 +27,31 @@ export default function UserSettings() {
               <TabsList className="grid w-full grid-cols-7 lg:w-auto">
                 <TabsTrigger value="profile" className="gap-2">
                   <User className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t('tabs.profile')}</span>
+                  <span className="hidden sm:inline">Perfil</span>
                 </TabsTrigger>
                 <TabsTrigger value="security" className="gap-2">
                   <Lock className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t('tabs.security')}</span>
+                  <span className="hidden sm:inline">Segurança</span>
                 </TabsTrigger>
                 <TabsTrigger value="workspace" className="gap-2">
                   <Building2 className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t('tabs.workspace')}</span>
+                  <span className="hidden sm:inline">Workspace</span>
                 </TabsTrigger>
                 <TabsTrigger value="notifications" className="gap-2">
                   <Bell className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t('tabs.notifications')}</span>
+                  <span className="hidden sm:inline">Notificações</span>
                 </TabsTrigger>
                 <TabsTrigger value="appearance" className="gap-2">
                   <Palette className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t('tabs.appearance')}</span>
+                  <span className="hidden sm:inline">Aparência</span>
                 </TabsTrigger>
                 <TabsTrigger value="activity" className="gap-2">
                   <Activity className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t('tabs.activity')}</span>
+                  <span className="hidden sm:inline">Atividade</span>
                 </TabsTrigger>
                 <TabsTrigger value="privacy" className="gap-2">
                   <Shield className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t('tabs.privacy')}</span>
+                  <span className="hidden sm:inline">Privacidade</span>
                 </TabsTrigger>
               </TabsList>
 

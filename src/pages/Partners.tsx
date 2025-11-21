@@ -14,7 +14,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
 import { PARTNER_CATEGORIES, type PartnerFormData } from "@/schemas/partner.schema";
 import type { Database } from "@/integrations/supabase/types";
-import { useTranslation } from "react-i18next";
 
 type Partner = Database["public"]["Tables"]["partners"]["Row"];
 
@@ -23,7 +22,6 @@ import { Header } from "@/components/layout/Header";
 
 export default function Partners() {
   const { currentWorkspace } = useWorkspace();
-  const { t } = useTranslation('partners');
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
   const isFirstMount = useRef(true);
@@ -53,7 +51,7 @@ export default function Partners() {
       const { data, error } = await partnersService.getAll(currentWorkspace.id);
 
       if (error) {
-        toast.error(t('toast.loadError'));
+        toast.error("Erro ao carregar parceiros");
         console.error(error);
       } else {
         setPartners(data || []);
@@ -116,10 +114,10 @@ export default function Partners() {
     const { error } = await partnersService.delete(partnerToDelete.id, currentWorkspace.id);
 
     if (error) {
-      toast.error(t('toast.deleteError'));
+      toast.error("Erro ao excluir parceiro");
       console.error(error);
     } else {
-      toast.success(t('toast.deleteSuccess'));
+      toast.success("Parceiro excluído com sucesso");
       setPartners(partners.filter((p) => p.id !== partnerToDelete.id));
     }
 
@@ -139,10 +137,10 @@ export default function Partners() {
       );
 
       if (error) {
-        toast.error(t('toast.updateError'));
+        toast.error("Erro ao atualizar parceiro");
         console.error(error);
       } else if (updated) {
-        toast.success(t('toast.updateSuccess'));
+        toast.success("Parceiro atualizado com sucesso");
         setPartners(partners.map((p) => (p.id === updated.id ? updated : p)));
       }
     } else {
@@ -153,10 +151,10 @@ export default function Partners() {
       );
 
       if (error) {
-        toast.error(t('toast.createError'));
+        toast.error("Erro ao criar parceiro");
         console.error(error);
       } else if (created) {
-        toast.success(t('toast.createSuccess'));
+        toast.success("Parceiro adicionado com sucesso");
         setPartners([...partners, created]);
       }
     }
@@ -172,10 +170,10 @@ export default function Partners() {
     );
 
     if (error) {
-      toast.error(t('toast.notesError'));
+      toast.error("Erro ao atualizar notas");
       console.error(error);
     } else if (updated) {
-      toast.success(t('toast.notesSuccess'));
+      toast.success("Notas atualizadas com sucesso");
       setPartners(partners.map((p) => (p.id === updated.id ? updated : p)));
       setSelectedPartner(updated);
     }
@@ -190,8 +188,8 @@ export default function Partners() {
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header
-          title={t('title')}
-          subtitle={t('subtitle')}
+          title="Parceiros e Fornecedores"
+          subtitle="Gerencie seus parceiros e fornecedores"
         />
         <main className="flex-1 overflow-y-auto p-6">
           <div className="max-w-7xl mx-auto">
@@ -203,7 +201,7 @@ export default function Partners() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
-              placeholder={t('search.placeholder')}
+              placeholder="Buscar por nome ou categoria..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -212,13 +210,13 @@ export default function Partners() {
 
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
             <SelectTrigger className="w-full md:w-64">
-              <SelectValue placeholder={t('filters.allCategories')} />
+              <SelectValue placeholder="Todas as categorias" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t('filters.allCategories')}</SelectItem>
+              <SelectItem value="all">Todas as categorias</SelectItem>
               {PARTNER_CATEGORIES.map((category) => (
                 <SelectItem key={category} value={category}>
-                  {t(`categories.${category}`)}
+                  {category}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -226,7 +224,7 @@ export default function Partners() {
 
           <Button onClick={handleAddPartner} className="w-full md:w-auto">
             <Plus className="w-4 h-4 mr-2" />
-            {t('actions.add')}
+            Adicionar Parceiro
           </Button>
         </div>
       </div>
@@ -241,13 +239,13 @@ export default function Partners() {
       ) : filteredPartners.length === 0 ? (
         <EmptyState
           icon={Search}
-          title={searchQuery ? t('search.noResults') : t('empty.title')}
+          title={searchQuery ? "Nenhum parceiro encontrado" : "Nenhum parceiro cadastrado"}
           description={
             searchQuery
-              ? t('search.tryOtherTerms')
-              : t('empty.description')
+              ? "Tente buscar com outros termos"
+              : "Adicione parceiros e fornecedores para gerenciar seus contatos profissionais"
           }
-          actionLabel={!searchQuery ? t('actions.add') : undefined}
+          actionLabel={!searchQuery ? "Adicionar Parceiro" : undefined}
           onAction={!searchQuery ? handleAddPartner : undefined}
         />
       ) : (
@@ -285,8 +283,8 @@ export default function Partners() {
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
         onConfirm={confirmDelete}
-        title={t('delete.title')}
-        description={t('delete.description', { name: partnerToDelete?.name })}
+        title="Excluir Parceiro"
+        description={`Tem certeza que deseja excluir ${partnerToDelete?.name}? Esta ação não pode ser desfeita.`}
       />
           </div>
         </main>

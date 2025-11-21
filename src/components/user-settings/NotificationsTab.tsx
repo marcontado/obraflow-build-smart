@@ -4,7 +4,6 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useTranslation } from "react-i18next";
 
 export function NotificationsTab() {
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -12,32 +11,32 @@ export function NotificationsTab() {
   const [taskAssignments, setTaskAssignments] = useState(true);
   const [mentions, setMentions] = useState(true);
   const [weeklyDigest, setWeeklyDigest] = useState(false);
-  const { t } = useTranslation('settings');
 
   const handleSave = () => {
-    toast.success(t('notifications.success'));
+    toast.success("Preferências de notificação salvas!");
   };
 
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h3 className="text-lg font-semibold text-foreground">{t('notifications.title')}</h3>
+        <h3 className="text-lg font-semibold text-foreground">Notificações</h3>
         <p className="text-sm text-muted-foreground">
-          {t('notifications.description')}
+          Configure como você deseja receber notificações
         </p>
       </div>
 
       <div className="space-y-6">
+        {/* Email Notifications */}
         <div className="rounded-lg border border-border bg-card p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-start gap-3">
               <Mail className="h-5 w-5 text-primary mt-1" />
               <div>
                 <Label htmlFor="email-notifications" className="text-base font-medium cursor-pointer">
-                  {t('notifications.email.title')}
+                  Notificações por Email
                 </Label>
                 <p className="text-sm text-muted-foreground">
-                  {t('notifications.email.description')}
+                  Receba atualizações importantes por email
                 </p>
               </div>
             </div>
@@ -49,16 +48,17 @@ export function NotificationsTab() {
           </div>
         </div>
 
+        {/* Project Updates */}
         <div className="rounded-lg border border-border bg-card p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-start gap-3">
               <Bell className="h-5 w-5 text-primary mt-1" />
               <div>
                 <Label htmlFor="project-updates" className="text-base font-medium cursor-pointer">
-                  {t('notifications.projectUpdates.title')}
+                  Atualizações de Projetos
                 </Label>
                 <p className="text-sm text-muted-foreground">
-                  {t('notifications.projectUpdates.description')}
+                  Notificações quando um projeto for atualizado
                 </p>
               </div>
             </div>
@@ -70,16 +70,17 @@ export function NotificationsTab() {
           </div>
         </div>
 
+        {/* Task Assignments */}
         <div className="rounded-lg border border-border bg-card p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-start gap-3">
               <MessageSquare className="h-5 w-5 text-primary mt-1" />
               <div>
                 <Label htmlFor="task-assignments" className="text-base font-medium cursor-pointer">
-                  {t('notifications.taskAssignments.title')}
+                  Atribuições de Tarefas
                 </Label>
                 <p className="text-sm text-muted-foreground">
-                  {t('notifications.taskAssignments.description')}
+                  Notificações quando uma tarefa for atribuída a você
                 </p>
               </div>
             </div>
@@ -91,16 +92,17 @@ export function NotificationsTab() {
           </div>
         </div>
 
+        {/* Mentions */}
         <div className="rounded-lg border border-border bg-card p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-start gap-3">
               <MessageSquare className="h-5 w-5 text-primary mt-1" />
               <div>
                 <Label htmlFor="mentions" className="text-base font-medium cursor-pointer">
-                  {t('notifications.mentions.title')}
+                  Menções
                 </Label>
                 <p className="text-sm text-muted-foreground">
-                  {t('notifications.mentions.description')}
+                  Notificações quando você for mencionado em comentários
                 </p>
               </div>
             </div>
@@ -112,16 +114,17 @@ export function NotificationsTab() {
           </div>
         </div>
 
+        {/* Weekly Digest */}
         <div className="rounded-lg border border-border bg-card p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-start gap-3">
               <Mail className="h-5 w-5 text-primary mt-1" />
               <div>
                 <Label htmlFor="weekly-digest" className="text-base font-medium cursor-pointer">
-                  {t('notifications.weeklyDigest.title')}
+                  Resumo Semanal
                 </Label>
                 <p className="text-sm text-muted-foreground">
-                  {t('notifications.weeklyDigest.description')}
+                  Receba um resumo semanal das atividades do workspace
                 </p>
               </div>
             </div>
@@ -136,7 +139,7 @@ export function NotificationsTab() {
 
       <div className="flex justify-end pt-4">
         <Button onClick={handleSave}>
-          {t('notifications.save')}
+          Salvar Preferências
         </Button>
       </div>
     </div>

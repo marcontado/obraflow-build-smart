@@ -1,19 +1,30 @@
-import { useTranslation } from "react-i18next";
-import { Calendar, Edit, Trash2, User } from "lucide-react";
+// Utilitário para formatar data YYYY-MM-DD para DD/MM/AAAA
+function formatDateBR(dateStr?: string) {
+  if (!dateStr) return '';
+  const [year, month, day] = dateStr.split('-');
+  if (!year || !month || !day) return dateStr;
+  return `${day}/${month}/${year}`;
+}
+import { Calendar, Clock, Edit, Trash2, User } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { format } from "date-fns";
-import { useLocale } from "@/contexts/LocaleContext";
 
 const priorityColors = {
   low: "bg-blue-500/10 text-blue-600 border-blue-200",
   medium: "bg-yellow-500/10 text-yellow-600 border-yellow-200",
   high: "bg-orange-500/10 text-orange-600 border-orange-200",
   urgent: "bg-red-500/10 text-red-600 border-red-200",
+};
+
+const priorityLabels = {
+  low: "Baixa",
+  medium: "Média",
+  high: "Alta",
+  urgent: "Urgente",
 };
 
 interface TaskCardProps {
@@ -23,8 +34,6 @@ interface TaskCardProps {
 }
 
 export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
-  const { t } = useTranslation('tasks');
-  const { dateLocale } = useLocale();
   const {
     attributes,
     listeners,
@@ -62,7 +71,6 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
                 e.stopPropagation();
                 onEdit();
               }}
-              aria-label={t('card.edit')}
             >
               <Edit className="h-3 w-3" />
             </Button>
@@ -74,7 +82,6 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
                 e.stopPropagation();
                 onDelete();
               }}
-              aria-label={t('card.delete')}
             >
               <Trash2 className="h-3 w-3 text-destructive" />
             </Button>
@@ -92,7 +99,7 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
             variant="outline"
             className={cn("text-xs", priorityColors[task.priority as keyof typeof priorityColors])}
           >
-            {t(`priority.${task.priority}`)}
+            {priorityLabels[task.priority as keyof typeof priorityLabels]}
           </Badge>
         </div>
 
@@ -100,7 +107,7 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
           {task.due_date && (
             <div className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
-              <span>{format(new Date(task.due_date), 'P', { locale: dateLocale })}</span>
+              <span>{formatDateBR(task.due_date)}</span>
             </div>
           )}
           {task.profiles?.full_name && (

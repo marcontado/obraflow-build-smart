@@ -6,7 +6,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Phone, Mail, MapPin, Edit, Trash2, Save, X } from "lucide-react";
 import { StarRating } from "./StarRating";
 import type { Database } from "@/integrations/supabase/types";
-import { useTranslation } from "react-i18next";
 
 type Partner = Database["public"]["Tables"]["partners"]["Row"];
 
@@ -27,7 +26,6 @@ export function PartnerDetailModal({
   onDelete,
   onUpdateNotes,
 }: PartnerDetailModalProps) {
-  const { t } = useTranslation('partners');
   const [editingNotes, setEditingNotes] = useState(false);
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
@@ -84,7 +82,7 @@ export function PartnerDetailModal({
                       : "bg-muted text-muted-foreground"
                   }
                 >
-                  {partner.status === "ativo" ? t('status.active') : t('status.inactive')}
+                  {partner.status}
                 </Badge>
                 <StarRating value={partner.rating || 0} readonly />
               </div>
@@ -95,7 +93,7 @@ export function PartnerDetailModal({
         <div className="space-y-6 pt-4">
           {/* Contato */}
           <section>
-            <h3 className="font-heading font-semibold text-lg mb-3 text-primary">{t('details.contact')}</h3>
+            <h3 className="font-heading font-semibold text-lg mb-3 text-primary">Contato</h3>
             <div className="space-y-2">
               {partner.phone && (
                 <div className="flex items-center gap-3">
@@ -129,16 +127,16 @@ export function PartnerDetailModal({
 
           {/* Sobre */}
           <section>
-            <h3 className="font-heading font-semibold text-lg mb-3 text-primary">{t('details.about')}</h3>
+            <h3 className="font-heading font-semibold text-lg mb-3 text-primary">Sobre</h3>
             <div className="space-y-3">
               <div>
-                <span className="text-sm text-muted-foreground">{t('details.category')}:</span>
-                <div className="font-medium mt-1">{t(`categories.${partner.category}`)}</div>
+                <span className="text-sm text-muted-foreground">Categoria:</span>
+                <div className="font-medium mt-1">{partner.category}</div>
               </div>
 
               {partner.tags && partner.tags.length > 0 && (
                 <div>
-                  <span className="text-sm text-muted-foreground">{t('details.specialties')}:</span>
+                  <span className="text-sm text-muted-foreground">Especialidades:</span>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {partner.tags.map((tag, index) => (
                       <Badge key={index} variant="outline">
@@ -151,7 +149,7 @@ export function PartnerDetailModal({
 
               {partner.diferencial && (
                 <div>
-                  <span className="text-sm text-muted-foreground">{t('details.differential')}:</span>
+                  <span className="text-sm text-muted-foreground">Diferencial:</span>
                   <p className="mt-1 text-foreground">{partner.diferencial}</p>
                 </div>
               )}
@@ -161,11 +159,11 @@ export function PartnerDetailModal({
           {/* Notas Internas */}
           <section>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-heading font-semibold text-lg text-primary">{t('details.internalNotes')}</h3>
+              <h3 className="font-heading font-semibold text-lg text-primary">Notas Internas</h3>
               {!editingNotes && (
                 <Button size="sm" variant="outline" onClick={handleEditNotes}>
                   <Edit className="w-4 h-4 mr-1" />
-                  {t('details.editNotes')}
+                  Editar
                 </Button>
               )}
             </div>
@@ -176,17 +174,17 @@ export function PartnerDetailModal({
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={4}
-                  placeholder={t('form.notesPlaceholder')}
+                  placeholder="Adicionar observações internas sobre este parceiro..."
                   className="resize-none"
                 />
                 <div className="flex gap-2">
                   <Button size="sm" onClick={handleSaveNotes} disabled={saving}>
                     <Save className="w-4 h-4 mr-1" />
-                    {saving ? t('actions.saving') : t('actions.save')}
+                    {saving ? "Salvando..." : "Salvar"}
                   </Button>
                   <Button size="sm" variant="outline" onClick={handleCancelEdit}>
                     <X className="w-4 h-4 mr-1" />
-                    {t('actions.cancel')}
+                    Cancelar
                   </Button>
                 </div>
               </div>
@@ -195,7 +193,7 @@ export function PartnerDetailModal({
                 {partner.notes ? (
                   <p className="text-foreground whitespace-pre-wrap">{partner.notes}</p>
                 ) : (
-                  <p className="text-muted-foreground italic">{t('details.noNotes')}</p>
+                  <p className="text-muted-foreground italic">Nenhuma nota adicionada ainda.</p>
                 )}
               </div>
             )}
@@ -206,15 +204,15 @@ export function PartnerDetailModal({
         <div className="flex justify-between items-center pt-6 border-t">
           <Button variant="destructive" onClick={() => onDelete(partner)}>
             <Trash2 className="w-4 h-4 mr-2" />
-            {t('actions.delete')}
+            Excluir
           </Button>
           <div className="flex gap-3">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              {t('actions.close')}
+              Fechar
             </Button>
             <Button onClick={() => onEdit(partner)}>
               <Edit className="w-4 h-4 mr-2" />
-              {t('actions.edit')}
+              Editar
             </Button>
           </div>
         </div>

@@ -9,11 +9,11 @@ import ContratoModal from "@/components/projects/ContratoModal";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 import { projectsService } from "@/services/projects.service";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { withWorkspaceGuard } from "@/hoc/withWorkspaceGuard";
 import { toast } from "sonner";
-import { useTranslation } from "react-i18next";
 
 function Projects() {
   const navigate = useNavigate();
@@ -24,7 +24,6 @@ function Projects() {
   const [formOpen, setFormOpen] = useState(false);
   const [contratoModalOpen, setContratoModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const { t } = useTranslation('projects');
 
   useEffect(() => {
     if (currentWorkspace) {
@@ -44,7 +43,7 @@ function Projects() {
       if (error) throw error;
       setProjects(data || []);
     } catch (error: any) {
-      toast.error(t('errors.loadError'));
+      toast.error("Erro ao carregar projetos");
       console.error(error);
     } finally {
       setLoading(false);
@@ -59,6 +58,7 @@ function Projects() {
       return projects.filter(p => p.status === "completed");
     }
     
+    // Active projects: planning, in_progress, on_hold
     const activeProjects = projects.filter(p => p.status !== "completed");
     
     if (statusFilter === "all") {
@@ -72,10 +72,10 @@ function Projects() {
   const completedProjects = getFilteredProjects("completed");
 
   const statusLabels: Record<string, string> = {
-    all: t('filters.all'),
-    planning: t('status.planning'),
-    in_progress: t('status.inProgress'),
-    on_hold: t('status.onHold')
+    all: "Todos",
+    planning: "Planejamento",
+    in_progress: "Em Andamento",
+    on_hold: "Em Pausa"
   };
 
   return (
@@ -83,31 +83,31 @@ function Projects() {
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header
-          title={t('title')}
-          subtitle={t('subtitle')}
+          title="Projetos"
+          subtitle="Gerencie todos os seus projetos de design de interiores"
         />
         <main className="flex-1 overflow-y-auto p-6">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-medium">{t('myProjects')}</h3>
+              <h3 className="text-lg font-medium">Meus Projetos</h3>
               <p className="text-sm text-muted-foreground">
-                {t('totalCount', { count: projects.length })}
+                {projects.length} projeto(s) no total
               </p>
             </div>
             <Button onClick={() => setFormOpen(true)} className="gap-2">
               <Plus className="h-4 w-4" />
-              {t('actions.new')}
+              Novo Projeto
             </Button>
           </div>
 
           <Tabs defaultValue="active" className="w-full">
             <TabsList className="mb-6">
               <TabsTrigger value="active" className="gap-2">
-                {t('tabs.active')}
+                Projetos Ativos
                 <Badge variant="secondary">{activeProjects.length}</Badge>
               </TabsTrigger>
               <TabsTrigger value="completed" className="gap-2">
-                {t('tabs.completed')}
+                Concluídos
                 <Badge variant="secondary">{completedProjects.length}</Badge>
               </TabsTrigger>
             </TabsList>
@@ -136,12 +136,12 @@ function Projects() {
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <p className="text-lg text-muted-foreground mb-4">
                     {statusFilter === "all" 
-                      ? t('empty.noActive')
-                      : t('empty.noFiltered', { status: statusLabels[statusFilter].toLowerCase() })}
+                      ? "Nenhum projeto ativo encontrado" 
+                      : `Nenhum projeto ${statusLabels[statusFilter].toLowerCase()} encontrado`}
                   </p>
                   <Button onClick={() => setFormOpen(true)} className="gap-2">
                     <Plus className="h-4 w-4" />
-                    {t('empty.createFirst')}
+                    Criar Primeiro Projeto
                   </Button>
                 </div>
               ) : (
@@ -175,10 +175,10 @@ function Projects() {
               ) : completedProjects.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <p className="text-lg text-muted-foreground mb-4">
-                    {t('empty.noCompleted')}
+                    Nenhum projeto concluído ainda
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {t('empty.completedWillAppear')}
+                    Os projetos marcados como concluídos aparecerão aqui
                   </p>
                 </div>
               ) : (

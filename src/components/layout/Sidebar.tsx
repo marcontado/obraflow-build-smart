@@ -5,30 +5,28 @@ import { authService } from "@/services/auth.service";
 import { toast } from "sonner";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useTranslation } from "react-i18next";
+
+const navigation = [
+  { name: "Dashboard", href: "/app", icon: Home },
+  { name: "Projetos", href: "/app/projects", icon: FolderKanban },
+  { name: "Clientes", href: "/app/clients", icon: Users },
+  { name: "Fornecedores", href: "/app/partners", icon: Handshake, feature: "partners" as const },
+  { name: "Relatórios", href: "/app/reports", icon: BarChart3, feature: "reports" as const },
+  { name: "Financeiro", href: "/app/financeiro", icon: DollarSign, alwaysLocked: true },
+  { name: "Templates de Documentos", href: "/app/templates", icon: FileText, feature: "templates" as const },
+  { name: "Suporte", href: "/app/suporte", icon: MessageCircle },
+];
 
 export function Sidebar() {
   const navigate = useNavigate();
   const { hasFeature } = useFeatureAccess();
-  const { t } = useTranslation('navigation');
-
-  const navigation = [
-    { name: t('menu.home'), href: "/app", icon: Home },
-    { name: t('menu.projects'), href: "/app/projects", icon: FolderKanban },
-    { name: t('menu.clients'), href: "/app/clients", icon: Users },
-    { name: t('menu.partners'), href: "/app/partners", icon: Handshake, feature: "partners" as const },
-    { name: t('menu.reports'), href: "/app/reports", icon: BarChart3, feature: "reports" as const },
-    { name: t('menu.financial'), href: "/app/financeiro", icon: DollarSign, alwaysLocked: true },
-    { name: t('menu.templates'), href: "/app/templates", icon: FileText, feature: "templates" as const },
-    { name: t('menu.support'), href: "/app/suporte", icon: MessageCircle },
-  ];
 
   const handleLogout = async () => {
     const { error } = await authService.signOut();
     if (error) {
-      toast.error(t('header.signOutError'));
+      toast.error("Erro ao fazer logout");
     } else {
-      toast.success(t('header.signOutSuccess'));
+      toast.success("Logout realizado com sucesso");
       navigate("/auth");
     }
   };
@@ -63,8 +61,8 @@ export function Sidebar() {
                   <TooltipContent>
                     <p>
                       {item.alwaysLocked 
-                        ? t('locked.development')
-                        : t('locked.upgradeRequired')}
+                        ? "Em desenvolvimento" 
+                        : "Disponível nos planos Studio e Domus"}
                     </p>
                   </TooltipContent>
                 </Tooltip>
@@ -99,7 +97,7 @@ export function Sidebar() {
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground"
         >
           <LogOut className="h-5 w-5" />
-          {t('menu.logout')}
+          Sair
         </button>
       </div>
     </div>

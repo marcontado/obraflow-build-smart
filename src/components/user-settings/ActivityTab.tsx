@@ -3,8 +3,6 @@ import { Activity, FileText, Users, FolderOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
-import { useTranslation } from "react-i18next";
-import { useLocale } from "@/contexts/LocaleContext";
 
 interface ActivityItem {
   id: string;
@@ -19,8 +17,6 @@ export function ActivityTab() {
   const { currentWorkspace } = useWorkspace();
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const { t } = useTranslation('settings');
-  const { dateLocale } = useLocale();
 
   useEffect(() => {
     if (user?.id && currentWorkspace?.id) {
@@ -32,6 +28,7 @@ export function ActivityTab() {
     try {
       setLoading(true);
       
+      // Fetch recent projects
       const { data: projects } = await supabase
         .from("projects")
         .select("id, name, created_at")
@@ -40,6 +37,7 @@ export function ActivityTab() {
         .order("created_at", { ascending: false })
         .limit(5);
 
+      // Fetch recent clients
       const { data: clients } = await supabase
         .from("clients")
         .select("id, name, created_at")
@@ -48,6 +46,7 @@ export function ActivityTab() {
         .order("created_at", { ascending: false })
         .limit(5);
 
+      // Fetch recent tasks
       const { data: tasks } = await supabase
         .from("tasks")
         .select("id, title, created_at")
@@ -62,7 +61,7 @@ export function ActivityTab() {
         allActivities.push({
           id: project.id,
           type: "project",
-          action: t('activity.actions.createdProject', { name: project.name }),
+          action: `Criou o projeto "${project.name}"`,
           timestamp: project.created_at,
           icon: FolderOpen,
         });
@@ -72,7 +71,7 @@ export function ActivityTab() {
         allActivities.push({
           id: client.id,
           type: "client",
-          action: t('activity.actions.addedClient', { name: client.name }),
+          action: `Adicionou o cliente "${client.name}"`,
           timestamp: client.created_at,
           icon: Users,
         });
@@ -82,12 +81,13 @@ export function ActivityTab() {
         allActivities.push({
           id: task.id,
           type: "task",
-          action: t('activity.actions.createdTask', { name: task.title }),
+          action: `Criou a tarefa "${task.title}"`,
           timestamp: task.created_at,
           icon: FileText,
         });
       });
 
+      // Sort by timestamp
       allActivities.sort((a, b) => 
         new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       );
@@ -103,7 +103,7 @@ export function ActivityTab() {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-12">
-        <div className="text-center text-muted-foreground">{t('activity.loading')}</div>
+        <div className="text-center text-muted-foreground">Carregando atividades...</div>
       </div>
     );
   }
@@ -111,9 +111,9 @@ export function ActivityTab() {
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h3 className="text-lg font-semibold text-foreground">{t('activity.title')}</h3>
+        <h3 className="text-lg font-semibold text-foreground">Histórico de Atividades</h3>
         <p className="text-sm text-muted-foreground">
-          {t('activity.description')}
+          Suas ações recentes no workspace
         </p>
       </div>
 
@@ -121,10 +121,10 @@ export function ActivityTab() {
         <div className="flex flex-col items-center justify-center p-12 text-center">
           <Activity className="h-12 w-12 text-muted-foreground mb-4" />
           <h3 className="text-lg font-semibold text-foreground mb-2">
-            {t('activity.empty.title')}
+            Nenhuma Atividade Recente
           </h3>
           <p className="text-sm text-muted-foreground">
-            {t('activity.empty.description')}
+            Suas atividades aparecerão aqui quando você começar a usar o sistema
           </p>
         </div>
       ) : (
@@ -144,7 +144,7 @@ export function ActivityTab() {
                     {activity.action}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {new Date(activity.timestamp).toLocaleString(dateLocale as any, {
+                    {new Date(activity.timestamp).toLocaleString('pt-BR', {
                       day: '2-digit',
                       month: 'short',
                       year: 'numeric',
