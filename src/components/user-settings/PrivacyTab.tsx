@@ -17,24 +17,26 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export function PrivacyTab() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [exporting, setExporting] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const { t } = useTranslation('settings');
 
   const handleExportData = async () => {
     try {
       setExporting(true);
-      toast.info("Preparando exportação de dados...");
+      toast.info(t('privacy.exportData.preparing'));
       
       // In a real implementation, this would call a backend function
       // to gather all user data and create a downloadable file
       
-      toast.success("Solicitação de exportação enviada! Você receberá um email em breve.");
+      toast.success(t('privacy.exportData.success'));
     } catch (error) {
-      toast.error("Erro ao solicitar exportação de dados");
+      toast.error(t('profile.error'));
     } finally {
       setExporting(false);
     }
@@ -51,10 +53,10 @@ export function PrivacyTab() {
       // For now, we'll just sign out
       
       await supabase.auth.signOut();
-      toast.success("Conta deletada com sucesso");
+      toast.success(t('privacy.deleteAccount.success'));
       navigate("/auth");
     } catch (error) {
-      toast.error("Erro ao deletar conta");
+      toast.error(t('profile.error'));
     } finally {
       setDeleting(false);
     }
@@ -63,13 +65,12 @@ export function PrivacyTab() {
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h3 className="text-lg font-semibold text-foreground">Privacidade e Dados</h3>
+        <h3 className="text-lg font-semibold text-foreground">{t('privacy.title')}</h3>
         <p className="text-sm text-muted-foreground">
-          Gerencie seus dados pessoais e privacidade
+          {t('privacy.description')}
         </p>
       </div>
 
-      {/* Export Data */}
       <div className="rounded-lg border border-border bg-card p-6">
         <div className="flex items-start gap-4">
           <div className="rounded-full bg-primary/10 p-3">
@@ -77,35 +78,32 @@ export function PrivacyTab() {
           </div>
           <div className="flex-1">
             <h4 className="font-semibold text-foreground mb-2">
-              Exportar Seus Dados
+              {t('privacy.exportData.title')}
             </h4>
             <p className="text-sm text-muted-foreground mb-4">
-              Faça o download de uma cópia de todos os seus dados pessoais, projetos, clientes e atividades.
-              De acordo com a LGPD, você tem o direito de solicitar e receber seus dados.
+              {t('privacy.exportData.description')}
             </p>
             <Button
               onClick={handleExportData}
               disabled={exporting}
               variant="outline"
             >
-              {exporting ? "Processando..." : "Exportar Meus Dados"}
+              {exporting ? t('privacy.exportData.processing') : t('privacy.exportData.button')}
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Privacy Information */}
       <div className="rounded-lg border border-border bg-muted/30 p-4">
-        <h4 className="font-medium text-foreground mb-2">Seus Direitos</h4>
+        <h4 className="font-medium text-foreground mb-2">{t('privacy.rights.title')}</h4>
         <ul className="text-sm text-muted-foreground space-y-2">
-          <li>• Você pode solicitar acesso aos seus dados pessoais</li>
-          <li>• Você pode solicitar a correção de dados incorretos</li>
-          <li>• Você pode solicitar a exclusão dos seus dados</li>
-          <li>• Você pode solicitar a portabilidade dos seus dados</li>
+          <li>• {t('privacy.rights.access')}</li>
+          <li>• {t('privacy.rights.correction')}</li>
+          <li>• {t('privacy.rights.deletion')}</li>
+          <li>• {t('privacy.rights.portability')}</li>
         </ul>
       </div>
 
-      {/* Delete Account */}
       <div className="rounded-lg border border-destructive bg-destructive/5 p-6">
         <div className="flex items-start gap-4">
           <div className="rounded-full bg-destructive/10 p-3">
@@ -113,36 +111,34 @@ export function PrivacyTab() {
           </div>
           <div className="flex-1">
             <h4 className="font-semibold text-foreground mb-2">
-              Deletar Conta
+              {t('privacy.deleteAccount.title')}
             </h4>
             <Alert variant="destructive" className="mb-4">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                Esta ação é irreversível! Todos os seus dados, projetos, clientes e atividades serão permanentemente deletados.
-                Se você é o proprietário de um workspace, ele também será deletado.
+                {t('privacy.deleteAccount.warning')}
               </AlertDescription>
             </Alert>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive">
-                  Deletar Minha Conta
+                  {t('privacy.deleteAccount.button')}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Tem certeza absoluta?</AlertDialogTitle>
+                  <AlertDialogTitle>{t('privacy.deleteAccount.confirmTitle')}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Esta ação não pode ser desfeita. Isso irá permanentemente deletar sua conta
-                    e remover todos os seus dados de nossos servidores.
+                    {t('privacy.deleteAccount.confirmDescription')}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogCancel>{t('privacy.deleteAccount.cancel')}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleDeleteAccount}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    {deleting ? "Deletando..." : "Sim, deletar minha conta"}
+                    {deleting ? t('privacy.deleteAccount.deleting') : t('privacy.deleteAccount.confirm')}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
