@@ -1,9 +1,32 @@
 {
   "title": "Clients",
+  "subtitle": "Manage your clients",
   "create": "Add Client",
   "edit": "Edit Client",
   "delete": "Delete Client",
   "details": "Client Details",
+  "actions": {
+    "new": "New Client",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteSuccess": "Client deleted successfully!"
+  },
+  "search": {
+    "placeholder": "Search by name or email..."
+  },
+  "card": {
+    "projectCount": "{{count}} active project",
+    "projectCount_plural": "{{count}} active projects"
+  },
+  "empty": {
+    "noClients": "No clients registered",
+    "noSearchResults": "No clients found",
+    "createFirst": "Create First Client"
+  },
+  "delete": {
+    "title": "Delete Client",
+    "description": "Are you sure you want to delete client \"{{name}}\"? This action cannot be undone."
+  },
   "fields": {
     "name": "Name",
     "email": "Email",
@@ -28,12 +51,12 @@
   "messages": {
     "createSuccess": "Client added successfully!",
     "updateSuccess": "Client updated successfully!",
-    "deleteSuccess": "Client deleted successfully!",
-    "error": "Error processing client"
+    "deleteSuccess": "Client deleted successfully!"
   },
-  "empty": {
-    "title": "No clients found",
-    "description": "Get started by adding your first client",
-    "action": "Add Client"
+  "errors": {
+    "loadError": "Error loading clients",
+    "createError": "Error creating client",
+    "updateError": "Error updating client",
+    "deleteError": "Error deleting client"
   }
 }

@@ -1,9 +1,35 @@
 {
   "title": "Clientes",
+  "subtitle": "Gerencie seus clientes",
   "create": "Adicionar Cliente",
   "edit": "Editar Cliente",
   "delete": "Excluir Cliente",
   "details": "Detalhes do Cliente",
+  "actions": {
+    "new": "Novo Cliente",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "deleteSuccess": "Cliente excluído com sucesso!"
+  },
+  "search": {
+    "placeholder": "Buscar por nome ou email..."
+  },
+  "card": {
+    "projectCount": "{{count}} projeto ativo",
+    "projectCount_plural": "{{count}} projetos ativos"
+  },
+  "empty": {
+    "noClients": "Nenhum cliente cadastrado",
+    "noSearchResults": "Nenhum cliente encontrado",
+    "createFirst": "Criar Primeiro Cliente",
+    "title": "Nenhum cliente encontrado",
+    "description": "Comece adicionando seu primeiro cliente",
+    "action": "Adicionar Cliente"
+  },
+  "delete": {
+    "title": "Excluir Cliente",
+    "description": "Tem certeza que deseja excluir o cliente \"{{name}}\"? Esta ação não pode ser desfeita."
+  },
   "fields": {
     "name": "Nome",
     "email": "Email",
@@ -31,9 +57,10 @@
     "deleteSuccess": "Cliente excluído com sucesso!",
     "error": "Erro ao processar cliente"
   },
-  "empty": {
-    "title": "Nenhum cliente encontrado",
-    "description": "Comece adicionando seu primeiro cliente",
-    "action": "Adicionar Cliente"
+  "errors": {
+    "loadError": "Erro ao carregar clientes",
+    "createError": "Erro ao criar cliente",
+    "updateError": "Erro ao atualizar cliente",
+    "deleteError": "Erro ao excluir cliente"
   }
 }

@@ -1,9 +1,57 @@
 {
   "title": "Projects",
+  "subtitle": "Manage all your interior design projects",
+  "myProjects": "My Projects",
+  "totalCount": "{{count}} project(s) in total",
   "create": "Create Project",
   "edit": "Edit Project",
   "delete": "Delete Project",
   "details": "Project Details",
+  "actions": {
+    "new": "New Project",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View Details"
+  },
+  "tabs": {
+    "active": "Active Projects",
+    "completed": "Completed",
+    "overview": "Overview",
+    "tasks": "Tasks",
+    "files": "Files",
+    "briefing": "Briefing",
+    "moodboard": "Moodboard",
+    "schedule": "Schedule",
+    "budget": "Budget"
+  },
+  "filters": {
+    "all": "All",
+    "planning": "Planning",
+    "inProgress": "In Progress",
+    "onHold": "On Hold"
+  },
+  "status": {
+    "planning": "Planning",
+    "in_progress": "In Progress",
+    "inProgress": "In Progress",
+    "review": "Under Review",
+    "completed": "Completed",
+    "on_hold": "On Hold",
+    "onHold": "On Hold"
+  },
+  "card": {
+    "progress": "Progress",
+    "budget": "Budget",
+    "budgetUsed": "{{percent}}% used",
+    "until": "until"
+  },
+  "empty": {
+    "noActive": "No active projects found",
+    "noCompleted": "No completed projects yet",
+    "noFiltered": "No {{status}} projects found",
+    "createFirst": "Create First Project",
+    "completedWillAppear": "Projects marked as completed will appear here"
+  },
   "fields": {
     "name": "Project Name",
     "description": "Description",
@@ -20,31 +68,15 @@
     "moodboard": "Moodboard",
     "technicalFiles": "Technical Files"
   },
-  "status": {
-    "planning": "Planning",
-    "in_progress": "In Progress",
-    "review": "Under Review",
-    "completed": "Completed",
-    "on_hold": "On Hold"
-  },
-  "tabs": {
-    "overview": "Overview",
-    "tasks": "Tasks",
-    "files": "Files",
-    "briefing": "Briefing",
-    "moodboard": "Moodboard",
-    "schedule": "Schedule",
-    "budget": "Budget"
-  },
   "messages": {
     "createSuccess": "Project created successfully!",
     "updateSuccess": "Project updated successfully!",
-    "deleteSuccess": "Project deleted successfully!",
-    "error": "Error processing project"
+    "deleteSuccess": "Project deleted successfully!"
   },
-  "empty": {
-    "title": "No projects found",
-    "description": "Get started by creating your first project",
-    "action": "Create Project"
+  "errors": {
+    "loadError": "Error loading projects",
+    "createError": "Error creating project",
+    "updateError": "Error updating project",
+    "deleteError": "Error deleting project"
   }
 }
