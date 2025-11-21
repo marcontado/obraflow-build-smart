@@ -1,54 +1,49 @@
 import i18n from './i18n';
 
 /**
- * Helper function to safely access nested keys
- */
-function deepGet(obj: any, path: string): any {
-  const keys = path.split('.');
-  let current = obj;
-  for (const key of keys) {
-    if (current && typeof current === 'object' && key in current) {
-      current = current[key];
-    } else {
-      return undefined;
-    }
-  }
-  return current;
-}
-
-/**
  * Promise that resolves when i18n is fully ready with all namespaces loaded
- * and critical nested keys are accessible
+ * Uses i18n.t() to verify translations are working instead of direct store access
  */
-export const i18nReady = new Promise<void>((resolve) => {
+export const i18nReady = new Promise<void>((resolve, reject) => {
+  const startTime = Date.now();
+  const MAX_WAIT_TIME = 10000; // 10 seconds maximum
+  
   const checkReady = () => {
-    if (!i18n.isInitialized) {
-      console.log('⏳ i18nReady: Waiting for i18n to initialize...');
-      setTimeout(checkReady, 50);
+    const elapsed = Date.now() - startTime;
+    
+    // Timeout protection
+    if (elapsed > MAX_WAIT_TIME) {
+      console.error('❌ i18nReady: Timeout after 10 seconds');
+      reject(new Error('i18n initialization timeout'));
       return;
     }
     
-    const currentLang = i18n.language?.split('-')[0] || 'pt';
+    if (!i18n.isInitialized) {
+      console.log('⏳ i18nReady: Waiting for i18n to initialize...');
+      setTimeout(checkReady, 100);
+      return;
+    }
+    
     const hasCommon = i18n.hasLoadedNamespace('common');
     const hasSettings = i18n.hasLoadedNamespace('settings');
     
     if (!hasCommon || !hasSettings) {
       console.log('⏳ i18nReady: Waiting for critical namespaces...', { hasCommon, hasSettings });
-      setTimeout(checkReady, 50);
+      setTimeout(checkReady, 100);
       return;
     }
     
-    // Deep verification: Check critical nested keys
-    const settingsData = i18n.store?.data?.[currentLang]?.settings;
-    const criticalKey = deepGet(settingsData, 'security.changePassword.title');
+    // Test translations using i18n.t() - more reliable than store access
+    const testTranslation = i18n.t('security.changePassword.title', { ns: 'settings' });
     
-    if (!criticalKey || typeof criticalKey !== 'string') {
-      console.log('⏳ i18nReady: Waiting for nested keys to be accessible...', { criticalKey });
-      setTimeout(checkReady, 50);
+    // If it returns the key itself, translations aren't loaded yet
+    if (testTranslation === 'security.changePassword.title') {
+      console.log('⏳ i18nReady: Waiting for translations to be ready...');
+      setTimeout(checkReady, 100);
       return;
     }
     
-    console.log('✅ i18nReady: All critical namespaces and nested keys are loaded');
+    console.log('✅ i18nReady: All translations loaded and working');
     resolve();
   };
   
