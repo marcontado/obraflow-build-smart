@@ -1,6 +1,7 @@
-import { Bell, LogOut } from "lucide-react";
+import { Bell, LogOut, Settings, Users, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,15 +12,36 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import { WorkspaceSelector } from "@/components/workspaces/WorkspaceSelector";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { useUserRole } from "@/hooks/useUserRole";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useState } from "react";
+import { InviteModal } from "@/components/workspaces/InviteModal";
 
 interface HeaderProps {
   title: string;
   subtitle?: string;
 }
 
+const roleColors = {
+  owner: "bg-primary text-primary-foreground",
+  admin: "bg-accent text-accent-foreground",
+  member: "bg-secondary text-secondary-foreground",
+};
+
+const roleLabels = {
+  owner: "Proprietário",
+  admin: "Administrador",
+  member: "Membro",
+};
+
 export function Header({ title, subtitle }: HeaderProps) {
   const { user, signOut } = useAuth();
+  const { currentWorkspace } = useWorkspace();
+  const { role, isOwner, isAdmin } = useUserRole();
+  const navigate = useNavigate();
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
   const handleSignOut = async () => {
     try {
@@ -57,15 +79,37 @@ export function Header({ title, subtitle }: HeaderProps) {
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-64">
               <DropdownMenuLabel>
-                <div className="flex flex-col space-y-1">
+                <div className="flex flex-col space-y-2">
                   <p className="text-sm font-medium">Minha Conta</p>
                   <p className="text-xs text-muted-foreground">{user?.email}</p>
+                  {role && (
+                    <Badge className={roleColors[role]} variant="secondary">
+                      {roleLabels[role]}
+                    </Badge>
+                  )}
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
+              <DropdownMenuItem onClick={() => navigate("/app/settings")} className="cursor-pointer">
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Configurações</span>
+              </DropdownMenuItem>
+              {(isOwner || isAdmin) && (
+                <DropdownMenuItem onClick={() => setInviteModalOpen(true)} className="cursor-pointer">
+                  <Users className="mr-2 h-4 w-4" />
+                  <span>Convidar Membros</span>
+                </DropdownMenuItem>
+              )}
+              {currentWorkspace && (
+                <DropdownMenuItem onClick={() => navigate(`/workspace/${currentWorkspace.id}/settings`)} className="cursor-pointer">
+                  <Building2 className="mr-2 h-4 w-4" />
+                  <span>Workspace</span>
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive">
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Sair</span>
               </DropdownMenuItem>
@@ -73,6 +117,15 @@ export function Header({ title, subtitle }: HeaderProps) {
           </DropdownMenu>
         </div>
       </div>
+
+      {currentWorkspace && (
+        <InviteModal
+          open={inviteModalOpen}
+          onClose={() => setInviteModalOpen(false)}
+          onSuccess={() => setInviteModalOpen(false)}
+          workspaceId={currentWorkspace.id}
+        />
+      )}
     </header>
   );
 }
