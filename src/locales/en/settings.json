@@ -10,59 +10,180 @@
     "privacy": "Privacy"
   },
   "profile": {
-    "title": "Profile Information",
-    "fullName": "Full name",
+    "title": "Personal Information",
+    "description": "Update your personal information and profile picture",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "Your full name",
     "email": "Email",
+    "emailCannotChange": "Email cannot be changed",
     "phone": "Phone",
+    "phonePlaceholder": "(00) 00000-0000",
+    "memberSince": "Member since",
     "avatar": "Profile picture",
-    "changeAvatar": "Change picture",
-    "save": "Save changes",
+    "changeAvatar": "Change Avatar",
+    "uploading": "Uploading...",
+    "avatarInfo": "JPG, PNG or WEBP. Maximum 2MB.",
+    "avatarTooBig": "Image too large. Maximum size: 2MB",
+    "avatarInvalidFormat": "Unsupported format. Use JPG, PNG or WEBP",
+    "avatarSuccess": "Avatar updated successfully!",
+    "avatarError": "Error uploading avatar",
+    "save": "Save Changes",
     "success": "Profile updated successfully!",
-    "error": "Error updating profile"
+    "error": "Error updating profile",
+    "organizations": {
+      "title": "My Organizations",
+      "description": "Manage your workspaces and access settings",
+      "newOrganization": "New Organization",
+      "current": "Current",
+      "select": "Select",
+      "manage": "Manage",
+      "switchSuccess": "Workspace changed",
+      "switchDescription": "You are now working on: {{name}}",
+      "emptyTitle": "No organizations found",
+      "emptyDescription": "Create your first organization to start managing your projects",
+      "createFirst": "Create First Organization"
+    }
   },
   "appearance": {
     "title": "Appearance",
+    "description": "Customize the look and feel of the application",
     "theme": {
       "title": "Theme",
+      "description": "Select the interface theme",
       "light": "Light",
       "dark": "Dark",
       "system": "System",
-      "description": {
-        "light": "Light theme for better daytime viewing",
-        "dark": "Dark theme to reduce eye strain",
-        "system": "Automatically syncs with system settings"
-      }
+      "lightDescription": "Light theme for better daytime viewing",
+      "darkDescription": "Dark theme to reduce eye strain",
+      "systemDescription": "Automatically syncs with system settings"
     },
     "language": {
       "title": "Language",
+      "description": "Choose your preferred language",
       "pt": "Português",
       "en": "English",
       "es": "Español",
-      "description": {
-        "pt": "Portuguese (Brazil)",
-        "en": "English (US)",
-        "es": "Spanish"
-      }
-    }
+      "ptDescription": "Portuguese (Brazil)",
+      "enDescription": "English (US)",
+      "esDescription": "Spanish"
+    },
+    "tip": "Tip: Use keyboard shortcuts to toggle theme quickly"
   },
   "security": {
     "title": "Security",
-    "changePassword": "Change password",
-    "currentPassword": "Current password",
-    "newPassword": "New password",
-    "confirmNewPassword": "Confirm new password",
-    "twoFactor": "Two-factor authentication",
-    "sessions": "Active sessions",
-    "success": "Password changed successfully!",
-    "error": "Error changing password"
+    "description": "Manage your password and security settings",
+    "changePassword": {
+      "title": "Change Password",
+      "description": "We recommend using a strong and unique password that you don't use on other sites",
+      "current": "Current Password",
+      "currentPlaceholder": "Enter your current password",
+      "new": "New Password",
+      "newPlaceholder": "Enter your new password",
+      "confirm": "Confirm New Password",
+      "confirmPlaceholder": "Confirm your new password",
+      "button": "Change Password",
+      "success": "Password changed successfully!",
+      "error": "Error changing password",
+      "required": "Current password is required",
+      "mismatch": "Passwords do not match"
+    },
+    "sessions": {
+      "title": "Active Sessions",
+      "description": "Feature in development. Soon you will be able to view and manage all your active sessions."
+    }
+  },
+  "workspace": {
+    "title": "Current Workspace",
+    "description": "Information about your workspace and permissions",
+    "noWorkspace": {
+      "title": "No Workspace Selected",
+      "description": "Select or create a workspace to continue",
+      "button": "Select Workspace"
+    },
+    "plan": "Plan",
+    "role": {
+      "title": "Your Role",
+      "owner": "Owner",
+      "admin": "Administrator",
+      "member": "Member",
+      "ownerDescription": "Full access, including member, project and settings management. Can delete the workspace.",
+      "adminDescription": "Can manage members, projects and most workspace settings.",
+      "memberDescription": "Can view and edit projects, but cannot manage settings or members."
+    },
+    "actions": {
+      "settings": "Settings",
+      "inviteMembers": "Invite Members to Workspace",
+      "switchWorkspace": "Switch Workspace"
+    }
   },
   "notifications": {
     "title": "Notifications",
-    "email": "Email notifications",
-    "push": "Push notifications",
-    "projectUpdates": "Project updates",
-    "taskAssignments": "Task assignments",
-    "comments": "Comments",
-    "mentions": "Mentions"
+    "description": "Configure how you want to receive notifications",
+    "email": {
+      "title": "Email Notifications",
+      "description": "Receive important updates via email"
+    },
+    "projectUpdates": {
+      "title": "Project Updates",
+      "description": "Notifications when a project is updated"
+    },
+    "taskAssignments": {
+      "title": "Task Assignments",
+      "description": "Notifications when a task is assigned to you"
+    },
+    "mentions": {
+      "title": "Mentions",
+      "description": "Notifications when you are mentioned in comments"
+    },
+    "weeklyDigest": {
+      "title": "Weekly Summary",
+      "description": "Receive a weekly summary of workspace activities"
+    },
+    "save": "Save Preferences",
+    "success": "Notification preferences saved!"
+  },
+  "privacy": {
+    "title": "Privacy and Data",
+    "description": "Manage your personal data and privacy",
+    "exportData": {
+      "title": "Export Your Data",
+      "description": "Download a copy of all your personal data, projects, clients and activities. According to GDPR, you have the right to request and receive your data.",
+      "button": "Export My Data",
+      "processing": "Processing...",
+      "preparing": "Preparing data export...",
+      "success": "Export request sent! You will receive an email soon."
+    },
+    "rights": {
+      "title": "Your Rights",
+      "access": "You can request access to your personal data",
+      "correction": "You can request correction of incorrect data",
+      "deletion": "You can request deletion of your data",
+      "portability": "You can request portability of your data"
+    },
+    "deleteAccount": {
+      "title": "Delete Account",
+      "warning": "This action is irreversible! All your data, projects, clients and activities will be permanently deleted. If you are the owner of a workspace, it will also be deleted.",
+      "button": "Delete My Account",
+      "confirmTitle": "Are you absolutely sure?",
+      "confirmDescription": "This action cannot be undone. This will permanently delete your account and remove all your data from our servers.",
+      "cancel": "Cancel",
+      "confirm": "Yes, delete my account",
+      "deleting": "Deleting...",
+      "success": "Account deleted successfully"
+    }
+  },
+  "activity": {
+    "title": "Activity History",
+    "description": "Your recent actions in the workspace",
+    "loading": "Loading activities...",
+    "empty": {
+      "title": "No Recent Activity",
+      "description": "Your activities will appear here when you start using the system"
+    },
+    "actions": {
+      "createdProject": "Created project \"{{name}}\"",
+      "addedClient": "Added client \"{{name}}\"",
+      "createdTask": "Created task \"{{name}}\""
+    }
   }
 }
