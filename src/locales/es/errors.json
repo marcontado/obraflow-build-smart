@@ -1,0 +1,35 @@
+{
+  "general": {
+    "title": "Algo salió mal",
+    "description": "Ocurrió un error inesperado. Por favor, inténtelo de nuevo.",
+    "retry": "Intentar de nuevo",
+    "goHome": "Volver al inicio"
+  },
+  "notFound": {
+    "title": "Página no encontrada",
+    "description": "La página que está buscando no existe.",
+    "goHome": "Volver al inicio"
+  },
+  "unauthorized": {
+    "title": "Acceso denegado",
+    "description": "No tiene permiso para acceder a esta página.",
+    "goHome": "Volver al inicio"
+  },
+  "validation": {
+    "required": "Este campo es obligatorio",
+    "email": "Email inválido",
+    "phone": "Teléfono inválido",
+    "minLength": "Mínimo {{min}} caracteres",
+    "maxLength": "Máximo {{max}} caracteres",
+    "min": "Valor mínimo: {{min}}",
+    "max": "Valor máximo: {{max}}",
+    "pattern": "Formato inválido",
+    "url": "URL inválida",
+    "date": "Fecha inválida"
+  },
+  "network": {
+    "offline": "Sin conexión a internet",
+    "timeout": "Se agotó el tiempo de espera",
+    "serverError": "Error del servidor"
+  }
+}

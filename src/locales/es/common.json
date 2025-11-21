@@ -1,0 +1,65 @@
+{
+  "buttons": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "back": "Volver",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar",
+    "add": "Añadir",
+    "remove": "Quitar",
+    "close": "Cerrar",
+    "confirm": "Confirmar",
+    "yes": "Sí",
+    "no": "No",
+    "view": "Ver",
+    "download": "Descargar",
+    "upload": "Subir",
+    "update": "Actualizar"
+  },
+  "status": {
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "pending": "Pendiente",
+    "completed": "Completado",
+    "cancelled": "Cancelado"
+  },
+  "messages": {
+    "loading": "Cargando...",
+    "saving": "Guardando...",
+    "deleting": "Eliminando...",
+    "success": "¡Éxito!",
+    "error": "Error",
+    "noData": "No hay datos disponibles",
+    "noResults": "No se encontraron resultados",
+    "confirmDelete": "¿Está seguro de que desea eliminar?",
+    "unsavedChanges": "Tiene cambios sin guardar",
+    "required": "Campo obligatorio",
+    "invalidEmail": "Email inválido",
+    "invalidPhone": "Teléfono inválido"
+  },
+  "time": {
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "tomorrow": "Mañana",
+    "week": "Semana",
+    "month": "Mes",
+    "year": "Año",
+    "date": "Fecha",
+    "time": "Hora"
+  },
+  "currency": "€",
+  "pagination": {
+    "showing": "Mostrando",
+    "of": "de",
+    "results": "resultados",
+    "page": "Página",
+    "perPage": "Por página"
+  }
+}

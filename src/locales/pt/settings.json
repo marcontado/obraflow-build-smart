@@ -1,0 +1,68 @@
+{
+  "title": "Configurações",
+  "tabs": {
+    "profile": "Perfil",
+    "security": "Segurança",
+    "workspace": "Workspace",
+    "notifications": "Notificações",
+    "appearance": "Aparência",
+    "activity": "Atividade",
+    "privacy": "Privacidade"
+  },
+  "profile": {
+    "title": "Informações do Perfil",
+    "fullName": "Nome completo",
+    "email": "Email",
+    "phone": "Telefone",
+    "avatar": "Foto de perfil",
+    "changeAvatar": "Alterar foto",
+    "save": "Salvar alterações",
+    "success": "Perfil atualizado com sucesso!",
+    "error": "Erro ao atualizar perfil"
+  },
+  "appearance": {
+    "title": "Aparência",
+    "theme": {
+      "title": "Tema",
+      "light": "Claro",
+      "dark": "Escuro",
+      "system": "Sistema",
+      "description": {
+        "light": "Tema claro para melhor visualização durante o dia",
+        "dark": "Tema escuro para reduzir cansaço visual",
+        "system": "Sincroniza automaticamente com as configurações do sistema"
+      }
+    },
+    "language": {
+      "title": "Idioma",
+      "pt": "Português",
+      "en": "English",
+      "es": "Español",
+      "description": {
+        "pt": "Idioma padrão do sistema",
+        "en": "System language",
+        "es": "Idioma del sistema"
+      }
+    }
+  },
+  "security": {
+    "title": "Segurança",
+    "changePassword": "Alterar senha",
+    "currentPassword": "Senha atual",
+    "newPassword": "Nova senha",
+    "confirmNewPassword": "Confirmar nova senha",
+    "twoFactor": "Autenticação de dois fatores",
+    "sessions": "Sessões ativas",
+    "success": "Senha alterada com sucesso!",
+    "error": "Erro ao alterar senha"
+  },
+  "notifications": {
+    "title": "Notificações",
+    "email": "Notificações por email",
+    "push": "Notificações push",
+    "projectUpdates": "Atualizações de projetos",
+    "taskAssignments": "Atribuições de tarefas",
+    "comments": "Comentários",
+    "mentions": "Menções"
+  }
+}

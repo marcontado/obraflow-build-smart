@@ -1,0 +1,50 @@
+{
+  "title": "Proyectos",
+  "create": "Crear Proyecto",
+  "edit": "Editar Proyecto",
+  "delete": "Eliminar Proyecto",
+  "details": "Detalles del Proyecto",
+  "fields": {
+    "name": "Nombre del Proyecto",
+    "description": "Descripción",
+    "client": "Cliente",
+    "status": "Estado",
+    "type": "Tipo",
+    "location": "Ubicación",
+    "startDate": "Fecha de Inicio",
+    "endDate": "Fecha de Finalización",
+    "budget": "Presupuesto",
+    "spent": "Gastado",
+    "progress": "Progreso",
+    "briefing": "Briefing",
+    "moodboard": "Moodboard",
+    "technicalFiles": "Archivos Técnicos"
+  },
+  "status": {
+    "planning": "Planificación",
+    "in_progress": "En Progreso",
+    "review": "En Revisión",
+    "completed": "Completado",
+    "on_hold": "En Pausa"
+  },
+  "tabs": {
+    "overview": "Visión General",
+    "tasks": "Tareas",
+    "files": "Archivos",
+    "briefing": "Briefing",
+    "moodboard": "Moodboard",
+    "schedule": "Cronograma",
+    "budget": "Presupuesto"
+  },
+  "messages": {
+    "createSuccess": "¡Proyecto creado con éxito!",
+    "updateSuccess": "¡Proyecto actualizado con éxito!",
+    "deleteSuccess": "¡Proyecto eliminado con éxito!",
+    "error": "Error al procesar proyecto"
+  },
+  "empty": {
+    "title": "No se encontraron proyectos",
+    "description": "Comience creando su primer proyecto",
+    "action": "Crear Proyecto"
+  }
+}

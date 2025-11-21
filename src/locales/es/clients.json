@@ -1,0 +1,39 @@
+{
+  "title": "Clientes",
+  "create": "Añadir Cliente",
+  "edit": "Editar Cliente",
+  "delete": "Eliminar Cliente",
+  "details": "Detalles del Cliente",
+  "fields": {
+    "name": "Nombre",
+    "email": "Email",
+    "phone": "Teléfono",
+    "cpf": "Identificación Fiscal",
+    "rg": "Número de Identificación",
+    "nationality": "Nacionalidad",
+    "occupation": "Ocupación",
+    "maritalStatus": "Estado Civil",
+    "address": "Dirección",
+    "city": "Ciudad",
+    "state": "Estado",
+    "zipCode": "Código Postal",
+    "notes": "Notas"
+  },
+  "maritalStatus": {
+    "single": "Soltero(a)",
+    "married": "Casado(a)",
+    "divorced": "Divorciado(a)",
+    "widowed": "Viudo(a)"
+  },
+  "messages": {
+    "createSuccess": "¡Cliente añadido con éxito!",
+    "updateSuccess": "¡Cliente actualizado con éxito!",
+    "deleteSuccess": "¡Cliente eliminado con éxito!",
+    "error": "Error al procesar cliente"
+  },
+  "empty": {
+    "title": "No se encontraron clientes",
+    "description": "Comience añadiendo su primer cliente",
+    "action": "Añadir Cliente"
+  }
+}

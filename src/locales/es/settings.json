@@ -1,0 +1,68 @@
+{
+  "title": "Configuración",
+  "tabs": {
+    "profile": "Perfil",
+    "security": "Seguridad",
+    "workspace": "Workspace",
+    "notifications": "Notificaciones",
+    "appearance": "Apariencia",
+    "activity": "Actividad",
+    "privacy": "Privacidad"
+  },
+  "profile": {
+    "title": "Información del Perfil",
+    "fullName": "Nombre completo",
+    "email": "Email",
+    "phone": "Teléfono",
+    "avatar": "Foto de perfil",
+    "changeAvatar": "Cambiar foto",
+    "save": "Guardar cambios",
+    "success": "¡Perfil actualizado con éxito!",
+    "error": "Error al actualizar perfil"
+  },
+  "appearance": {
+    "title": "Apariencia",
+    "theme": {
+      "title": "Tema",
+      "light": "Claro",
+      "dark": "Oscuro",
+      "system": "Sistema",
+      "description": {
+        "light": "Tema claro para mejor visualización durante el día",
+        "dark": "Tema oscuro para reducir la fatiga visual",
+        "system": "Se sincroniza automáticamente con la configuración del sistema"
+      }
+    },
+    "language": {
+      "title": "Idioma",
+      "pt": "Português",
+      "en": "English",
+      "es": "Español",
+      "description": {
+        "pt": "Portugués (Brasil)",
+        "en": "Inglés (EE.UU.)",
+        "es": "Español"
+      }
+    }
+  },
+  "security": {
+    "title": "Seguridad",
+    "changePassword": "Cambiar contraseña",
+    "currentPassword": "Contraseña actual",
+    "newPassword": "Nueva contraseña",
+    "confirmNewPassword": "Confirmar nueva contraseña",
+    "twoFactor": "Autenticación de dos factores",
+    "sessions": "Sesiones activas",
+    "success": "¡Contraseña cambiada con éxito!",
+    "error": "Error al cambiar contraseña"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "email": "Notificaciones por email",
+    "push": "Notificaciones push",
+    "projectUpdates": "Actualizaciones de proyectos",
+    "taskAssignments": "Asignaciones de tareas",
+    "comments": "Comentarios",
+    "mentions": "Menciones"
+  }
+}

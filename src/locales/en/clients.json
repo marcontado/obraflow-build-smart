@@ -1,0 +1,39 @@
+{
+  "title": "Clients",
+  "create": "Add Client",
+  "edit": "Edit Client",
+  "delete": "Delete Client",
+  "details": "Client Details",
+  "fields": {
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "cpf": "Tax ID",
+    "rg": "ID Number",
+    "nationality": "Nationality",
+    "occupation": "Occupation",
+    "maritalStatus": "Marital Status",
+    "address": "Address",
+    "city": "City",
+    "state": "State",
+    "zipCode": "ZIP Code",
+    "notes": "Notes"
+  },
+  "maritalStatus": {
+    "single": "Single",
+    "married": "Married",
+    "divorced": "Divorced",
+    "widowed": "Widowed"
+  },
+  "messages": {
+    "createSuccess": "Client added successfully!",
+    "updateSuccess": "Client updated successfully!",
+    "deleteSuccess": "Client deleted successfully!",
+    "error": "Error processing client"
+  },
+  "empty": {
+    "title": "No clients found",
+    "description": "Get started by adding your first client",
+    "action": "Add Client"
+  }
+}

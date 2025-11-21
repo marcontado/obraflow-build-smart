@@ -1,0 +1,28 @@
+{
+  "menu": {
+    "home": "Inicio",
+    "projects": "Proyectos",
+    "clients": "Clientes",
+    "partners": "Socios",
+    "reports": "Informes",
+    "templates": "Plantillas",
+    "documents": "Documentos",
+    "settings": "Configuración",
+    "admin": "Administración",
+    "logout": "Cerrar Sesión"
+  },
+  "breadcrumb": {
+    "home": "Inicio",
+    "projects": "Proyectos",
+    "projectDetails": "Detalles del Proyecto",
+    "clients": "Clientes",
+    "settings": "Configuración"
+  },
+  "workspace": {
+    "title": "Workspace",
+    "select": "Seleccionar Workspace",
+    "create": "Crear Workspace",
+    "settings": "Configuración del Workspace",
+    "switch": "Cambiar Workspace"
+  }
+}
