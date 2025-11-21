@@ -53,9 +53,11 @@
       "light": "Claro",
       "dark": "Escuro",
       "system": "Sistema",
-      "lightDescription": "Tema claro para melhor visualização durante o dia",
-      "darkDescription": "Tema escuro para reduzir cansaço visual",
-      "systemDescription": "Sincroniza automaticamente com as configurações do sistema"
+      "description": {
+        "light": "Tema claro para melhor visualização durante o dia",
+        "dark": "Tema escuro para reduzir cansaço visual",
+        "system": "Sincroniza automaticamente com as configurações do sistema"
+      }
     },
     "language": {
       "title": "Idioma",
@@ -63,9 +65,11 @@
       "pt": "Português",
       "en": "English",
       "es": "Español",
-      "ptDescription": "Português (Brasil)",
-      "enDescription": "Inglês (EUA)",
-      "esDescription": "Espanhol"
+      "description": {
+        "pt": "Português (Brasil)",
+        "en": "Inglês (EUA)",
+        "es": "Espanhol"
+      }
     },
     "tip": "Dica: Use atalhos de teclado para alternar o tema rapidamente"
   },
