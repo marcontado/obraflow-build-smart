@@ -39,6 +39,7 @@ i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
+    lng: 'pt',
     resources: {
       pt: {
         common: commonPT,
@@ -85,7 +86,7 @@ i18n
       caches: ['localStorage'],
     },
     react: {
-      useSuspense: false,
+      useSuspense: true,
       bindI18n: 'languageChanged loaded',
       bindI18nStore: 'added removed',
       transEmptyNodeValue: '',
@@ -93,5 +94,14 @@ i18n
       transKeepBasicHtmlNodesFor: ['br', 'strong', 'i', 'p'],
     },
   });
+
+// Ensure i18n is initialized before app starts
+if (!i18n.isInitialized) {
+  console.log('🔄 Initializing i18n...');
+}
+
+i18n.on('initialized', () => {
+  console.log('✅ i18n initialized with language:', i18n.language);
+});
 
 export default i18n;
