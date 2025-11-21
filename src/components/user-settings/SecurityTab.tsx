@@ -26,33 +26,7 @@ type ChangePasswordData = z.infer<typeof changePasswordSchema>;
 export function SecurityTab() {
   const [loading, setLoading] = useState(false);
   const [newPassword, setNewPassword] = useState("");
-  const { t, i18n } = useTranslation('settings');
-
-  // Enhanced debug logging with deep store inspection
-  useEffect(() => {
-    const currentLang = i18n.language?.split('-')[0] || 'pt';
-    const settingsData = i18n.store?.data?.[currentLang]?.settings as any;
-    
-    console.log('🔍 SecurityTab Deep Debug:');
-    console.log('  - Current language:', i18n.language);
-    console.log('  - Has settings namespace:', i18n.hasLoadedNamespace('settings'));
-    console.log('  - Settings data exists in store:', !!settingsData);
-    
-    if (settingsData) {
-      console.log('  - Settings data structure:', Object.keys(settingsData));
-      console.log('  - security object:', settingsData.security);
-      console.log('  - security.changePassword:', settingsData.security?.changePassword);
-    }
-    
-    console.log('  - Direct store access (security.changePassword.title):', 
-      settingsData?.security?.changePassword?.title);
-    console.log('  - t() function (security.title):', t('security.title'));
-    console.log('  - t() function (security.changePassword.title):', t('security.changePassword.title'));
-    console.log('  - t() function (security.changePassword.button):', t('security.changePassword.button'));
-    
-    console.log('🔍 Full i18n store dump for', currentLang, ':', 
-      JSON.stringify(i18n.store?.data?.[currentLang], null, 2).substring(0, 1000));
-  }, [i18n, t]);
+  const { t } = useTranslation('settings');
 
   const {
     register,
@@ -88,18 +62,6 @@ export function SecurityTab() {
 
   return (
     <div className="space-y-6 p-6">
-      {/* Debug Info - TEMPORARY */}
-      <div className="rounded-lg border-2 border-yellow-500 bg-yellow-50 dark:bg-yellow-950 p-4 mb-4">
-        <h4 className="font-bold text-yellow-800 dark:text-yellow-200 mb-2">🔍 DEBUG INFO (temporário)</h4>
-        <div className="text-xs space-y-1 font-mono">
-          <div>Language: {i18n.language}</div>
-          <div>Namespace loaded: {i18n.hasLoadedNamespace('settings') ? '✅' : '❌'}</div>
-          <div>Translation test: "{t('security.title')}"</div>
-          <div>Raw key test: "security.changePassword.title" → "{t('security.changePassword.title')}"</div>
-          <div>Available namespaces: {JSON.stringify(i18n.options.ns)}</div>
-        </div>
-      </div>
-
       <div>
         <h3 className="text-lg font-semibold text-foreground">{t('security.title')}</h3>
         <p className="text-sm text-muted-foreground">
