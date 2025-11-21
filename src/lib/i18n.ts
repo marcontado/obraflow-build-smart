@@ -38,11 +38,13 @@ import dashboardES from '@/locales/es/dashboard.json';
 import tasksES from '@/locales/es/tasks.json';
 import partnersES from '@/locales/es/partners.json';
 
-i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
-    resources: {
+// Configure i18n with proper error handling
+const initI18n = async () => {
+  await i18n
+    .use(LanguageDetector)
+    .use(initReactI18next)
+    .init({
+      resources: {
       pt: {
         common: commonPT,
         auth: authPT,
@@ -80,34 +82,59 @@ i18n
         partners: partnersES,
       },
     },
-    fallbackLng: 'pt',
-    defaultNS: 'common',
-    ns: ['common', 'auth', 'navigation', 'settings', 'projects', 'clients', 'errors', 'dashboard', 'tasks', 'partners'],
-    preload: ['pt', 'en', 'es'],
-    interpolation: {
-      escapeValue: false,
-    },
-    detection: {
-      order: ['localStorage', 'navigator'],
-      caches: ['localStorage'],
-    },
-    react: {
-      useSuspense: false,
-      bindI18n: 'languageChanged loaded',
-      bindI18nStore: 'added removed',
-      transEmptyNodeValue: '',
-      transSupportBasicHtmlNodes: true,
-      transKeepBasicHtmlNodesFor: ['br', 'strong', 'i', 'p'],
-    },
-  });
+      fallbackLng: 'pt',
+      defaultNS: 'common',
+      ns: ['common', 'auth', 'navigation', 'settings', 'projects', 'clients', 'errors', 'dashboard', 'tasks', 'partners'],
+      preload: ['pt', 'en', 'es'],
+      load: 'languageOnly', // Load only 'pt', not 'pt-BR'
+      interpolation: {
+        escapeValue: false,
+      },
+      detection: {
+        order: ['localStorage', 'navigator'],
+        caches: ['localStorage'],
+        lookupLocalStorage: 'i18nextLng',
+      },
+      react: {
+        useSuspense: false,
+        bindI18n: 'languageChanged loaded',
+        bindI18nStore: 'added removed',
+        transEmptyNodeValue: '',
+        transSupportBasicHtmlNodes: true,
+        transKeepBasicHtmlNodesFor: ['br', 'strong', 'i', 'p'],
+      },
+      // Debug missing keys
+      saveMissing: true,
+      missingKeyHandler: (lngs, ns, key, fallbackValue) => {
+        console.warn(`🔴 Missing translation key: [${ns}] ${key} for languages:`, lngs);
+      },
+      // Ensure all namespaces are loaded
+      partialBundledLanguages: false,
+    });
 
-// Ensure i18n is initialized before app starts
-if (!i18n.isInitialized) {
-  console.log('🔄 Initializing i18n...');
-}
+  // Ensure all namespaces are loaded for all languages
+  await Promise.all([
+    i18n.loadNamespaces(['common', 'auth', 'navigation', 'settings', 'projects', 'clients', 'errors', 'dashboard', 'tasks', 'partners']),
+  ]);
 
-i18n.on('initialized', () => {
-  console.log('✅ i18n initialized with language:', i18n.language);
+  console.log('✅ i18n fully initialized with all namespaces');
+  console.log('Available namespaces:', i18n.options.ns);
+  console.log('Current language:', i18n.language);
+  console.log('Loaded resources:', Object.keys(i18n.store.data));
+  
+  return i18n;
+};
+
+// Initialize i18n immediately
+initI18n().catch((error) => {
+  console.error('❌ Failed to initialize i18n:', error);
+});
+
+// Listen to language change events
+i18n.on('languageChanged', (lng) => {
+  console.log('🔄 Language changed to:', lng);
+  // Reload all namespaces for the new language
+  i18n.loadNamespaces(['common', 'auth', 'navigation', 'settings', 'projects', 'clients', 'errors', 'dashboard', 'tasks', 'partners']);
 });
 
 export default i18n;
