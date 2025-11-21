@@ -53,9 +53,11 @@
       "light": "Light",
       "dark": "Dark",
       "system": "System",
-      "lightDescription": "Light theme for better daytime viewing",
-      "darkDescription": "Dark theme to reduce eye strain",
-      "systemDescription": "Automatically syncs with system settings"
+      "description": {
+        "light": "Light theme for better daytime viewing",
+        "dark": "Dark theme to reduce eye strain",
+        "system": "Automatically syncs with system settings"
+      }
     },
     "language": {
       "title": "Language",
@@ -63,9 +65,11 @@
       "pt": "Português",
       "en": "English",
       "es": "Español",
-      "ptDescription": "Portuguese (Brazil)",
-      "enDescription": "English (US)",
-      "esDescription": "Spanish"
+      "description": {
+        "pt": "Portuguese (Brazil)",
+        "en": "English (US)",
+        "es": "Spanish"
+      }
     },
     "tip": "Tip: Use keyboard shortcuts to toggle theme quickly"
   },
