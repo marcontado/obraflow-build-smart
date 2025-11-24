@@ -12,7 +12,7 @@ export const projectsService = {
   async getAll(workspaceId: string) {
     const { data, error } = await supabase
       .from("projects")
-      .select("*, clients(name)")
+      .select("*, clients!projects_client_id_fkey(name)")
       .eq("workspace_id", workspaceId)
       .order("created_at", { ascending: false });
 
@@ -22,7 +22,7 @@ export const projectsService = {
   async getById(id: string, workspaceId: string) {
     const { data, error } = await supabase
       .from("projects")
-      .select("*, clients(name), project_areas(*)")
+      .select("*, clients!projects_client_id_fkey(name), project_areas(*)")
       .eq("id", id)
       .eq("workspace_id", workspaceId)
       .single();

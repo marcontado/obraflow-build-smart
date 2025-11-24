@@ -9,7 +9,7 @@ class DocumentsService {
   async getAll(workspaceId: string, projectId?: string) {
     let query = supabase
       .from("generated_documents")
-      .select("*, document_templates(name), projects(name), clients(name)")
+      .select("*, document_templates(name), projects(name), clients!generated_documents_client_id_fkey(name)")
       .eq("workspace_id", workspaceId);
     
     if (projectId) {
@@ -22,7 +22,7 @@ class DocumentsService {
   async getById(id: string, workspaceId: string) {
     return supabase
       .from("generated_documents")
-      .select("*, document_templates(*), projects(*), clients(*)")
+      .select("*, document_templates(*), projects(*), clients!generated_documents_client_id_fkey(*)")
       .eq("id", id)
       .eq("workspace_id", workspaceId)
       .single();
