@@ -19,6 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { Textarea } from "@/components/ui/textarea";
 import { projectAreaSchema, type ProjectAreaFormData } from "@/schemas/project-area.schema";
 import { projectAreasService } from "@/services/project-areas.service";
@@ -61,7 +62,9 @@ export function ProjectAreaFormDialog({
       form.reset({
         name: initialData.name || "",
         description: initialData.description || "",
-        budget: initialData.budget?.toString() || "",
+        budget: initialData.budget 
+          ? initialData.budget.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+          : "",
       });
     } else {
       form.reset({
@@ -82,10 +85,15 @@ export function ProjectAreaFormDialog({
       return;
     }
 
+    // Converter o valor do orçamento removendo formatação
+    const budgetValue = data.budget 
+      ? Number(data.budget.replace(/\./g, '').replace(',', '.'))
+      : null;
+
     const areaData = {
       name: data.name,
       description: data.description || null,
-      budget: data.budget ? Number(data.budget) : null,
+      budget: budgetValue,
       project_id: projectId,
       workspace_id: currentWorkspace.id,
     };
@@ -163,9 +171,13 @@ export function ProjectAreaFormDialog({
               name="budget"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Orçamento (R$)</FormLabel>
+                  <FormLabel>Orçamento</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.01" placeholder="0.00" {...field} />
+                    <CurrencyInput
+                      placeholder="R$ 0,00"
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
