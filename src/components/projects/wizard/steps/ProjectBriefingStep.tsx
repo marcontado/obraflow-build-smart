@@ -1,21 +1,35 @@
 import { UseFormReturn } from "react-hook-form";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { styleOptions } from "@/types/project.types";
 import type { ProjectWizardData } from "@/schemas/project.schema";
+import { Separator } from "@/components/ui/separator";
 
 interface ProjectBriefingStepProps {
   form: UseFormReturn<ProjectWizardData>;
 }
 
 export function ProjectBriefingStep({ form }: ProjectBriefingStepProps) {
+  const watchedStyles = form.watch("briefing.styles") || [];
+
+  const handleStyleToggle = (style: string) => {
+    const currentStyles = watchedStyles;
+    const newStyles = currentStyles.includes(style)
+      ? currentStyles.filter(s => s !== style)
+      : [...currentStyles, style];
+    form.setValue("briefing.styles", newStyles);
+  };
+
   return (
     <div className="space-y-6">
-      <p className="text-sm text-muted-foreground">
-        Estas informações ajudarão a contextualizar o projeto e alinhar expectativas.
-      </p>
+      <div>
+        <h3 className="text-lg font-semibold mb-2">Informações do Briefing</h3>
+        <p className="text-sm text-muted-foreground">
+          Preencha as informações do projeto para alinhar expectativas e objetivos.
+        </p>
+      </div>
 
       <FormField
         control={form.control}
@@ -38,40 +52,137 @@ export function ProjectBriefingStep({ form }: ProjectBriefingStepProps) {
         )}
       />
 
-      <FormField
-        control={form.control}
-        name="briefing.style"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Estilo Desejado</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o estilo" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {styleOptions.map(style => (
-                  <SelectItem key={style} value={style}>
-                    {style}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <div className="space-y-3">
+        <Label>Estilos Desejados (selecione um ou mais)</Label>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {styleOptions.map((style) => (
+            <div key={style} className="flex items-center space-x-2">
+              <Checkbox
+                id={`style-${style}`}
+                checked={watchedStyles.includes(style)}
+                onCheckedChange={() => handleStyleToggle(style)}
+              />
+              <label
+                htmlFor={`style-${style}`}
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {style}
+              </label>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <Separator />
+
+      <div>
+        <h4 className="text-base font-semibold mb-3">Perfil do Cliente</h4>
+        
+        <div className="space-y-4">
+          <FormField
+            control={form.control}
+            name="briefing.client_profile"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Perfil Detalhado</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Descreva o perfil do cliente (idade, profissão, estilo de vida...)"
+                    className="min-h-[80px]"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="briefing.client_desires"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Desejos do Cliente</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="O que o cliente deseja alcançar com este projeto?"
+                    className="min-h-[80px]"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="briefing.client_pains"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Dores e Problemas</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Quais problemas o cliente enfrenta atualmente?"
+                    className="min-h-[80px]"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="briefing.client_essence"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Essência / Identidade</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Qual é a essência e identidade do cliente?"
+                    className="min-h-[80px]"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="briefing.client_objectives"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Objetivos e Prioridades</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Quais são os objetivos e prioridades principais?"
+                    className="min-h-[80px]"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      </div>
+
+      <Separator />
 
       <FormField
         control={form.control}
         name="briefing.audience"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Público-alvo / Usuários</FormLabel>
+            <FormLabel>Público-alvo / Usuários do Espaço</FormLabel>
             <FormControl>
-              <Input
+              <Textarea
                 placeholder="Ex: Casal jovem, 2 filhos e 1 pet"
+                className="min-h-[60px]"
                 {...field}
               />
             </FormControl>
@@ -140,6 +251,29 @@ export function ProjectBriefingStep({ form }: ProjectBriefingStepProps) {
             </FormControl>
             <FormDescription>
               Ex: Preferir madeira natural, evitar plástico e materiais sintéticos
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <Separator />
+
+      <FormField
+        control={form.control}
+        name="briefing.field_research"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Pesquisa de Campo / Visita Técnica</FormLabel>
+            <FormControl>
+              <Textarea
+                placeholder="Registre informações importantes da visita ao local..."
+                className="min-h-[100px]"
+                {...field}
+              />
+            </FormControl>
+            <FormDescription>
+              Observações importantes sobre o local, medidas, estrutura atual, etc.
             </FormDescription>
             <FormMessage />
           </FormItem>

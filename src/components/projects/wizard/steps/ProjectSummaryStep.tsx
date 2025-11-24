@@ -1,17 +1,18 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, DollarSign, MapPin, Users, Image as ImageIcon, File, Target } from "lucide-react";
+import { Calendar, DollarSign, MapPin, Users, Image as ImageIcon, File, Target, Camera } from "lucide-react";
 import { projectTypes } from "@/types/project.types";
 import type { ProjectWizardData } from "@/schemas/project.schema";
-import type { MoodboardItem, TechnicalFile } from "@/types/project.types";
+import type { MoodboardItem, TechnicalFile, SitePhoto } from "@/types/project.types";
 
 interface ProjectSummaryStepProps {
   formData: ProjectWizardData;
+  sitePhotos: SitePhoto[];
   moodboardItems: MoodboardItem[];
   technicalFiles: TechnicalFile[];
 }
 
-export function ProjectSummaryStep({ formData, moodboardItems, technicalFiles }: ProjectSummaryStepProps) {
+export function ProjectSummaryStep({ formData, sitePhotos, moodboardItems, technicalFiles }: ProjectSummaryStepProps) {
   const projectType = projectTypes.find(t => t.value === formData.type);
   
   return (
@@ -77,7 +78,7 @@ export function ProjectSummaryStep({ formData, moodboardItems, technicalFiles }:
       </Card>
 
       {/* Briefing */}
-      {formData.briefing && (formData.briefing.goal || formData.briefing.style || formData.briefing.needs) && (
+      {formData.briefing && (formData.briefing.goal || (formData.briefing.styles && formData.briefing.styles.length > 0) || formData.briefing.needs) && (
         <Card className="p-6">
           <h4 className="font-semibold text-lg mb-4 flex items-center gap-2">
             <Target className="h-5 w-5" />
@@ -90,10 +91,10 @@ export function ProjectSummaryStep({ formData, moodboardItems, technicalFiles }:
                 <p>{formData.briefing.goal}</p>
               </div>
             )}
-            {formData.briefing.style && (
+            {formData.briefing.styles && formData.briefing.styles.length > 0 && (
               <div>
-                <p className="font-medium text-muted-foreground">Estilo:</p>
-                <p>{formData.briefing.style}</p>
+                <p className="font-medium text-muted-foreground">Estilos:</p>
+                <p>{formData.briefing.styles.join(", ")}</p>
               </div>
             )}
             {formData.briefing.audience && (
@@ -111,6 +112,33 @@ export function ProjectSummaryStep({ formData, moodboardItems, technicalFiles }:
           </div>
         </Card>
       )}
+
+      {/* Registro Fotográfico */}
+      <Card className="p-6">
+        <h4 className="font-semibold text-lg mb-4 flex items-center gap-2">
+          <Camera className="h-5 w-5" />
+          Registro Fotográfico
+        </h4>
+        {sitePhotos.length > 0 ? (
+          <div className="grid grid-cols-4 gap-2">
+            {sitePhotos.slice(0, 8).map((photo, index) => (
+              <img
+                key={index}
+                src={photo.url}
+                alt={`Foto do local ${index + 1}`}
+                className="w-full h-20 object-cover rounded"
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">Nenhuma foto adicionada</p>
+        )}
+        {sitePhotos.length > 8 && (
+          <p className="text-xs text-muted-foreground mt-2">
+            +{sitePhotos.length - 8} fotos adicionais
+          </p>
+        )}
+      </Card>
 
       {/* Referências Visuais */}
       <Card className="p-6">

@@ -6,7 +6,7 @@ interface ProjectBriefingViewProps {
 }
 
 export function ProjectBriefingView({ briefing }: ProjectBriefingViewProps) {
-  const isEmpty = !briefing || Object.values(briefing).every(v => !v);
+  const isEmpty = !briefing || Object.values(briefing).every(v => !v || (Array.isArray(v) && v.length === 0));
   
   if (isEmpty) return null;
 
@@ -22,10 +22,40 @@ export function ProjectBriefingView({ briefing }: ProjectBriefingViewProps) {
             <p className="text-sm text-muted-foreground">{briefing.goal}</p>
           </div>
         )}
-        {briefing.style && (
+        {briefing.styles && briefing.styles.length > 0 && (
           <div>
-            <h4 className="text-sm font-semibold text-foreground mb-1">Estilo Desejado</h4>
-            <p className="text-sm text-muted-foreground">{briefing.style}</p>
+            <h4 className="text-sm font-semibold text-foreground mb-1">Estilos Desejados</h4>
+            <p className="text-sm text-muted-foreground">{briefing.styles.join(", ")}</p>
+          </div>
+        )}
+        {briefing.client_profile && (
+          <div>
+            <h4 className="text-sm font-semibold text-foreground mb-1">Perfil do Cliente</h4>
+            <p className="text-sm text-muted-foreground">{briefing.client_profile}</p>
+          </div>
+        )}
+        {briefing.client_desires && (
+          <div>
+            <h4 className="text-sm font-semibold text-foreground mb-1">Desejos do Cliente</h4>
+            <p className="text-sm text-muted-foreground">{briefing.client_desires}</p>
+          </div>
+        )}
+        {briefing.client_pains && (
+          <div>
+            <h4 className="text-sm font-semibold text-foreground mb-1">Dores e Problemas</h4>
+            <p className="text-sm text-muted-foreground">{briefing.client_pains}</p>
+          </div>
+        )}
+        {briefing.client_essence && (
+          <div>
+            <h4 className="text-sm font-semibold text-foreground mb-1">Essência / Identidade</h4>
+            <p className="text-sm text-muted-foreground">{briefing.client_essence}</p>
+          </div>
+        )}
+        {briefing.client_objectives && (
+          <div>
+            <h4 className="text-sm font-semibold text-foreground mb-1">Objetivos e Prioridades</h4>
+            <p className="text-sm text-muted-foreground">{briefing.client_objectives}</p>
           </div>
         )}
         {briefing.audience && (
@@ -50,6 +80,12 @@ export function ProjectBriefingView({ briefing }: ProjectBriefingViewProps) {
           <div>
             <h4 className="text-sm font-semibold text-foreground mb-1">Materiais Preferidos</h4>
             <p className="text-sm text-muted-foreground">{briefing.preferred_materials}</p>
+          </div>
+        )}
+        {briefing.field_research && (
+          <div>
+            <h4 className="text-sm font-semibold text-foreground mb-1">Pesquisa de Campo</h4>
+            <p className="text-sm text-muted-foreground">{briefing.field_research}</p>
           </div>
         )}
         {briefing.references_links && (
