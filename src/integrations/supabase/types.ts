@@ -695,6 +695,93 @@ export type Database = {
           },
         ]
       }
+      project_deliveries: {
+        Row: {
+          area_id: string | null
+          attachments: Json | null
+          budget_item_id: string | null
+          created_at: string
+          created_by: string | null
+          delivery_date: string
+          id: string
+          notes: string | null
+          photos: Json | null
+          project_id: string
+          status: string
+          supplier_name: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          area_id?: string | null
+          attachments?: Json | null
+          budget_item_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivery_date: string
+          id?: string
+          notes?: string | null
+          photos?: Json | null
+          project_id: string
+          status?: string
+          supplier_name: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          area_id?: string | null
+          attachments?: Json | null
+          budget_item_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivery_date?: string
+          id?: string
+          notes?: string | null
+          photos?: Json | null
+          project_id?: string
+          status?: string
+          supplier_name?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_delivery_area"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "project_areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_delivery_budget_item"
+            columns: ["budget_item_id"]
+            isOneToOne: false
+            referencedRelation: "budget_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_delivery_created_by"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_delivery_project"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_delivery_workspace"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           briefing: Json | null
