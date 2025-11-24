@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { ProjectCard } from "@/components/projects/ProjectCard";
 import { ProjectWizard } from "@/components/projects/wizard/ProjectWizard";
 import ContratoModal from "@/components/projects/ContratoModal";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +25,7 @@ function Projects() {
   const [formOpen, setFormOpen] = useState(false);
   const [contratoModalOpen, setContratoModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   useEffect(() => {
     if (currentWorkspace) {
@@ -54,18 +56,31 @@ function Projects() {
   };
 
   const getFilteredProjects = (tab: "active" | "completed") => {
+    let filtered = projects;
+    
+    // Filter by tab (active/completed)
     if (tab === "completed") {
-      return projects.filter(p => p.status === "completed");
+      filtered = filtered.filter(p => p.status === "completed");
+    } else {
+      // Active projects: planning, in_progress, on_hold
+      filtered = filtered.filter(p => p.status !== "completed");
+      
+      // Filter by status
+      if (statusFilter !== "all") {
+        filtered = filtered.filter(p => p.status === statusFilter);
+      }
     }
     
-    // Active projects: planning, in_progress, on_hold
-    const activeProjects = projects.filter(p => p.status !== "completed");
-    
-    if (statusFilter === "all") {
-      return activeProjects;
+    // Filter by search query (name or client)
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(p => 
+        p.name.toLowerCase().includes(query) ||
+        (p.clients?.name && p.clients.name.toLowerCase().includes(query))
+      );
     }
     
-    return activeProjects.filter(p => p.status === statusFilter);
+    return filtered;
   };
 
   const activeProjects = getFilteredProjects("active");
@@ -87,17 +102,29 @@ function Projects() {
           subtitle="Gerencie todos os seus projetos de design de interiores"
         />
         <main className="flex-1 overflow-y-auto p-6">
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-medium">Meus Projetos</h3>
-              <p className="text-sm text-muted-foreground">
-                {projects.length} projeto(s) no total
-              </p>
+          <div className="mb-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium">Meus Projetos</h3>
+                <p className="text-sm text-muted-foreground">
+                  {projects.length} projeto(s) no total
+                </p>
+              </div>
+              <Button onClick={() => setFormOpen(true)} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Novo Projeto
+              </Button>
             </div>
-            <Button onClick={() => setFormOpen(true)} className="gap-2">
-              <Plus className="h-4 w-4" />
-              Novo Projeto
-            </Button>
+            
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por nome do projeto ou cliente..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
           </div>
 
           <Tabs defaultValue="active" className="w-full">
