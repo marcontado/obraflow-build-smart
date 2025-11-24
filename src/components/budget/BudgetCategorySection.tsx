@@ -27,24 +27,24 @@ export function BudgetCategorySection({
   return (
     <AccordionItem 
       value={category.id}
-      className="border rounded-lg mb-3"
-      style={{ borderColor: category.color || 'hsl(var(--border))' }}
+      className="border rounded-md mb-2"
+      style={{ borderLeftWidth: '3px', borderLeftColor: category.color || 'hsl(var(--border))' }}
     >
-      <AccordionTrigger className="px-6 hover:no-underline">
-        <div className="flex items-center justify-between w-full pr-4">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">{category.icon}</span>
-            <span className="font-semibold text-lg">{category.name}</span>
-            <Badge variant="secondary" className="ml-2">
-              {items.length} {items.length === 1 ? 'item' : 'itens'}
+      <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/50 transition-colors">
+        <div className="flex items-center justify-between w-full pr-3">
+          <div className="flex items-center gap-2">
+            <span className="text-lg opacity-70">{category.icon}</span>
+            <span className="font-medium text-sm">{category.name}</span>
+            <Badge variant="outline" className="ml-1 text-xs h-5">
+              {items.length}
             </Badge>
           </div>
-          <div className="text-lg font-bold text-primary">
+          <div className="text-sm font-semibold text-foreground/80">
             R$ {categoryTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </div>
         </div>
       </AccordionTrigger>
-      <AccordionContent className="px-6 pb-6">
+      <AccordionContent className="px-4 pb-4">
         {items.length > 0 ? (
           <BudgetItemsTable
             items={items}
@@ -53,7 +53,7 @@ export function BudgetCategorySection({
             onDuplicate={onDuplicateItem}
           />
         ) : (
-          <div className="text-center py-8 text-muted-foreground">
+          <div className="text-center py-6 text-sm text-muted-foreground">
             Nenhum item nesta categoria
           </div>
         )}

@@ -187,11 +187,6 @@ function ProjectDetails() {
     try {
       const { data, error } = await budgetCategoriesService.getByWorkspace(currentWorkspace.id);
       if (error) throw error;
-      if (!data || data.length === 0) {
-        await budgetCategoriesService.seedDefaultCategories(currentWorkspace.id);
-        fetchBudgetCategories();
-        return;
-      }
       setBudgetCategories(data || []);
     } catch (error: any) {
       console.error("Erro ao carregar categorias:", error);
@@ -624,7 +619,7 @@ function ProjectDetails() {
               </div>
 
               {budgetCategories.filter(cat => cat.is_active).length > 0 ? (
-                <Accordion type="multiple" className="space-y-3">
+                <Accordion type="multiple" className="space-y-1">
                   {budgetCategories
                     .filter(cat => cat.is_active)
                     .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
@@ -646,11 +641,24 @@ function ProjectDetails() {
                     })}
                 </Accordion>
               ) : (
-                <Card>
+                <Card className="border-dashed">
                   <CardContent className="py-12">
-                    <p className="text-center text-muted-foreground">
-                      Nenhuma categoria ativa. Crie uma categoria para começar a adicionar itens.
-                    </p>
+                    <div className="text-center space-y-3">
+                      <p className="text-muted-foreground">
+                        Nenhuma categoria criada ainda.
+                      </p>
+                      <p className="text-sm text-muted-foreground/70">
+                        💡 Sugestões: Revestimentos, Iluminação, Marcenaria, Pintura, Mobiliário
+                      </p>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => document.querySelector<HTMLElement>('[aria-label="Nova Categoria"]')?.click()}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Criar Primeira Categoria
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               )}

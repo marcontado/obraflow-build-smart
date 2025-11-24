@@ -92,7 +92,7 @@ export function BudgetCategoryManager({ onCreateCategory }: BudgetCategoryManage
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="ghost" size="sm" aria-label="Nova Categoria">
           <Plus className="h-4 w-4 mr-2" />
           Nova Categoria
         </Button>
