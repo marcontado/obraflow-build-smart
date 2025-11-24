@@ -1,11 +1,30 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import type { BriefingData } from "@/types/project.types";
 
 interface ProjectBriefingViewProps {
   briefing: BriefingData;
+  projectStatus?: string;
 }
 
-export function ProjectBriefingView({ briefing }: ProjectBriefingViewProps) {
+const statusColors = {
+  planning: "bg-blue-500/10 text-blue-600 border-blue-200",
+  in_progress: "bg-green-500/10 text-green-600 border-green-200",
+  review: "bg-yellow-500/10 text-yellow-600 border-yellow-200",
+  completed: "bg-purple-500/10 text-purple-600 border-purple-200",
+  on_hold: "bg-gray-500/10 text-gray-600 border-gray-200",
+};
+
+const statusLabels = {
+  planning: "Planejamento",
+  in_progress: "Em Andamento",
+  review: "Em Revisão",
+  completed: "Concluído",
+  on_hold: "Em Espera",
+};
+
+export function ProjectBriefingView({ briefing, projectStatus }: ProjectBriefingViewProps) {
   const isEmpty = !briefing || Object.values(briefing).every(v => !v || (Array.isArray(v) && v.length === 0));
   
   if (isEmpty) return null;
@@ -13,7 +32,17 @@ export function ProjectBriefingView({ briefing }: ProjectBriefingViewProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Briefing do Projeto</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>Briefing do Projeto</CardTitle>
+          {projectStatus && (
+            <Badge
+              variant="outline"
+              className={cn("border", statusColors[projectStatus as keyof typeof statusColors])}
+            >
+              {statusLabels[projectStatus as keyof typeof statusLabels]}
+            </Badge>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {briefing.goal && (

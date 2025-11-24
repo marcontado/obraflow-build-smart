@@ -238,6 +238,39 @@ function ProjectDetails() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  <div>
+                    <h4 className="text-sm font-medium text-muted-foreground mb-2">Atalho de Status</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {Object.entries(statusLabels).map(([status, label]) => (
+                        <Button
+                          key={status}
+                          variant={project.status === status ? "default" : "outline"}
+                          size="sm"
+                          onClick={async () => {
+                            try {
+                              const { error } = await projectsService.update(
+                                project.id,
+                                { status: status as any },
+                                currentWorkspace!.id
+                              );
+                              if (error) throw error;
+                              toast.success(`Status alterado para "${label}"`);
+                              fetchProject();
+                            } catch (error: any) {
+                              toast.error("Erro ao alterar status");
+                            }
+                          }}
+                          className={cn(
+                            "transition-all",
+                            project.status === status && statusColors[status as keyof typeof statusColors]
+                          )}
+                        >
+                          {label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  
                   {project.description && (
                     <div>
                       <h4 className="text-sm font-medium text-muted-foreground mb-1">Descrição</h4>
@@ -313,7 +346,7 @@ function ProjectDetails() {
                 </CardContent>
               </Card>
 
-              {project.briefing && <ProjectBriefingView briefing={project.briefing} />}
+              {project.briefing && <ProjectBriefingView briefing={project.briefing} projectStatus={project.status} />}
               
               {project.site_photos && project.site_photos.length > 0 && (
                 <ProjectSitePhotosView photos={project.site_photos} />
