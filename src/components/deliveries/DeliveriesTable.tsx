@@ -68,6 +68,7 @@ export function DeliveriesTable({
               <TableHead>Fornecedor</TableHead>
               <TableHead>Ambiente</TableHead>
               <TableHead>Item Vinculado</TableHead>
+              <TableHead>Recebido por</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-center">Fotos</TableHead>
               <TableHead className="text-center">Anexos</TableHead>
@@ -77,7 +78,7 @@ export function DeliveriesTable({
           <TableBody>
             {deliveries.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                   Nenhuma entrega registrada
                 </TableCell>
               </TableRow>
@@ -91,7 +92,16 @@ export function DeliveriesTable({
                     <TableCell className="font-medium">
                       {format(new Date(delivery.delivery_date), "dd/MM/yyyy", { locale: ptBR })}
                     </TableCell>
-                    <TableCell>{delivery.supplier_name}</TableCell>
+                    <TableCell>
+                      {delivery.partner ? (
+                        <div>
+                          <div className="font-medium">{delivery.partner.name}</div>
+                          <div className="text-xs text-muted-foreground">{delivery.partner.category}</div>
+                        </div>
+                      ) : (
+                        delivery.supplier_name
+                      )}
+                    </TableCell>
                     <TableCell>
                       {delivery.area?.name || (
                         <span className="text-muted-foreground text-sm">-</span>
@@ -99,6 +109,20 @@ export function DeliveriesTable({
                     </TableCell>
                     <TableCell>
                       {delivery.budget_item?.item_name || (
+                        <span className="text-muted-foreground text-sm">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {delivery.received_by ? (
+                        <div>
+                          <div className="text-sm">{delivery.received_by}</div>
+                          {delivery.received_signature && (
+                            <div className="text-xs text-muted-foreground truncate max-w-[150px]">
+                              {delivery.received_signature}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
                         <span className="text-muted-foreground text-sm">-</span>
                       )}
                     </TableCell>

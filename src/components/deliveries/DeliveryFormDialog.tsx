@@ -31,8 +31,13 @@ import { deliverySchema, type DeliveryFormData } from "@/schemas/delivery.schema
 import { deliveryStatus } from "@/types/delivery.types";
 import type { ProjectArea } from "@/types";
 import type { BudgetItemWithRelations } from "@/types/budget.types";
-import { Upload, X, FileText, Image as ImageIcon } from "lucide-react";
+import { Upload, X, FileText, Image as ImageIcon, UserPlus } from "lucide-react";
 import { toast } from "sonner";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { partnersService } from "@/services/partners.service";
+import type { Database } from "@/integrations/supabase/types";
+
+type Partner = Database["public"]["Tables"]["partners"]["Row"];
 
 interface DeliveryFormDialogProps {
   open: boolean;
@@ -53,10 +58,13 @@ export function DeliveryFormDialog({
   initialData,
   isEditing = false,
 }: DeliveryFormDialogProps) {
+  const { currentWorkspace } = useWorkspace();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState<File[]>([]);
   const [selectedAttachments, setSelectedAttachments] = useState<File[]>([]);
   const [photosPreviews, setPhotosPreviews] = useState<string[]>([]);
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [isNewPartner, setIsNewPartner] = useState(false);
 
   const form = useForm<DeliveryFormData>({
     resolver: zodResolver(deliverySchema),
@@ -65,10 +73,18 @@ export function DeliveryFormDialog({
     },
   });
 
+  // Carregar parceiros quando dialog abre
+  useEffect(() => {
+    if (open && currentWorkspace?.id) {
+      loadPartners();
+    }
+  }, [open, currentWorkspace?.id]);
+
   // Reset form quando dialog abre com novos dados
   useEffect(() => {
     if (open && initialData) {
       form.reset(initialData);
+      setIsNewPartner(!initialData.partner_id);
     } else if (open && !initialData) {
       form.reset({
         status: "recebido",
@@ -76,8 +92,20 @@ export function DeliveryFormDialog({
       setSelectedPhotos([]);
       setSelectedAttachments([]);
       setPhotosPreviews([]);
+      setIsNewPartner(false);
     }
   }, [open, initialData, form]);
+
+  const loadPartners = async () => {
+    if (!currentWorkspace?.id) return;
+    
+    const { data, error } = await partnersService.getAll(currentWorkspace.id);
+    if (error) {
+      toast.error("Erro ao carregar fornecedores");
+      return;
+    }
+    setPartners(data || []);
+  };
 
   // Criar previews das fotos
   useEffect(() => {
@@ -173,19 +201,77 @@ export function DeliveryFormDialog({
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="supplier_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Fornecedor *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Nome do fornecedor" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {!isNewPartner ? (
+                  <FormField
+                    control={form.control}
+                    name="partner_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Fornecedor *</FormLabel>
+                        <Select 
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            const selected = partners.find(p => p.id === value);
+                            if (selected) {
+                              form.setValue("supplier_name", selected.name);
+                            }
+                          }} 
+                          value={field.value || ""}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione um fornecedor" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {partners.map((partner) => (
+                              <SelectItem key={partner.id} value={partner.id}>
+                                {partner.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          type="button"
+                          variant="link"
+                          size="sm"
+                          className="p-0 h-auto"
+                          onClick={() => setIsNewPartner(true)}
+                        >
+                          <UserPlus className="h-3 w-3 mr-1" />
+                          Criar novo fornecedor
+                        </Button>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ) : (
+                  <FormField
+                    control={form.control}
+                    name="supplier_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome do Fornecedor *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Digite o nome do fornecedor" {...field} />
+                        </FormControl>
+                        <Button
+                          type="button"
+                          variant="link"
+                          size="sm"
+                          className="p-0 h-auto"
+                          onClick={() => {
+                            setIsNewPartner(false);
+                            form.setValue("partner_id", undefined);
+                          }}
+                        >
+                          Selecionar fornecedor existente
+                        </Button>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
                 <FormField
                   control={form.control}
@@ -280,6 +366,49 @@ export function DeliveryFormDialog({
                   </FormItem>
                 )}
               />
+            </div>
+
+            {/* Registro de Recebimento */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold">Registro de Recebimento</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="received_by"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Recebido por</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Nome de quem recebeu" 
+                          {...field}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="received_signature"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Assinatura</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Assinatura ou confirmação" 
+                          {...field}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
             {/* Fotos */}
