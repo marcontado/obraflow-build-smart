@@ -90,12 +90,12 @@ export function BudgetItemsTable({ items, onEdit, onDelete, onDuplicate }: Budge
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[40px]"></TableHead>
-              <TableHead>Item</TableHead>
-              <TableHead>Categoria</TableHead>
-              <TableHead>Valor Total</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
+              <TableHead className="w-12"></TableHead>
+              <TableHead className="w-[35%]">Item</TableHead>
+              <TableHead className="w-[20%]">Categoria</TableHead>
+              <TableHead className="w-[15%]">Valor Total</TableHead>
+              <TableHead className="w-[12%]">Status</TableHead>
+              <TableHead className="w-[18%] text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -107,7 +107,7 @@ export function BudgetItemsTable({ items, onEdit, onDelete, onDuplicate }: Budge
               return (
                 <Collapsible key={item.id} open={isExpanded} onOpenChange={() => toggleItem(item.id)}>
                   <TableRow>
-                    <TableCell>
+                    <TableCell className="w-12">
                       <CollapsibleTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-6 w-6">
                           {isExpanded ? (
@@ -119,7 +119,7 @@ export function BudgetItemsTable({ items, onEdit, onDelete, onDuplicate }: Budge
                       </CollapsibleTrigger>
                     </TableCell>
                     
-                    <TableCell className="font-medium">
+                    <TableCell className="w-[35%] font-medium">
                       <div className="space-y-1">
                         <div>{item.item_name}</div>
                         {item.description && (
@@ -130,7 +130,7 @@ export function BudgetItemsTable({ items, onEdit, onDelete, onDuplicate }: Budge
                       </div>
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell className="w-[20%]">
                       {item.category && (
                         <Badge
                           variant="outline"
@@ -143,7 +143,7 @@ export function BudgetItemsTable({ items, onEdit, onDelete, onDuplicate }: Budge
                       )}
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell className="w-[15%]">
                       <div className="font-bold">
                         {item.total_price
                           ? Number(item.total_price).toLocaleString("pt-BR", {
@@ -154,23 +154,24 @@ export function BudgetItemsTable({ items, onEdit, onDelete, onDuplicate }: Budge
                       </div>
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell className="w-[12%]">
                       <Badge className={statusInfo.color}>{statusInfo.label}</Badge>
                     </TableCell>
 
-                    <TableCell className="text-right">
+                    <TableCell className="w-[18%] text-right">
                       <div className="flex justify-end gap-1">
                         {onDuplicate && (
-                          <Button variant="ghost" size="icon" onClick={() => onDuplicate(item)}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
                             <Copy className="h-4 w-4" />
                           </Button>
                         )}
-                        <Button variant="ghost" size="icon" onClick={() => onEdit(item)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(item)}>
                           <Pencil className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
+                          className="h-8 w-8"
                           onClick={() => onDelete(item.id)}
                         >
                           <Trash2 className="h-4 w-4" />
