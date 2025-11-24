@@ -64,7 +64,7 @@ function generateAdminToken(userId: string, email: string): string {
     userId,
     email,
     type: 'admin',
-    exp: Date.now() + (30 * 60 * 1000) // 30 minutos
+    exp: Date.now() + (4 * 60 * 60 * 1000) // 4 horas
   };
   return btoa(JSON.stringify(payload));
 }
@@ -117,7 +117,7 @@ serve(async (req) => {
 
   try {
     // VERIFY TOKEN (via body.action)
-    if (body.action === 'verify') {
+    if (body.action === 'verify' || body.action === 'refresh') {
       const authHeader = req.headers.get('authorization');
       
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -150,14 +150,21 @@ serve(async (req) => {
         .eq('user_id', tokenData.userId)
         .single();
 
+      const response: any = {
+        userId: tokenData.userId,
+        email: profile?.email || tokenData.email,
+        fullName: profile?.full_name || null,
+        avatarUrl: profile?.avatar_url || null,
+        role: adminData?.role || 'analyst',
+      };
+
+      // Se for refresh, gerar novo token
+      if (body.action === 'refresh') {
+        response.token = generateAdminToken(tokenData.userId, profile?.email || tokenData.email);
+      }
+
       return new Response(
-        JSON.stringify({
-          userId: tokenData.userId,
-          email: profile?.email || tokenData.email,
-          fullName: profile?.full_name || null,
-          avatarUrl: profile?.avatar_url || null,
-          role: adminData?.role || 'analyst',
-        }),
+        JSON.stringify(response),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,10 +11,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAdminInfo } from "@/hooks/useAdminInfo";
 import { Skeleton } from "@/components/ui/skeleton";
-import { User, LogOut } from "lucide-react";
+import { User, LogOut, RefreshCw, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { adminAuthService } from "@/services/admin-auth.service";
 import { toast } from "sonner";
+import { useState } from "react";
 
 const roleLabels = {
   super_admin: "Super Admin",
@@ -28,8 +30,9 @@ const roleVariants = {
 };
 
 export function AdminHeader() {
-  const { adminInfo, loading } = useAdminInfo();
+  const { adminInfo, loading, tokenExpiringSoon } = useAdminInfo();
   const navigate = useNavigate();
+  const [refreshing, setRefreshing] = useState(false);
 
   const handleLogout = () => {
     adminAuthService.clearAdminToken();
@@ -37,6 +40,21 @@ export function AdminHeader() {
     sessionStorage.removeItem("admin_session_timestamp");
     toast.success("Logout realizado com sucesso");
     navigate("/admin/login");
+  };
+
+  const handleRefreshToken = async () => {
+    setRefreshing(true);
+    try {
+      await adminAuthService.refreshToken();
+      toast.success("Sessão renovada com sucesso");
+      window.location.reload();
+    } catch (error) {
+      console.error("Erro ao renovar token:", error);
+      toast.error("Erro ao renovar sessão. Faça login novamente.");
+      handleLogout();
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   if (loading) {
@@ -73,33 +91,56 @@ export function AdminHeader() {
           <p className="text-sm font-medium">
             Olá, {adminInfo.fullName || adminInfo.email}
           </p>
-          <Badge variant={roleVariants[adminInfo.role as keyof typeof roleVariants] || "outline"} className="text-xs">
-            {roleLabels[adminInfo.role as keyof typeof roleLabels] || adminInfo.role}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant={roleVariants[adminInfo.role as keyof typeof roleVariants] || "outline"} className="text-xs">
+              {roleLabels[adminInfo.role as keyof typeof roleLabels] || adminInfo.role}
+            </Badge>
+            {tokenExpiringSoon && (
+              <Badge variant="destructive" className="text-xs flex items-center gap-1">
+                <AlertTriangle className="h-3 w-3" />
+                Sessão expirando
+              </Badge>
+            )}
+          </div>
         </div>
       </div>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Avatar className="h-10 w-10 cursor-pointer">
-            <AvatarImage src={adminInfo.avatarUrl || undefined} />
-            <AvatarFallback>{initials}</AvatarFallback>
-          </Avatar>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem disabled>
-            <User className="mr-2 h-4 w-4" />
-            <span>Perfil</span>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleLogout} className="text-destructive">
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Sair do Painel</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className="flex items-center gap-2">
+        {tokenExpiringSoon && (
+          <Button
+            onClick={handleRefreshToken}
+            disabled={refreshing}
+            size="sm"
+            variant="outline"
+            className="gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            Renovar Sessão
+          </Button>
+        )}
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Avatar className="h-10 w-10 cursor-pointer">
+              <AvatarImage src={adminInfo.avatarUrl || undefined} />
+              <AvatarFallback>{initials}</AvatarFallback>
+            </Avatar>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem disabled>
+              <User className="mr-2 h-4 w-4" />
+              <span>Perfil</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Sair do Painel</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </div>
   );
 }

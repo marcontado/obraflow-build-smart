@@ -13,6 +13,7 @@ interface AdminInfo {
 export function useAdminInfo() {
   const [adminInfo, setAdminInfo] = useState<AdminInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [tokenExpiringSoon, setTokenExpiringSoon] = useState(false);
 
   useEffect(() => {
     async function loadAdminInfo() {
@@ -47,6 +48,9 @@ export function useAdminInfo() {
           role: data.role,
           avatarUrl: data.avatarUrl,
         });
+
+        // Verificar se token está expirando em breve
+        setTokenExpiringSoon(adminAuthService.isTokenExpiringSoon(30));
       } catch (error) {
         console.error("Erro ao carregar informações do admin:", error);
       } finally {
@@ -55,7 +59,14 @@ export function useAdminInfo() {
     }
 
     loadAdminInfo();
+
+    // Verificar expiração do token a cada minuto
+    const interval = setInterval(() => {
+      setTokenExpiringSoon(adminAuthService.isTokenExpiringSoon(30));
+    }, 60000);
+
+    return () => clearInterval(interval);
   }, []);
 
-  return { adminInfo, loading };
+  return { adminInfo, loading, tokenExpiringSoon };
 }
