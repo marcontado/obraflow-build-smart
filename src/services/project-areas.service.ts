@@ -1,4 +1,4 @@
-import { supabase } from "./supabase.server";
+import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
 type ProjectArea = Database["public"]["Tables"]["project_areas"]["Row"];
