@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { ClientSelect } from "@/components/shared/ClientSelect";
 import { projectTypes } from "@/types/project.types";
 import type { ProjectWizardData } from "@/schemas/project.schema";
@@ -166,13 +167,11 @@ export function ProjectBasicInfoStep({ form }: ProjectBasicInfoStepProps) {
         name="budget"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Orçamento Total (R$)</FormLabel>
+            <FormLabel>Orçamento Total</FormLabel>
             <FormControl>
-              <Input
-                type="number"
-                placeholder="0.00"
-                step="0.01"
-                {...field}
+              <CurrencyInput
+                value={field.value}
+                onValueChange={field.onChange}
               />
             </FormControl>
             <FormMessage />
