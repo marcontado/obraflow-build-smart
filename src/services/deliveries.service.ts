@@ -16,6 +16,7 @@ export const deliveriesService = {
         *,
         budget_item:budget_items(id, item_name),
         area:project_areas(id, name),
+        partner:partners(id, name, category, phone, email),
         created_by_profile:profiles(id, full_name)
       `)
       .eq("project_id", projectId)

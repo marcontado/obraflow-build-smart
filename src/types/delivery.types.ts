@@ -13,6 +13,13 @@ export interface ProjectDeliveryWithRelations extends ProjectDelivery {
     id: string;
     name: string;
   } | null;
+  partner?: {
+    id: string;
+    name: string;
+    category: string;
+    phone: string | null;
+    email: string | null;
+  } | null;
   created_by_profile?: {
     id: string;
     full_name: string;

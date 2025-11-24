@@ -775,8 +775,11 @@ export type Database = {
           delivery_date: string
           id: string
           notes: string | null
+          partner_id: string | null
           photos: Json | null
           project_id: string
+          received_by: string | null
+          received_signature: string | null
           status: string
           supplier_name: string
           updated_at: string
@@ -791,8 +794,11 @@ export type Database = {
           delivery_date: string
           id?: string
           notes?: string | null
+          partner_id?: string | null
           photos?: Json | null
           project_id: string
+          received_by?: string | null
+          received_signature?: string | null
           status?: string
           supplier_name: string
           updated_at?: string
@@ -807,8 +813,11 @@ export type Database = {
           delivery_date?: string
           id?: string
           notes?: string | null
+          partner_id?: string | null
           photos?: Json | null
           project_id?: string
+          received_by?: string | null
+          received_signature?: string | null
           status?: string
           supplier_name?: string
           updated_at?: string
@@ -848,6 +857,13 @@ export type Database = {
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_deliveries_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
             referencedColumns: ["id"]
           },
         ]
