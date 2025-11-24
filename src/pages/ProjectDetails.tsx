@@ -24,6 +24,7 @@ import { ProjectBriefingView } from "@/components/projects/ProjectBriefingView";
 import { ProjectSitePhotosView } from "@/components/projects/ProjectSitePhotosView";
 import { ProjectMoodboardView } from "@/components/projects/ProjectMoodboardView";
 import { ProjectFilesView } from "@/components/projects/ProjectFilesView";
+import { ProjectDeliveriesView } from "@/components/deliveries/ProjectDeliveriesView";
 import "@/components/projects/GanttChartStyles.css";
 import { supabase } from "@/integrations/supabase/client";
 import { projectsService } from "@/services/projects.service";
@@ -362,6 +363,7 @@ function ProjectDetails() {
               <TabsTrigger value="budget">Orçamento Detalhado</TabsTrigger>
               <TabsTrigger value="gantt">Cronograma</TabsTrigger>
               <TabsTrigger value="tasks">Tarefas</TabsTrigger>
+              <TabsTrigger value="deliveries">Entregas</TabsTrigger>
             </TabsList>
 
             <TabsContent value="dashboard" className="space-y-6">
@@ -684,6 +686,14 @@ function ProjectDetails() {
 
             <TabsContent value="tasks">
               <KanbanBoard projectId={id!} />
+            </TabsContent>
+
+            <TabsContent value="deliveries">
+              <ProjectDeliveriesView
+                projectId={id!}
+                areas={projectAreas}
+                budgetItems={budgetItems}
+              />
             </TabsContent>
           </Tabs>
         </main>
