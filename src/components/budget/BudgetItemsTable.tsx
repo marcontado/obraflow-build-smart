@@ -9,7 +9,12 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, ExternalLink, Copy, ChevronDown, ChevronUp } from "lucide-react";
+import { 
+  Pencil, Trash2, ExternalLink, Copy, ChevronDown, ChevronUp,
+  Package, Hammer, PaintBucket, Lightbulb, Droplets, Wind,
+  Sofa, DoorOpen, Drill, Boxes, ShoppingCart, Wrench
+} from "lucide-react";
+import * as Icons from "lucide-react";
 import type { BudgetItemWithRelations } from "@/types/budget.types";
 import { budgetItemStatus } from "@/types/budget.types";
 import {
@@ -57,6 +62,12 @@ export function BudgetItemsTable({ items, onEdit, onDelete, onDuplicate }: Budge
       return diff;
     }
     return 0;
+  };
+
+  const getCategoryIcon = (iconName: string | undefined) => {
+    if (!iconName) return null;
+    const IconComponent = (Icons as any)[iconName];
+    return IconComponent ? <IconComponent className="h-4 w-4" /> : null;
   };
 
   const totals = items.reduce(
@@ -123,9 +134,11 @@ export function BudgetItemsTable({ items, onEdit, onDelete, onDuplicate }: Budge
                       {item.category && (
                         <Badge
                           variant="outline"
+                          className="flex items-center gap-1.5 w-fit"
                           style={{ borderColor: item.category.color, color: item.category.color }}
                         >
-                          {item.category.icon} {item.category.name}
+                          {getCategoryIcon(item.category.icon)}
+                          <span>{item.category.name}</span>
                         </Badge>
                       )}
                     </TableCell>
