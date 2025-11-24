@@ -596,6 +596,74 @@ function ProjectDetails() {
               )}
             </TabsContent>
 
+            <TabsContent value="budget" className="space-y-6">
+              <BudgetSummaryCards 
+                totalBudget={getBudgetTotals().totalBudget}
+                totalSpent={getBudgetTotals().totalSpent}
+                totalQuoted={getBudgetTotals().totalQuoted}
+              />
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold">Itens do Orçamento</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Controle detalhado de todos os custos do projeto
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <BudgetCategoryManager
+                    onCreateCategory={handleCreateCategory}
+                  />
+                  <Button onClick={() => {
+                    setBudgetItemToEdit(null);
+                    setBudgetItemDialogOpen(true);
+                  }}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Novo Item
+                  </Button>
+                </div>
+              </div>
+
+              <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
+                <TabsList className="w-full justify-start overflow-x-auto">
+                  <TabsTrigger value="all">Todas</TabsTrigger>
+                  {budgetCategories
+                    .filter(cat => cat.is_active)
+                    .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+                    .map(category => (
+                      <TabsTrigger key={category.id} value={category.id}>
+                        <span className="mr-2">{category.icon || '📦'}</span>
+                        {category.name}
+                      </TabsTrigger>
+                    ))}
+                </TabsList>
+
+                <div className="mt-6">
+                  {getFilteredBudgetItems().length > 0 ? (
+                    <BudgetItemsTable
+                      items={getFilteredBudgetItems()}
+                      onEdit={(item) => {
+                        setBudgetItemToEdit(item);
+                        setBudgetItemDialogOpen(true);
+                      }}
+                      onDelete={handleDeleteBudgetItem}
+                      onDuplicate={handleDuplicateBudgetItem}
+                    />
+                  ) : (
+                    <Card>
+                      <CardContent className="py-12">
+                        <p className="text-center text-muted-foreground">
+                          {selectedCategory === "all" 
+                            ? "Nenhum item cadastrado. Crie o primeiro item do orçamento."
+                            : "Nenhum item nesta categoria."}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </Tabs>
+            </TabsContent>
+
             <TabsContent value="gantt">
               {/* Remover restrição de feature para admins */}
               {true ? (
@@ -654,6 +722,41 @@ function ProjectDetails() {
         isLoading={false}
         title="Excluir Área"
         description={`Tem certeza que deseja excluir a área "${areaToDelete?.name}"? Esta ação não pode ser desfeita.`}
+      />
+
+      <BudgetItemFormDialog
+        open={budgetItemDialogOpen}
+        onOpenChange={(open) => {
+          setBudgetItemDialogOpen(open);
+          if (!open) setBudgetItemToEdit(null);
+        }}
+        onSubmit={budgetItemToEdit ? handleEditBudgetItem : handleCreateBudgetItem}
+        categories={budgetCategories}
+        areas={projectAreas}
+        initialData={budgetItemToEdit ? {
+          category_id: budgetItemToEdit.category_id,
+          area_id: budgetItemToEdit.area_id || undefined,
+          item_name: budgetItemToEdit.item_name,
+          executor: budgetItemToEdit.executor || undefined,
+          description: budgetItemToEdit.description || undefined,
+          status: budgetItemToEdit.status as any,
+          measurement_unit: budgetItemToEdit.measurement_unit || undefined,
+          measurement_base: budgetItemToEdit.measurement_base?.toString() || undefined,
+          measurement_purchased: budgetItemToEdit.measurement_purchased?.toString() || undefined,
+          quantity: budgetItemToEdit.quantity?.toString() || undefined,
+          store_name: budgetItemToEdit.store_name || undefined,
+          product_code: budgetItemToEdit.product_code || undefined,
+          unit_price: budgetItemToEdit.unit_price?.toString() || undefined,
+          store_link: budgetItemToEdit.store_link || undefined,
+          alternative_store_name: budgetItemToEdit.alternative_store_name || undefined,
+          alternative_product_code: budgetItemToEdit.alternative_product_code || undefined,
+          alternative_unit_price: budgetItemToEdit.alternative_unit_price?.toString() || undefined,
+          alternative_store_link: budgetItemToEdit.alternative_store_link || undefined,
+          selected_store: (budgetItemToEdit.selected_store as "main" | "alternative") || "main",
+          deadline: budgetItemToEdit.deadline || undefined,
+          notes: budgetItemToEdit.notes || undefined,
+        } : undefined}
+        isEditing={!!budgetItemToEdit}
       />
     </div>
   );
