@@ -223,21 +223,81 @@ export type Database = {
           },
         ]
       }
+      client_representatives: {
+        Row: {
+          company_client_id: string
+          created_at: string
+          id: string
+          is_primary: boolean | null
+          representative_client_id: string
+          role: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          company_client_id: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean | null
+          representative_client_id: string
+          role?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          company_client_id?: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean | null
+          representative_client_id?: string
+          role?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_representative_company"
+            columns: ["company_client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_representative_person"
+            columns: ["representative_client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_representative_workspace"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           address: string | null
           city: string | null
+          client_type: Database["public"]["Enums"]["client_type"]
+          cnpj: string | null
           cpf: string | null
           created_at: string
           created_by: string | null
           email: string | null
           id: string
+          inscricao_estadual: string | null
+          inscricao_municipal: string | null
           marital_status: string | null
           name: string
           nationality: string | null
           notes: string | null
           occupation: string | null
           phone: string | null
+          razao_social: string | null
           rg: string | null
           state: string | null
           updated_at: string
@@ -247,17 +307,22 @@ export type Database = {
         Insert: {
           address?: string | null
           city?: string | null
+          client_type?: Database["public"]["Enums"]["client_type"]
+          cnpj?: string | null
           cpf?: string | null
           created_at?: string
           created_by?: string | null
           email?: string | null
           id?: string
+          inscricao_estadual?: string | null
+          inscricao_municipal?: string | null
           marital_status?: string | null
           name: string
           nationality?: string | null
           notes?: string | null
           occupation?: string | null
           phone?: string | null
+          razao_social?: string | null
           rg?: string | null
           state?: string | null
           updated_at?: string
@@ -267,17 +332,22 @@ export type Database = {
         Update: {
           address?: string | null
           city?: string | null
+          client_type?: Database["public"]["Enums"]["client_type"]
+          cnpj?: string | null
           cpf?: string | null
           created_at?: string
           created_by?: string | null
           email?: string | null
           id?: string
+          inscricao_estadual?: string | null
+          inscricao_municipal?: string | null
           marital_status?: string | null
           name?: string
           nationality?: string | null
           notes?: string | null
           occupation?: string | null
           phone?: string | null
+          razao_social?: string | null
           rg?: string | null
           state?: string | null
           updated_at?: string
@@ -793,9 +863,11 @@ export type Database = {
           end_date: string | null
           id: string
           location: string | null
+          main_contact_id: string | null
           moodboard: Json | null
           name: string
           progress: number | null
+          project_manager_id: string | null
           site_photos: Json | null
           spent: number | null
           start_date: string | null
@@ -815,9 +887,11 @@ export type Database = {
           end_date?: string | null
           id?: string
           location?: string | null
+          main_contact_id?: string | null
           moodboard?: Json | null
           name: string
           progress?: number | null
+          project_manager_id?: string | null
           site_photos?: Json | null
           spent?: number | null
           start_date?: string | null
@@ -837,9 +911,11 @@ export type Database = {
           end_date?: string | null
           id?: string
           location?: string | null
+          main_contact_id?: string | null
           moodboard?: Json | null
           name?: string
           progress?: number | null
+          project_manager_id?: string | null
           site_photos?: Json | null
           spent?: number | null
           start_date?: string | null
@@ -850,6 +926,20 @@ export type Database = {
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_main_contact"
+            columns: ["main_contact_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_project_manager"
+            columns: ["project_manager_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fk_projects_workspace"
             columns: ["workspace_id"]
@@ -1173,6 +1263,19 @@ export type Database = {
         Args: { workspace_name: string }
         Returns: string
       }
+      get_client_representatives: {
+        Args: { _client_id: string; _workspace_id: string }
+        Returns: {
+          id: string
+          is_primary: boolean
+          representative_client_id: string
+          representative_cpf: string
+          representative_email: string
+          representative_name: string
+          representative_phone: string
+          role: string
+        }[]
+      }
       get_platform_admin_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["platform_role"]
@@ -1194,6 +1297,7 @@ export type Database = {
         Args: { _user_id: string }
         Returns: undefined
       }
+      pj_has_representative: { Args: { _client_id: string }; Returns: boolean }
       remove_platform_admin: {
         Args: { _removed_by?: string; _user_id: string }
         Returns: undefined
@@ -1220,6 +1324,7 @@ export type Database = {
       }
     }
     Enums: {
+      client_type: "PF" | "PJ"
       platform_role: "super_admin" | "support" | "analyst"
       project_status:
         | "planning"
@@ -1359,6 +1464,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      client_type: ["PF", "PJ"],
       platform_role: ["super_admin", "support", "analyst"],
       project_status: [
         "planning",

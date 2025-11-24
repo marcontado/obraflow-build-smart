@@ -1,7 +1,8 @@
-import { Mail, Phone, MapPin, Edit, Trash2, FolderOpen } from "lucide-react";
+import { Mail, Phone, MapPin, Edit, Trash2, FolderOpen, User, Building2, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { clientTypeLabels } from "@/types/client.types";
 
 interface ActiveProject {
   id: string;
@@ -16,6 +17,9 @@ interface ClientCardProps {
   phone?: string | null;
   city?: string | null;
   state?: string | null;
+  client_type?: "PF" | "PJ";
+  cpf?: string | null;
+  cnpj?: string | null;
   projectCount?: number;
   activeProjects?: ActiveProject[];
   onEdit: () => void;
@@ -28,16 +32,36 @@ export function ClientCard({
   phone,
   city,
   state,
+  client_type = "PF",
+  cpf,
+  cnpj,
   projectCount = 0,
   activeProjects = [],
   onEdit,
   onDelete,
 }: ClientCardProps) {
+  const Icon = client_type === "PJ" ? Building2 : User;
+  const document = client_type === "PJ" ? cnpj : cpf;
+  
   return (
     <Card className="transition-all hover:shadow-md">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
-          <CardTitle className="text-xl">{name}</CardTitle>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <CardTitle className="text-xl">{name}</CardTitle>
+              <Badge variant="outline" className="text-xs">
+                <Icon className="h-3 w-3 mr-1" />
+                {clientTypeLabels[client_type]}
+              </Badge>
+            </div>
+            {document && (
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <FileText className="h-3 w-3" />
+                {client_type === "PJ" ? "CNPJ" : "CPF"}: {document}
+              </p>
+            )}
+          </div>
           <div className="flex gap-1">
             <Button
               variant="ghost"
