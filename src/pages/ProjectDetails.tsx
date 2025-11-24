@@ -28,10 +28,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { projectsService } from "@/services/projects.service";
 import { projectAreasService } from "@/services/project-areas.service";
 import { tasksService } from "@/services/tasks.service";
+import { budgetCategoriesService } from "@/services/budget-categories.service";
+import { budgetItemsService } from "@/services/budget-items.service";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { projectTypes } from "@/types/project.types";
 import type { Database } from "@/integrations/supabase/types";
+import type { BudgetCategory, BudgetItemWithRelations } from "@/types/budget.types";
+import type { BudgetCategoryFormData } from "@/schemas/budget-category.schema";
+import type { BudgetItemFormData } from "@/schemas/budget-item.schema";
+import { BudgetSummaryCards } from "@/components/budget/BudgetSummaryCards";
+import { BudgetItemFormDialog } from "@/components/budget/BudgetItemFormDialog";
+import { BudgetItemsTable } from "@/components/budget/BudgetItemsTable";
+import { BudgetCategoryManager } from "@/components/budget/BudgetCategoryManager";
 
 type ProjectArea = Database["public"]["Tables"]["project_areas"]["Row"];
 
@@ -65,12 +74,21 @@ function ProjectDetails() {
   const [areaDialogOpen, setAreaDialogOpen] = useState(false);
   const [areaToEdit, setAreaToEdit] = useState<ProjectArea | null>(null);
   const [areaToDelete, setAreaToDelete] = useState<ProjectArea | null>(null);
+  
+  // Budget states
+  const [budgetCategories, setBudgetCategories] = useState<BudgetCategory[]>([]);
+  const [budgetItems, setBudgetItems] = useState<BudgetItemWithRelations[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [budgetItemDialogOpen, setBudgetItemDialogOpen] = useState(false);
+  const [budgetItemToEdit, setBudgetItemToEdit] = useState<BudgetItemWithRelations | null>(null);
 
   useEffect(() => {
     if (currentWorkspace) {
       fetchProject();
       fetchProjectAreas();
       fetchProjectTasks();
+      fetchBudgetCategories();
+      fetchBudgetItems();
     }
   }, [id, currentWorkspace]);
 
@@ -162,6 +180,143 @@ function ProjectDetails() {
     }
   };
 
+  // Budget functions
+  const fetchBudgetCategories = async () => {
+    if (!currentWorkspace) return;
+    try {
+      const { data, error } = await budgetCategoriesService.getByWorkspace(currentWorkspace.id);
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        await budgetCategoriesService.seedDefaultCategories(currentWorkspace.id);
+        fetchBudgetCategories();
+        return;
+      }
+      setBudgetCategories(data || []);
+    } catch (error: any) {
+      console.error("Erro ao carregar categorias:", error);
+    }
+  };
+
+  const fetchBudgetItems = async () => {
+    if (!id || !currentWorkspace) return;
+    try {
+      const { data, error } = await budgetItemsService.getByProject(id, currentWorkspace.id);
+      if (error) throw error;
+      setBudgetItems(data || []);
+    } catch (error: any) {
+      console.error("Erro ao carregar itens:", error);
+    }
+  };
+
+  const handleCreateCategory = async (data: BudgetCategoryFormData) => {
+    if (!currentWorkspace) return;
+    try {
+      const maxOrder = budgetCategories.reduce((max, cat) => Math.max(max, cat.sort_order || 0), 0);
+      const { error } = await budgetCategoriesService.create({
+        name: data.name,
+        description: data.description || null,
+        color: data.color,
+        icon: data.icon,
+        workspace_id: currentWorkspace.id,
+        sort_order: maxOrder + 1,
+      });
+      if (error) throw error;
+      toast.success("Categoria criada com sucesso");
+      fetchBudgetCategories();
+    } catch (error: any) {
+      toast.error("Erro ao criar categoria");
+    }
+  };
+
+  const handleCreateBudgetItem = async (data: BudgetItemFormData) => {
+    if (!id || !currentWorkspace) return;
+    try {
+      const { data: user } = await supabase.auth.getUser();
+      let measurementWithMargin = data.measurement_base ? parseFloat(data.measurement_base) : null;
+      if (data.add_margin && measurementWithMargin) measurementWithMargin *= 1.1;
+      const qty = data.quantity ? parseFloat(data.quantity) : 0;
+      const selectedPrice = data.selected_store === "main" ? (data.unit_price ? parseFloat(data.unit_price) : 0) : (data.alternative_unit_price ? parseFloat(data.alternative_unit_price) : 0);
+      const total = qty * selectedPrice;
+      const { error } = await budgetItemsService.create({
+        workspace_id: currentWorkspace.id, project_id: id, category_id: data.category_id, area_id: data.area_id || null,
+        item_name: data.item_name, executor: data.executor || null, description: data.description || null, status: data.status,
+        measurement_unit: data.measurement_unit, measurement_base: data.measurement_base ? parseFloat(data.measurement_base) : null,
+        measurement_with_margin: measurementWithMargin, measurement_purchased: data.measurement_purchased ? parseFloat(data.measurement_purchased) : null,
+        quantity: qty || null, store_name: data.store_name || null, product_code: data.product_code || null,
+        unit_price: data.unit_price ? parseFloat(data.unit_price) : null, store_link: data.store_link || null,
+        alternative_store_name: data.alternative_store_name || null, alternative_product_code: data.alternative_product_code || null,
+        alternative_unit_price: data.alternative_unit_price ? parseFloat(data.alternative_unit_price) : null,
+        alternative_store_link: data.alternative_store_link || null, selected_store: data.selected_store, total_price: total || null,
+        deadline: data.deadline || null, notes: data.notes || null, created_by: user?.user?.id || null,
+      });
+      if (error) throw error;
+      toast.success("Item criado");
+      fetchBudgetItems();
+      fetchProjectAreas();
+      fetchProject();
+    } catch (error: any) {
+      toast.error("Erro ao criar item");
+    }
+  };
+
+  const handleEditBudgetItem = async (data: BudgetItemFormData) => {
+    if (!budgetItemToEdit || !currentWorkspace) return;
+    try {
+      let measurementWithMargin = data.measurement_base ? parseFloat(data.measurement_base) : null;
+      if (data.add_margin && measurementWithMargin) measurementWithMargin *= 1.1;
+      const qty = data.quantity ? parseFloat(data.quantity) : 0;
+      const selectedPrice = data.selected_store === "main" ? (data.unit_price ? parseFloat(data.unit_price) : 0) : (data.alternative_unit_price ? parseFloat(data.alternative_unit_price) : 0);
+      const total = qty * selectedPrice;
+      const { error } = await budgetItemsService.update(budgetItemToEdit.id, {
+        category_id: data.category_id, area_id: data.area_id || null, item_name: data.item_name, executor: data.executor || null,
+        description: data.description || null, status: data.status, measurement_unit: data.measurement_unit,
+        measurement_base: data.measurement_base ? parseFloat(data.measurement_base) : null, measurement_with_margin: measurementWithMargin,
+        measurement_purchased: data.measurement_purchased ? parseFloat(data.measurement_purchased) : null, quantity: qty || null,
+        store_name: data.store_name || null, product_code: data.product_code || null, unit_price: data.unit_price ? parseFloat(data.unit_price) : null,
+        store_link: data.store_link || null, alternative_store_name: data.alternative_store_name || null,
+        alternative_product_code: data.alternative_product_code || null, alternative_unit_price: data.alternative_unit_price ? parseFloat(data.alternative_unit_price) : null,
+        alternative_store_link: data.alternative_store_link || null, selected_store: data.selected_store, total_price: total || null,
+        deadline: data.deadline || null, notes: data.notes || null,
+      }, currentWorkspace.id);
+      if (error) throw error;
+      toast.success("Item atualizado");
+      setBudgetItemToEdit(null);
+      fetchBudgetItems();
+      fetchProjectAreas();
+      fetchProject();
+    } catch (error: any) {
+      toast.error("Erro ao atualizar item");
+    }
+  };
+
+  const handleDeleteBudgetItem = async (itemId: string) => {
+    if (!currentWorkspace || !confirm("Excluir este item?")) return;
+    try {
+      const { error } = await budgetItemsService.delete(itemId, currentWorkspace.id);
+      if (error) throw error;
+      toast.success("Item excluído");
+      fetchBudgetItems();
+      fetchProjectAreas();
+      fetchProject();
+    } catch (error: any) {
+      toast.error("Erro ao excluir item");
+    }
+  };
+
+  const handleDuplicateBudgetItem = (item: BudgetItemWithRelations) => {
+    setBudgetItemToEdit({ ...item, id: "", item_name: `${item.item_name} (Cópia)` } as any);
+    setBudgetItemDialogOpen(true);
+  };
+
+  const getFilteredBudgetItems = () => selectedCategory === "all" ? budgetItems : budgetItems.filter((item) => item.category_id === selectedCategory);
+
+  const getBudgetTotals = () => {
+    const totalBudget = Number(project?.budget || 0);
+    const totalSpent = budgetItems.filter((item) => item.status === "comprado" || item.status === "aplicado").reduce((sum, item) => sum + Number(item.total_price || 0), 0);
+    const totalQuoted = budgetItems.reduce((sum, item) => sum + Number(item.total_price || 0), 0);
+    return { totalBudget, totalSpent, totalQuoted };
+  };
+
   const handleAreaDialogClose = () => {
     setAreaDialogOpen(false);
     setAreaToEdit(null);
@@ -209,7 +364,8 @@ function ProjectDetails() {
             <TabsList>
               <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
               <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-              <TabsTrigger value="areas">Áreas e Orçamentos</TabsTrigger>
+              <TabsTrigger value="areas">Áreas</TabsTrigger>
+              <TabsTrigger value="budget">Orçamento Detalhado</TabsTrigger>
               <TabsTrigger value="gantt">Cronograma</TabsTrigger>
               <TabsTrigger value="tasks">Tarefas</TabsTrigger>
             </TabsList>

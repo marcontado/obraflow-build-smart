@@ -44,6 +44,185 @@ export type Database = {
         }
         Relationships: []
       }
+      budget_categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          sort_order: number | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          sort_order?: number | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          sort_order?: number | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_budget_categories_workspace"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budget_items: {
+        Row: {
+          alternative_product_code: string | null
+          alternative_store_link: string | null
+          alternative_store_name: string | null
+          alternative_unit_price: number | null
+          area_id: string | null
+          category_id: string
+          created_at: string
+          created_by: string | null
+          deadline: string | null
+          description: string | null
+          executor: string | null
+          id: string
+          item_name: string
+          measurement_base: number | null
+          measurement_purchased: number | null
+          measurement_unit: string | null
+          measurement_with_margin: number | null
+          notes: string | null
+          product_code: string | null
+          project_id: string
+          quantity: number | null
+          selected_store: string | null
+          status: string | null
+          store_link: string | null
+          store_name: string | null
+          total_price: number | null
+          unit_price: number | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          alternative_product_code?: string | null
+          alternative_store_link?: string | null
+          alternative_store_name?: string | null
+          alternative_unit_price?: number | null
+          area_id?: string | null
+          category_id: string
+          created_at?: string
+          created_by?: string | null
+          deadline?: string | null
+          description?: string | null
+          executor?: string | null
+          id?: string
+          item_name: string
+          measurement_base?: number | null
+          measurement_purchased?: number | null
+          measurement_unit?: string | null
+          measurement_with_margin?: number | null
+          notes?: string | null
+          product_code?: string | null
+          project_id: string
+          quantity?: number | null
+          selected_store?: string | null
+          status?: string | null
+          store_link?: string | null
+          store_name?: string | null
+          total_price?: number | null
+          unit_price?: number | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          alternative_product_code?: string | null
+          alternative_store_link?: string | null
+          alternative_store_name?: string | null
+          alternative_unit_price?: number | null
+          area_id?: string | null
+          category_id?: string
+          created_at?: string
+          created_by?: string | null
+          deadline?: string | null
+          description?: string | null
+          executor?: string | null
+          id?: string
+          item_name?: string
+          measurement_base?: number | null
+          measurement_purchased?: number | null
+          measurement_unit?: string | null
+          measurement_with_margin?: number | null
+          notes?: string | null
+          product_code?: string | null
+          project_id?: string
+          quantity?: number | null
+          selected_store?: string | null
+          status?: string | null
+          store_link?: string | null
+          store_name?: string | null
+          total_price?: number | null
+          unit_price?: number | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_budget_items_area"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "project_areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_budget_items_category"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "budget_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_budget_items_created_by"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_budget_items_project"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_budget_items_workspace"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           address: string | null
