@@ -199,16 +199,10 @@ function ProjectDetails() {
               <ArrowLeft className="h-4 w-4" />
               Voltar
             </Button>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setWizardOpen(true)} className="gap-2">
-                <Edit className="h-4 w-4" />
-                Editar
-              </Button>
-              <Button variant="outline" onClick={() => setDeleteDialogOpen(true)} className="gap-2">
-                <Trash2 className="h-4 w-4 text-destructive" />
-                Excluir
-              </Button>
-            </div>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(true)} className="gap-2">
+              <Trash2 className="h-4 w-4 text-destructive" />
+              Excluir
+            </Button>
           </div>
 
           <Tabs defaultValue="dashboard" className="space-y-6">
@@ -228,7 +222,13 @@ function ProjectDetails() {
               <Card>
                 <CardHeader>
                   <div className="flex items-start justify-between">
-                    <CardTitle>Informações do Projeto</CardTitle>
+                    <div className="flex items-center gap-3">
+                      <CardTitle>Informações do Projeto</CardTitle>
+                      <Button variant="outline" size="sm" onClick={() => setWizardOpen(true)} className="gap-2">
+                        <Edit className="h-4 w-4" />
+                        Editar
+                      </Button>
+                    </div>
                     <Badge
                       variant="outline"
                       className={cn("border", statusColors[project.status as keyof typeof statusColors])}
