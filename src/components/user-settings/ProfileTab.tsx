@@ -124,6 +124,9 @@ export function ProfileTab() {
         .from('avatars')
         .getPublicUrl(filePath);
 
+      // Add cache-busting parameter to force image reload
+      const urlWithCacheBuster = `${publicUrl}?t=${Date.now()}`;
+
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ avatar_url: publicUrl })
@@ -131,8 +134,13 @@ export function ProfileTab() {
 
       if (updateError) throw updateError;
 
-      setAvatarUrl(publicUrl);
+      setAvatarUrl(urlWithCacheBuster);
       toast.success("Avatar atualizado com sucesso!");
+      
+      // Force a profile refetch to update other components
+      setTimeout(() => {
+        fetchProfile();
+      }, 500);
     } catch (error: any) {
       toast.error(error.message || "Erro ao fazer upload do avatar");
     } finally {
