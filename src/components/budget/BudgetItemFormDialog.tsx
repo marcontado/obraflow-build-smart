@@ -103,6 +103,20 @@ export function BudgetItemFormDialog({
     watchedValues.selected_store,
   ]);
 
+  // Reset form quando dialog abre com novos dados
+  useEffect(() => {
+    if (open && initialData) {
+      form.reset(initialData);
+    } else if (open && !initialData) {
+      form.reset({
+        status: "pendente",
+        measurement_unit: "m²",
+        selected_store: "main",
+        add_margin: false,
+      });
+    }
+  }, [open, initialData, form]);
+
   const handleSubmit = async (data: BudgetItemFormData) => {
     setIsSubmitting(true);
     try {
