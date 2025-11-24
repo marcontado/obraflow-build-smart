@@ -9,15 +9,14 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, ExternalLink, Copy } from "lucide-react";
+import { Pencil, Trash2, ExternalLink, Copy, ChevronDown, ChevronUp } from "lucide-react";
 import type { BudgetItemWithRelations } from "@/types/budget.types";
 import { budgetItemStatus } from "@/types/budget.types";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface BudgetItemsTableProps {
   items: BudgetItemWithRelations[];
@@ -27,6 +26,8 @@ interface BudgetItemsTableProps {
 }
 
 export function BudgetItemsTable({ items, onEdit, onDelete, onDuplicate }: BudgetItemsTableProps) {
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
+
   if (items.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
@@ -35,6 +36,12 @@ export function BudgetItemsTable({ items, onEdit, onDelete, onDuplicate }: Budge
       </div>
     );
   }
+
+  const toggleItem = (id: string) => {
+    setExpandedItems(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
 
   const getStatusInfo = (status: string) => {
     const info = budgetItemStatus.find((s) => s.value === status);
@@ -68,17 +75,14 @@ export function BudgetItemsTable({ items, onEdit, onDelete, onDuplicate }: Budge
 
   return (
     <div className="space-y-4">
-      <div className="rounded-md border overflow-x-auto">
+      <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[40px]"></TableHead>
               <TableHead>Item</TableHead>
-              <TableHead>Ambiente</TableHead>
-              <TableHead>Executor</TableHead>
-              <TableHead>Medições</TableHead>
-              <TableHead>Loja Principal</TableHead>
-              <TableHead>Loja Alternativa</TableHead>
-              <TableHead>Total</TableHead>
+              <TableHead>Categoria</TableHead>
+              <TableHead>Valor Total</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
@@ -87,177 +91,242 @@ export function BudgetItemsTable({ items, onEdit, onDelete, onDuplicate }: Budge
             {items.map((item) => {
               const statusInfo = getStatusInfo(item.status);
               const savings = calculateSavings(item);
-              const selectedPrice = item.selected_store === "main" ? item.unit_price : item.alternative_unit_price;
+              const isExpanded = expandedItems.includes(item.id);
 
               return (
-                <TableRow key={item.id}>
-                  <TableCell className="font-medium">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span>{item.item_name}</span>
-                        {item.category && (
-                          <Badge
-                            variant="outline"
-                            style={{ borderColor: item.category.color, color: item.category.color }}
-                          >
-                            {item.category.name}
-                          </Badge>
+                <Collapsible key={item.id} open={isExpanded} onOpenChange={() => toggleItem(item.id)}>
+                  <TableRow>
+                    <TableCell>
+                      <CollapsibleTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-6 w-6">
+                          {isExpanded ? (
+                            <ChevronUp className="h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </CollapsibleTrigger>
+                    </TableCell>
+                    
+                    <TableCell className="font-medium">
+                      <div className="space-y-1">
+                        <div>{item.item_name}</div>
+                        {item.description && (
+                          <p className="text-xs text-muted-foreground truncate max-w-[300px]">
+                            {item.description}
+                          </p>
                         )}
                       </div>
-                      {item.description && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <p className="text-xs text-muted-foreground truncate max-w-[200px] cursor-help">
-                                {item.description}
-                              </p>
-                            </TooltipTrigger>
-                            <TooltipContent className="max-w-xs">
-                              <p>{item.description}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      )}
-                    </div>
-                  </TableCell>
+                    </TableCell>
 
-                  <TableCell>
-                    {item.area ? (
-                      <Badge variant="secondary">{item.area.name}</Badge>
-                    ) : (
-                      <span className="text-muted-foreground text-sm">-</span>
-                    )}
-                  </TableCell>
-
-                  <TableCell>
-                    <span className="text-sm">{item.executor || "-"}</span>
-                  </TableCell>
-
-                  <TableCell>
-                    <div className="text-sm space-y-1">
-                      {item.measurement_base && (
-                        <div>
-                          Base: {item.measurement_base} {item.measurement_unit}
-                        </div>
-                      )}
-                      {item.measurement_purchased && (
-                        <div className="text-muted-foreground">
-                          Comprada: {item.measurement_purchased} {item.measurement_unit}
-                        </div>
-                      )}
-                      {item.quantity && (
-                        <div className="font-medium">Qty: {item.quantity}</div>
-                      )}
-                    </div>
-                  </TableCell>
-
-                  <TableCell>
-                    <div className="text-sm space-y-1">
-                      {item.store_name && <div className="font-medium">{item.store_name}</div>}
-                      {item.product_code && (
-                        <div className="text-muted-foreground">{item.product_code}</div>
-                      )}
-                      {item.unit_price && (
-                        <div>
-                          R$ {Number(item.unit_price).toFixed(2)}
-                          {item.selected_store === "main" && (
-                            <Badge variant="default" className="ml-2 text-xs">
-                              Selecionada
-                            </Badge>
-                          )}
-                        </div>
-                      )}
-                      {item.store_link && (
-                        <a
-                          href={item.store_link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-primary hover:underline"
+                    <TableCell>
+                      {item.category && (
+                        <Badge
+                          variant="outline"
+                          style={{ borderColor: item.category.color, color: item.category.color }}
                         >
-                          <ExternalLink className="h-3 w-3" />
-                          Link
-                        </a>
+                          {item.category.icon} {item.category.name}
+                        </Badge>
                       )}
-                    </div>
-                  </TableCell>
+                    </TableCell>
 
-                  <TableCell>
-                    {item.alternative_store_name ? (
-                      <div className="text-sm space-y-1">
-                        <div className="font-medium">{item.alternative_store_name}</div>
-                        {item.alternative_unit_price && (
-                          <div className="flex items-center gap-2">
-                            R$ {Number(item.alternative_unit_price).toFixed(2)}
-                            {savings !== 0 && (
-                              <Badge variant={savings > 0 ? "default" : "destructive"} className="text-xs">
-                                {savings > 0 ? "-" : "+"}
-                                {Math.abs(savings).toFixed(0)}%
-                              </Badge>
+                    <TableCell>
+                      <div className="font-bold">
+                        {item.total_price
+                          ? Number(item.total_price).toLocaleString("pt-BR", {
+                              style: "currency",
+                              currency: "BRL",
+                            })
+                          : "-"}
+                      </div>
+                    </TableCell>
+
+                    <TableCell>
+                      <Badge className={statusInfo.color}>{statusInfo.label}</Badge>
+                    </TableCell>
+
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        {onDuplicate && (
+                          <Button variant="ghost" size="icon" onClick={() => onDuplicate(item)}>
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="icon" onClick={() => onEdit(item)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => onDelete(item.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+
+                  <CollapsibleContent asChild>
+                    <TableRow>
+                      <TableCell colSpan={6} className="bg-muted/50">
+                        <div className="p-4 space-y-4">
+                          {/* Informações Gerais */}
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {item.area && (
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Ambiente</p>
+                                <Badge variant="secondary">{item.area.name}</Badge>
+                              </div>
                             )}
-                            {item.selected_store === "alternative" && (
-                              <Badge variant="default" className="ml-2 text-xs">
-                                Selecionada
-                              </Badge>
+                            {item.executor && (
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Executor</p>
+                                <p className="text-sm font-medium">{item.executor}</p>
+                              </div>
+                            )}
+                            {item.deadline && (
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Prazo</p>
+                                <p className="text-sm font-medium">
+                                  {new Date(item.deadline).toLocaleDateString("pt-BR")}
+                                </p>
+                              </div>
+                            )}
+                            {item.quantity && (
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Quantidade</p>
+                                <p className="text-sm font-medium">{item.quantity}</p>
+                              </div>
                             )}
                           </div>
-                        )}
-                        {item.alternative_store_link && (
-                          <a
-                            href={item.alternative_store_link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-primary hover:underline"
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                            Link
-                          </a>
-                        )}
-                      </div>
-                    ) : (
-                      <span className="text-muted-foreground text-sm">-</span>
-                    )}
-                  </TableCell>
 
-                  <TableCell>
-                    <div className="font-bold">
-                      {item.total_price
-                        ? Number(item.total_price).toLocaleString("pt-BR", {
-                            style: "currency",
-                            currency: "BRL",
-                          })
-                        : "-"}
-                    </div>
-                  </TableCell>
+                          {/* Medições */}
+                          {(item.measurement_base || item.measurement_purchased) && (
+                            <div>
+                              <p className="text-xs text-muted-foreground mb-2">Medições</p>
+                              <div className="grid grid-cols-2 gap-2 text-sm">
+                                {item.measurement_base && (
+                                  <div>
+                                    <span className="text-muted-foreground">Base:</span>{" "}
+                                    <span className="font-medium">
+                                      {item.measurement_base} {item.measurement_unit}
+                                    </span>
+                                  </div>
+                                )}
+                                {item.measurement_purchased && (
+                                  <div>
+                                    <span className="text-muted-foreground">Comprada:</span>{" "}
+                                    <span className="font-medium">
+                                      {item.measurement_purchased} {item.measurement_unit}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
 
-                  <TableCell>
-                    <Badge className={statusInfo.color}>{statusInfo.label}</Badge>
-                    {item.deadline && (
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {new Date(item.deadline).toLocaleDateString("pt-BR")}
-                      </div>
-                    )}
-                  </TableCell>
+                          {/* Lojas */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Loja Principal */}
+                            {item.store_name && (
+                              <div className="rounded-lg border p-3 space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <p className="text-xs font-semibold text-muted-foreground">
+                                    Loja Principal
+                                  </p>
+                                  {item.selected_store === "main" && (
+                                    <Badge variant="default" className="text-xs">
+                                      Selecionada
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="font-medium">{item.store_name}</p>
+                                {item.product_code && (
+                                  <p className="text-xs text-muted-foreground">
+                                    Cód: {item.product_code}
+                                  </p>
+                                )}
+                                {item.unit_price && (
+                                  <p className="text-lg font-bold">
+                                    R$ {Number(item.unit_price).toFixed(2)}
+                                  </p>
+                                )}
+                                {item.store_link && (
+                                  <a
+                                    href={item.store_link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                                  >
+                                    <ExternalLink className="h-3 w-3" />
+                                    Ver na loja
+                                  </a>
+                                )}
+                              </div>
+                            )}
 
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      {onDuplicate && (
-                        <Button variant="ghost" size="icon" onClick={() => onDuplicate(item)}>
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      )}
-                      <Button variant="ghost" size="icon" onClick={() => onEdit(item)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onDelete(item.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                            {/* Loja Alternativa */}
+                            {item.alternative_store_name && (
+                              <div className="rounded-lg border p-3 space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <p className="text-xs font-semibold text-muted-foreground">
+                                    Loja Alternativa
+                                  </p>
+                                  {item.selected_store === "alternative" && (
+                                    <Badge variant="default" className="text-xs">
+                                      Selecionada
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="font-medium">{item.alternative_store_name}</p>
+                                {item.alternative_product_code && (
+                                  <p className="text-xs text-muted-foreground">
+                                    Cód: {item.alternative_product_code}
+                                  </p>
+                                )}
+                                {item.alternative_unit_price && (
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-lg font-bold">
+                                      R$ {Number(item.alternative_unit_price).toFixed(2)}
+                                    </p>
+                                    {savings !== 0 && (
+                                      <Badge
+                                        variant={savings > 0 ? "default" : "destructive"}
+                                        className="text-xs"
+                                      >
+                                        {savings > 0 ? "-" : "+"}
+                                        {Math.abs(savings).toFixed(0)}%
+                                      </Badge>
+                                    )}
+                                  </div>
+                                )}
+                                {item.alternative_store_link && (
+                                  <a
+                                    href={item.alternative_store_link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                                  >
+                                    <ExternalLink className="h-3 w-3" />
+                                    Ver na loja
+                                  </a>
+                                )}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Notas */}
+                          {item.notes && (
+                            <div>
+                              <p className="text-xs text-muted-foreground mb-1">Observações</p>
+                              <p className="text-sm">{item.notes}</p>
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  </CollapsibleContent>
+                </Collapsible>
               );
             })}
           </TableBody>
