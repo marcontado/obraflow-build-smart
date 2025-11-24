@@ -17,6 +17,7 @@ import { ProjectBriefingStep } from "./steps/ProjectBriefingStep";
 import { ProjectMoodboardStep } from "./steps/ProjectMoodboardStep";
 import { ProjectTechnicalFilesStep } from "./steps/ProjectTechnicalFilesStep";
 import { ProjectSummaryStep } from "./steps/ProjectSummaryStep";
+import { WizardStepper } from "./WizardStepper";
 
 interface ProjectWizardProps {
   open: boolean;
@@ -313,16 +314,7 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="font-medium">{STEPS[currentStep - 1].title}</span>
-            <span className="text-muted-foreground">
-              Etapa {currentStep} de {STEPS.length}
-            </span>
-          </div>
-          <Progress value={progress} className="h-2" />
-          <p className="text-xs text-muted-foreground">{STEPS[currentStep - 1].description}</p>
-        </div>
+        <WizardStepper steps={STEPS} currentStep={currentStep} />
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 overflow-y-auto">
