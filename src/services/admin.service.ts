@@ -60,7 +60,16 @@ export const adminService = {
       },
     });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Admin action error:', error);
+      throw new Error(error.message || 'Erro ao alterar plano do workspace');
+    }
+    
+    if (data?.error) {
+      console.error('Admin action response error:', data.error);
+      throw new Error(data.error);
+    }
+    
     return data;
   },
 

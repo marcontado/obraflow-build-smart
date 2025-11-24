@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { adminService } from "@/services/admin.service";
+import { adminAuthService } from "@/services/admin-auth.service";
 import { useToast } from "@/hooks/use-toast";
 import { PLAN_NAMES } from "@/constants/plans";
 
@@ -38,6 +40,7 @@ export function ChangePlanDialog({
   currentPlan,
 }: ChangePlanDialogProps) {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [selectedPlan, setSelectedPlan] = useState<string>(currentPlan);
   const [loading, setLoading] = useState(false);
 
@@ -48,6 +51,18 @@ export function ChangePlanDialog({
         description: "O plano selecionado é o mesmo que o atual.",
         variant: "default",
       });
+      return;
+    }
+
+    // Verificar se o token é válido antes de fazer a chamada
+    if (!adminAuthService.isTokenValid()) {
+      toast({
+        title: "Sessão expirada",
+        description: "Sua sessão expirou. Faça login novamente.",
+        variant: "destructive",
+      });
+      adminAuthService.clearAdminToken();
+      navigate("/admin/login");
       return;
     }
 
@@ -62,11 +77,23 @@ export function ChangePlanDialog({
       onClose();
     } catch (error: any) {
       console.error("Error changing plan:", error);
-      toast({
-        title: "Erro ao alterar plano",
-        description: error.message,
-        variant: "destructive",
-      });
+      
+      // Verificar se é erro de autenticação
+      if (error.message?.includes('Unauthorized') || error.message?.includes('Invalid token')) {
+        toast({
+          title: "Sessão expirada",
+          description: "Sua sessão expirou. Faça login novamente.",
+          variant: "destructive",
+        });
+        adminAuthService.clearAdminToken();
+        navigate("/admin/login");
+      } else {
+        toast({
+          title: "Erro ao alterar plano",
+          description: error.message || "Erro desconhecido ao alterar plano",
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }

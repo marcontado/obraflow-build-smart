@@ -26,6 +26,7 @@ Deno.serve(async (req) => {
     // Validate custom admin token
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
+      console.error('Admin action failed: Missing authorization header');
       return new Response(JSON.stringify({ error: 'Unauthorized - Missing token' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -36,7 +37,8 @@ Deno.serve(async (req) => {
     const adminData = verifyAdminToken(token);
     
     if (!adminData) {
-      return new Response(JSON.stringify({ error: 'Unauthorized - Invalid token' }), {
+      console.error('Admin action failed: Invalid or expired token');
+      return new Response(JSON.stringify({ error: 'Unauthorized - Invalid or expired token' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -48,8 +50,12 @@ Deno.serve(async (req) => {
     );
 
     // Verify admin status in database
-    const { data: adminRole } = await supabase.rpc('get_platform_admin_role', { _user_id: adminData.userId });
+    const { data: adminRole, error: roleError } = await supabase.rpc('get_platform_admin_role', { _user_id: adminData.userId });
+    if (roleError) {
+      console.error('Failed to get admin role:', roleError);
+    }
     if (!adminRole) {
+      console.error(`Admin action failed: User ${adminData.email} is not a platform admin`);
       return new Response(JSON.stringify({ error: 'Forbidden - Admin access required' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

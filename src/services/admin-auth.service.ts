@@ -70,5 +70,49 @@ export const adminAuthService = {
     
     const payload = this.verifyToken(token);
     return payload !== null;
+  },
+
+  getTokenExpirationTime(): number | null {
+    const token = this.getAdminToken();
+    if (!token) return null;
+    
+    const payload = this.verifyToken(token);
+    return payload?.exp || null;
+  },
+
+  getTokenTimeRemaining(): number | null {
+    const exp = this.getTokenExpirationTime();
+    if (!exp) return null;
+    
+    return Math.max(0, exp - Date.now());
+  },
+
+  isTokenExpiringSoon(minutesThreshold: number = 30): boolean {
+    const timeRemaining = this.getTokenTimeRemaining();
+    if (timeRemaining === null) return false;
+    
+    return timeRemaining < (minutesThreshold * 60 * 1000);
+  },
+
+  async refreshToken(): Promise<void> {
+    const token = this.getAdminToken();
+    if (!token) throw new Error('No token to refresh');
+
+    const payload = this.verifyToken(token);
+    if (!payload) throw new Error('Invalid token');
+
+    // Re-authenticate to get a new token
+    const { data, error } = await supabase.functions.invoke('admin-auth', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      body: { action: 'refresh' }
+    });
+
+    if (error) throw error;
+    if (data.error) throw new Error(data.error);
+    if (data.token) {
+      localStorage.setItem(ADMIN_TOKEN_KEY, data.token);
+    }
   }
 };
