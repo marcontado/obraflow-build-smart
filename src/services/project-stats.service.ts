@@ -1,4 +1,4 @@
-import { supabase } from "./supabase.server";
+import { supabase } from "@/integrations/supabase/client";
 
 export const projectStatsService = {
   async getProjectStats(projectId: string, workspaceId: string) {

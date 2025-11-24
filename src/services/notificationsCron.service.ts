@@ -1,5 +1,5 @@
 // Serviço para checar vencimentos e acionar webhook do n8n
-import { supabase } from "./supabase.server";
+import { supabase } from "@/integrations/supabase/client";
 
 const N8N_WEBHOOK_URL = "https://matweber.app.n8n.cloud/webhook/42891fac-ae9c-4160-83a5-4f468007cae6";
 
