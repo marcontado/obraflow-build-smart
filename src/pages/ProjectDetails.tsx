@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Accordion } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
 import { ProjectWizard } from "@/components/projects/wizard/ProjectWizard";
 import { ProjectAreaCard } from "@/components/projects/ProjectAreaCard";
@@ -41,6 +42,7 @@ import { BudgetSummaryCards } from "@/components/budget/BudgetSummaryCards";
 import { BudgetItemFormDialog } from "@/components/budget/BudgetItemFormDialog";
 import { BudgetItemsTable } from "@/components/budget/BudgetItemsTable";
 import { BudgetCategoryManager } from "@/components/budget/BudgetCategoryManager";
+import { BudgetCategorySection } from "@/components/budget/BudgetCategorySection";
 
 type ProjectArea = Database["public"]["Tables"]["project_areas"]["Row"];
 
@@ -78,7 +80,6 @@ function ProjectDetails() {
   // Budget states
   const [budgetCategories, setBudgetCategories] = useState<BudgetCategory[]>([]);
   const [budgetItems, setBudgetItems] = useState<BudgetItemWithRelations[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [budgetItemDialogOpen, setBudgetItemDialogOpen] = useState(false);
   const [budgetItemToEdit, setBudgetItemToEdit] = useState<BudgetItemWithRelations | null>(null);
 
@@ -307,8 +308,6 @@ function ProjectDetails() {
     setBudgetItemToEdit({ ...item, id: "", item_name: `${item.item_name} (Cópia)` } as any);
     setBudgetItemDialogOpen(true);
   };
-
-  const getFilteredBudgetItems = () => selectedCategory === "all" ? budgetItems : budgetItems.filter((item) => item.category_id === selectedCategory);
 
   const getBudgetTotals = () => {
     const totalBudget = Number(project?.budget || 0);
@@ -624,44 +623,37 @@ function ProjectDetails() {
                 </div>
               </div>
 
-              <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-                <TabsList className="w-full justify-start overflow-x-auto">
-                  <TabsTrigger value="all">Todas</TabsTrigger>
+              {budgetCategories.filter(cat => cat.is_active).length > 0 ? (
+                <Accordion type="multiple" className="space-y-3">
                   {budgetCategories
                     .filter(cat => cat.is_active)
                     .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
-                    .map(category => (
-                      <TabsTrigger key={category.id} value={category.id}>
-                        <span className="mr-2">{category.icon || '📦'}</span>
-                        {category.name}
-                      </TabsTrigger>
-                    ))}
-                </TabsList>
-
-                <div className="mt-6">
-                  {getFilteredBudgetItems().length > 0 ? (
-                    <BudgetItemsTable
-                      items={getFilteredBudgetItems()}
-                      onEdit={(item) => {
-                        setBudgetItemToEdit(item);
-                        setBudgetItemDialogOpen(true);
-                      }}
-                      onDelete={handleDeleteBudgetItem}
-                      onDuplicate={handleDuplicateBudgetItem}
-                    />
-                  ) : (
-                    <Card>
-                      <CardContent className="py-12">
-                        <p className="text-center text-muted-foreground">
-                          {selectedCategory === "all" 
-                            ? "Nenhum item cadastrado. Crie o primeiro item do orçamento."
-                            : "Nenhum item nesta categoria."}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-              </Tabs>
+                    .map(category => {
+                      const categoryItems = budgetItems.filter(item => item.category_id === category.id);
+                      return (
+                        <BudgetCategorySection
+                          key={category.id}
+                          category={category}
+                          items={categoryItems}
+                          onEditItem={(item) => {
+                            setBudgetItemToEdit(item);
+                            setBudgetItemDialogOpen(true);
+                          }}
+                          onDeleteItem={handleDeleteBudgetItem}
+                          onDuplicateItem={handleDuplicateBudgetItem}
+                        />
+                      );
+                    })}
+                </Accordion>
+              ) : (
+                <Card>
+                  <CardContent className="py-12">
+                    <p className="text-center text-muted-foreground">
+                      Nenhuma categoria ativa. Crie uma categoria para começar a adicionar itens.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
 
             <TabsContent value="gantt">
