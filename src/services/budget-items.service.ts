@@ -1,4 +1,4 @@
-import { supabase } from "./supabase.server";
+import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
 type BudgetItem = Database["public"]["Tables"]["budget_items"]["Row"];
