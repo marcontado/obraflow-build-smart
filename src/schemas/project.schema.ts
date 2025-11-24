@@ -3,12 +3,18 @@ import { z } from "zod";
 // Schema para briefing
 export const briefingSchema = z.object({
   goal: z.string().optional(),
-  style: z.string().optional(),
+  styles: z.array(z.string()).optional(),
   audience: z.string().optional(),
   needs: z.string().optional(),
   restrictions: z.string().optional(),
   preferred_materials: z.string().optional(),
   references_links: z.string().optional(),
+  client_profile: z.string().optional(),
+  client_desires: z.string().optional(),
+  client_pains: z.string().optional(),
+  client_essence: z.string().optional(),
+  client_objectives: z.string().optional(),
+  field_research: z.string().optional(),
 });
 
 // Schema completo do projeto (wizard multi-step)

@@ -530,6 +530,7 @@ export type Database = {
           moodboard: Json | null
           name: string
           progress: number | null
+          site_photos: Json | null
           spent: number | null
           start_date: string | null
           status: Database["public"]["Enums"]["project_status"] | null
@@ -551,6 +552,7 @@ export type Database = {
           moodboard?: Json | null
           name: string
           progress?: number | null
+          site_photos?: Json | null
           spent?: number | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["project_status"] | null
@@ -572,6 +574,7 @@ export type Database = {
           moodboard?: Json | null
           name?: string
           progress?: number | null
+          site_photos?: Json | null
           spent?: number | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["project_status"] | null

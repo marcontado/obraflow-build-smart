@@ -15,6 +15,17 @@ export const technicalFileCategories = [
   { value: 'other', label: 'Outros' },
 ] as const;
 
+export const moodboardCategories = [
+  { value: 'reference', label: 'Referência Geral' },
+  { value: 'colors', label: 'Paleta de Cores' },
+  { value: 'furniture', label: 'Mobiliário' },
+  { value: 'materials', label: 'Materiais e Texturas' },
+  { value: 'lighting', label: 'Iluminação' },
+  { value: 'decor', label: 'Decoração' },
+  { value: 'layout', label: 'Layout e Distribuição' },
+  { value: 'other', label: 'Outros' },
+] as const;
+
 export const styleOptions = [
   'Moderno',
   'Industrial',
@@ -33,6 +44,16 @@ export interface MoodboardItem {
   description?: string;
   tags?: string[];
   file_name?: string;
+  category?: string;
+}
+
+export interface SitePhoto {
+  url: string;
+  date?: string;
+  area?: string;
+  labels?: string[];
+  description?: string;
+  file_name: string;
 }
 
 export interface TechnicalFile {
@@ -45,10 +66,16 @@ export interface TechnicalFile {
 
 export interface BriefingData {
   goal?: string;
-  style?: string;
+  styles?: string[];
   audience?: string;
   needs?: string;
   restrictions?: string;
   preferred_materials?: string;
   references_links?: string;
+  client_profile?: string;
+  client_desires?: string;
+  client_pains?: string;
+  client_essence?: string;
+  client_objectives?: string;
+  field_research?: string;
 }

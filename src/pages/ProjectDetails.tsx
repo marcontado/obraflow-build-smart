@@ -20,6 +20,7 @@ import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
 import { KanbanBoard } from "@/components/tasks/KanbanBoard";
 import { ProjectDashboard } from "@/components/projects/ProjectDashboard";
 import { ProjectBriefingView } from "@/components/projects/ProjectBriefingView";
+import { ProjectSitePhotosView } from "@/components/projects/ProjectSitePhotosView";
 import { ProjectMoodboardView } from "@/components/projects/ProjectMoodboardView";
 import { ProjectFilesView } from "@/components/projects/ProjectFilesView";
 import "@/components/projects/GanttChartStyles.css";
@@ -313,6 +314,10 @@ function ProjectDetails() {
               </Card>
 
               {project.briefing && <ProjectBriefingView briefing={project.briefing} />}
+              
+              {project.site_photos && project.site_photos.length > 0 && (
+                <ProjectSitePhotosView photos={project.site_photos} />
+              )}
               
               {project.moodboard && project.moodboard.length > 0 && (
                 <ProjectMoodboardView items={project.moodboard} />

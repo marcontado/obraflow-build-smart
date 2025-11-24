@@ -10,10 +10,11 @@ import { Form } from "@/components/ui/form";
 import { toast } from "sonner";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { projectsService } from "@/services/projects.service";
-import type { MoodboardItem, TechnicalFile } from "@/types/project.types";
+import type { MoodboardItem, TechnicalFile, SitePhoto } from "@/types/project.types";
 
 import { ProjectBasicInfoStep } from "./steps/ProjectBasicInfoStep";
 import { ProjectBriefingStep } from "./steps/ProjectBriefingStep";
+import { ProjectSitePhotosStep } from "./steps/ProjectSitePhotosStep";
 import { ProjectMoodboardStep } from "./steps/ProjectMoodboardStep";
 import { ProjectTechnicalFilesStep } from "./steps/ProjectTechnicalFilesStep";
 import { ProjectSummaryStep } from "./steps/ProjectSummaryStep";
@@ -29,16 +30,18 @@ interface ProjectWizardProps {
 
 const STEPS = [
   { id: 1, title: "Informações Básicas", description: "Nome, cliente, datas e orçamento" },
-  { id: 2, title: "Briefing Inicial", description: "Objetivos e contexto do projeto" },
-  { id: 3, title: "Referências Visuais", description: "Moodboard e inspirações" },
-  { id: 4, title: "Materiais Técnicos", description: "Plantas, renders e documentos" },
-  { id: 5, title: "Resumo", description: "Revisão e confirmação" },
+  { id: 2, title: "Briefing", description: "Objetivos, perfil do cliente e pesquisa" },
+  { id: 3, title: "Registro Fotográfico", description: "Fotos do local antes da reforma" },
+  { id: 4, title: "Referências Visuais", description: "Moodboard e inspirações" },
+  { id: 5, title: "Materiais Técnicos", description: "Plantas, renders e documentos" },
+  { id: 6, title: "Resumo", description: "Revisão e confirmação" },
 ];
 
 export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData }: ProjectWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [moodboardItems, setMoodboardItems] = useState<MoodboardItem[]>([]);
   const [technicalFiles, setTechnicalFiles] = useState<TechnicalFile[]>([]);
+  const [sitePhotos, setSitePhotos] = useState<SitePhoto[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdProjectId, setCreatedProjectId] = useState<string | null>(projectId || null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -59,12 +62,18 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
       location: "",
       briefing: {
         goal: "",
-        style: "",
+        styles: [],
         audience: "",
         needs: "",
         restrictions: "",
         preferred_materials: "",
         references_links: "",
+        client_profile: "",
+        client_desires: "",
+        client_pains: "",
+        client_essence: "",
+        client_objectives: "",
+        field_research: "",
       },
     },
   });
@@ -86,6 +95,7 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
       });
       setMoodboardItems(initialData.moodboard || []);
       setTechnicalFiles(initialData.technical_files || []);
+      setSitePhotos(initialData.site_photos || []);
       setCreatedProjectId(projectId || null);
       setHasUnsavedChanges(false);
     }
@@ -220,6 +230,7 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
     setCurrentStep(1);
     setMoodboardItems([]);
     setTechnicalFiles([]);
+    setSitePhotos([]);
     setCreatedProjectId(null);
     setHasUnsavedChanges(false);
     onClose();
@@ -241,9 +252,10 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
         return;
       }
 
-      // Atualizar projeto com briefing, moodboard e technical_files
+      // Atualizar projeto com briefing, site_photos, moodboard e technical_files
       const updateData = {
         briefing: data.briefing,
+        site_photos: sitePhotos as any,
         moodboard: moodboardItems as any,
         technical_files: technicalFiles as any,
       };
@@ -278,13 +290,21 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
         return <ProjectBriefingStep form={form} />;
       case 3:
         return (
+          <ProjectSitePhotosStep
+            projectId={activeProjectId}
+            photos={sitePhotos}
+            onPhotosChange={setSitePhotos}
+          />
+        );
+      case 4:
+        return (
           <ProjectMoodboardStep
             projectId={activeProjectId}
             items={moodboardItems}
             onItemsChange={setMoodboardItems}
           />
         );
-      case 4:
+      case 5:
         return (
           <ProjectTechnicalFilesStep
             projectId={activeProjectId}
@@ -292,10 +312,11 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
             onFilesChange={setTechnicalFiles}
           />
         );
-      case 5:
+      case 6:
         return (
           <ProjectSummaryStep
             formData={form.getValues()}
+            sitePhotos={sitePhotos}
             moodboardItems={moodboardItems}
             technicalFiles={technicalFiles}
           />
