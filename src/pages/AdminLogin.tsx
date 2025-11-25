@@ -21,6 +21,19 @@ export default function AdminLogin() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  // Forçar tema claro na página de Admin Login
+  useEffect(() => {
+    const htmlElement = document.documentElement;
+    const hadDarkClass = htmlElement.classList.contains('dark');
+    htmlElement.classList.remove('dark');
+    
+    return () => {
+      if (hadDarkClass) {
+        htmlElement.classList.add('dark');
+      }
+    };
+  }, []);
+
   useEffect(() => {
     // Verificar se já tem token válido
     if (adminAuthService.isTokenValid()) {

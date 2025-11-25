@@ -27,6 +27,19 @@ export default function Auth() {
   const defaultTab = searchParams.get("tab") || "signin";
   const selectedPlan = searchParams.get("plan");
 
+  // Forçar tema claro na página de Auth
+  useEffect(() => {
+    const htmlElement = document.documentElement;
+    const hadDarkClass = htmlElement.classList.contains('dark');
+    htmlElement.classList.remove('dark');
+    
+    return () => {
+      if (hadDarkClass) {
+        htmlElement.classList.add('dark');
+      }
+    };
+  }, []);
+
   useEffect(() => {
     // Verificar se veio de um link de reset de senha
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
