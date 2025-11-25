@@ -17,6 +17,20 @@ import { useEffect, useState } from "react";
 
 export default function Landing() {
   const [showWhatsappLabel, setShowWhatsappLabel] = useState(true);
+  
+  // Forçar tema claro na Landing Page
+  useEffect(() => {
+    const htmlElement = document.documentElement;
+    const hadDarkClass = htmlElement.classList.contains('dark');
+    htmlElement.classList.remove('dark');
+    
+    return () => {
+      if (hadDarkClass) {
+        htmlElement.classList.add('dark');
+      }
+    };
+  }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => setShowWhatsappLabel(false), 10000);
     // Scroll suave se houver intenção salva
