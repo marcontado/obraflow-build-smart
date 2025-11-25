@@ -4,15 +4,14 @@ import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import { GlassSidebar } from "@/components/landing/GlassSidebar";
 import { StorySection } from "@/components/landing/StorySection";
-import { HeroPreview } from "@/components/landing/HeroPreview";
 import { FeatureCard } from "@/components/landing/FeatureCard";
 import { TestimonialCard } from "@/components/landing/TestimonialCard";
 import { PlanCardPublic } from "@/components/landing/PlanCardPublic";
 import { FAQSection } from "@/components/landing/FAQSection";
 import { ArrowRight, Sparkles, Calendar, Users, BarChart3, FileText, Palette, Ruler } from "lucide-react";
-import ganttTimeline from "@/assets/screenshots/gantt-timeline.jpg";
-import kanbanTasks from "@/assets/screenshots/kanban-tasks.jpg";
-import budgetFinancial from "@/assets/screenshots/budget-financial.jpg";
+import architectWoman from "@/assets/architect-woman.jpg";
+import designerMan from "@/assets/designer-man.jpg";
+import workspaceModern from "@/assets/workspace-modern.jpg";
 import teamCollaboration from "@/assets/team-collaboration.jpg";
 import { useEffect, useState } from "react";
 
@@ -140,9 +139,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Hero Preview Section */}
-      <HeroPreview />
-
       {/* Story Sections */}
       <section id="recursos" className="py-20 bg-primary/5">
         <div className="container mx-auto px-4">
@@ -159,36 +155,33 @@ export default function Landing() {
             step="1"
             title="Visualize Cada Detalhe"
             description="Gantt interativo que transforma cronogramas complexos em visualizações claras e intuitivas. Acompanhe cada fase do projeto com precisão arquitetônica, ajuste prazos com facilidade e identifique dependências instantaneamente."
-            image={ganttTimeline}
-            imageAlt="Interface Gantt mostrando cronograma de projeto arquitetônico"
-            isScreenshot
+            image={workspaceModern}
+            imageAlt="Workspace moderno de arquitetura com múltiplas telas mostrando projetos"
           />
 
           <StorySection
             step="2"
-            title="Organize com Kanban Visual"
-            description="Quadro Kanban intuitivo para gerenciar tarefas com drag-and-drop. Visualize o fluxo de trabalho, priorize atividades e acompanhe o progresso de cada entrega em tempo real."
-            image={kanbanTasks}
-            imageAlt="Kanban board com tarefas organizadas por status"
+            title="Colabore em Tempo Real"
+            description="Sua equipe, seus clientes e fornecedores conectados em uma única plataforma. Compartilhe progresso, receba feedback instantâneo e mantenha todos alinhados com o conceito do projeto, do primeiro esboço à entrega final."
+            image={teamCollaboration}
+            imageAlt="Equipe de arquitetos colaborando em projeto"
             reverse
-            isScreenshot
           />
 
           <StorySection
             step="3"
             title="Controle Financeiro Preciso"
             description="Orçamentos detalhados por área do projeto, acompanhamento de gastos em tempo real e relatórios visuais que simplificam decisões complexas. Mantenha a rentabilidade sem perder a criatividade."
-            image={budgetFinancial}
-            imageAlt="Dashboard de orçamento mostrando gastos e planejamento financeiro"
-            isScreenshot
+            image={architectWoman}
+            imageAlt="Arquiteta trabalhando com plantas e orçamentos"
           />
 
           <StorySection
             step="4"
-            title="Colaboração Sem Limites"
-            description="Sua equipe, seus clientes e fornecedores conectados em uma única plataforma. Compartilhe progresso, receba feedback instantâneo e mantenha todos alinhados do primeiro esboço à entrega final."
-            image={teamCollaboration}
-            imageAlt="Equipe de arquitetos colaborando em projeto"
+            title="Gestão Profissional"
+            description="De briefings a entregas finais, organize cada etapa com elegância. Cadastre clientes, gerencie múltiplos projetos simultaneamente e acesse relatórios detalhados que impressionam e informam."
+            image={designerMan}
+            imageAlt="Designer de interiores apresentando projeto para cliente"
             reverse
           />
         </div>
