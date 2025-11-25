@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { ScreenshotFrame } from "./ScreenshotFrame";
 
 interface StorySectionProps {
   title: string;
@@ -7,9 +8,10 @@ interface StorySectionProps {
   imageAlt: string;
   reverse?: boolean;
   step: string;
+  isScreenshot?: boolean;
 }
 
-export function StorySection({ title, description, image, imageAlt, reverse, step }: StorySectionProps) {
+export function StorySection({ title, description, image, imageAlt, reverse, step, isScreenshot = false }: StorySectionProps) {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -43,23 +45,40 @@ export function StorySection({ title, description, image, imageAlt, reverse, ste
     >
       {/* Image side */}
       <div className={`relative group ${reverse ? "md:col-start-2" : ""}`}>
-        {/* Decorative frame */}
-        <div className="absolute -inset-4 bg-primary/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+        {!isScreenshot && (
+          <div className="absolute -inset-4 bg-primary/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+        )}
         
-        <div className="relative overflow-hidden rounded-2xl shadow-elegant border border-border/50">
-          <img
-            src={image}
-            alt={imageAlt}
-            className="w-full h-[500px] object-cover transform group-hover:scale-105 transition-transform duration-700"
-          />
-          
-          {/* Glass overlay with step number */}
-          <div className="absolute top-6 left-6 w-16 h-16 rounded-2xl bg-white/80 dark:bg-card/80 backdrop-blur-glass border border-white/20 flex items-center justify-center shadow-glass">
-            <span className="text-2xl font-heading font-bold text-primary">
-              {step}
-            </span>
+        {isScreenshot ? (
+          <div className="relative">
+            <ScreenshotFrame 
+              image={image}
+              alt={imageAlt}
+              variant="browser"
+            />
+            {/* Glass overlay with step number */}
+            <div className="absolute top-10 left-10 w-16 h-16 rounded-2xl bg-white/90 dark:bg-card/90 backdrop-blur-glass border border-white/20 flex items-center justify-center shadow-glass z-10">
+              <span className="text-2xl font-heading font-bold text-primary">
+                {step}
+              </span>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="relative overflow-hidden rounded-2xl shadow-elegant border border-border/50">
+            <img
+              src={image}
+              alt={imageAlt}
+              className="w-full h-[500px] object-cover transform group-hover:scale-105 transition-transform duration-700"
+            />
+            
+            {/* Glass overlay with step number */}
+            <div className="absolute top-6 left-6 w-16 h-16 rounded-2xl bg-white/80 dark:bg-card/80 backdrop-blur-glass border border-white/20 flex items-center justify-center shadow-glass">
+              <span className="text-2xl font-heading font-bold text-primary">
+                {step}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Content side */}
