@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { MessageCircle } from "lucide-react";
-import { sendN8nWebhook } from "@/services/n8nWebhook.service";
+import { enviarFeedback } from "@/services/feedback.service";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 
@@ -18,14 +18,23 @@ export default function Suporte() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const ok = await sendN8nWebhook({ nome, email, mensagem: feedback });
-    setLoading(false);
-    if (ok) {
-      setFeedback("");
-      setEmail("");
-      setNome("");
-      toast.success("Avaliação enviada! Obrigado pelo feedback.");
-    } else {
+    try {
+      const result = await enviarFeedback({
+        nomeCliente: nome,
+        emailCliente: email,
+        mensagem: feedback
+      });
+      setLoading(false);
+      if (result.success) {
+        setFeedback("");
+        setEmail("");
+        setNome("");
+        toast.success("Avaliação enviada! Obrigado pelo feedback.");
+      } else {
+        toast.error(result.message || "Erro ao enviar feedback. Tente novamente.");
+      }
+    } catch (error) {
+      setLoading(false);
       toast.error("Erro ao enviar feedback. Tente novamente.");
     }
   };
