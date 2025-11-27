@@ -43,13 +43,19 @@ export function PrivacyTab() {
   const handleDeleteAccount = async () => {
     try {
       setDeleting(true);
-      
-      // In a real implementation, this would:
-      // 1. Delete all user-created data
-      // 2. Remove user from workspaces
-      // 3. Delete the auth user
-      // For now, we'll just sign out
-      
+
+      // Excluir usuário no backend DynamoDB usando pk e sk na query string
+      if (user?.email) {
+        const pk = user.email; // ajuste conforme seu padrão, ex: "USER#" + user.email
+        const sk = user.email; // ajuste conforme seu padrão, ex: "PROFILE#" + user.email
+        const url = `https://archestra-backend.onrender.com/user?pk=${encodeURIComponent(pk)}&sk=${encodeURIComponent(sk)}`;
+        await fetch(url, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      // Sign out no Supabase
       await supabase.auth.signOut();
       toast.success("Conta deletada com sucesso");
       navigate("/auth");

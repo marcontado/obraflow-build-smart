@@ -143,7 +143,28 @@ export default function Auth() {
       localStorage.setItem("pending_plan_selection", selectedPlan);
     }
 
+    // Cadastro no Supabase
     const { error } = await authService.signUp(email, password);
+
+    // Cadastro no backend DynamoDB (ajustado para enviar name)
+    try {
+      const response = await fetch("https://archestra-backend.onrender.com/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: fullName, 
+          email,
+          password,
+          plan: selectedPlan,
+        }),
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        toast.error(data.error || "Erro ao cadastrar no backend.");
+      }
+    } catch (err: any) {
+      toast.error("Erro ao cadastrar no backend.");
+    }
 
     setLoading(false);
 
@@ -151,7 +172,6 @@ export default function Auth() {
       toast.error(error.message);
     } else {
       toast.success("Conta criada com sucesso! Redirecionando...");
-      // Redirect to onboarding for new users
       setTimeout(() => navigate("/onboarding"), 1000);
     }
   };
