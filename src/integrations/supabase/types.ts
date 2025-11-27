@@ -1292,6 +1292,19 @@ export type Database = {
           role: string
         }[]
       }
+      get_expiring_deadlines: {
+        Args: never
+        Returns: {
+          due_date: string
+          item_id: string
+          item_name: string
+          responsible_email: string
+          responsible_name: string
+          responsible_user_id: string
+          type: string
+          workspace_id: string
+        }[]
+      }
       get_platform_admin_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["platform_role"]
