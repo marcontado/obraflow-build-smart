@@ -44,8 +44,19 @@ import { BudgetItemFormDialog } from "@/components/budget/BudgetItemFormDialog";
 import { BudgetItemsTable } from "@/components/budget/BudgetItemsTable";
 import { BudgetCategoryManager } from "@/components/budget/BudgetCategoryManager";
 import { BudgetCategorySection } from "@/components/budget/BudgetCategorySection";
+import { useAuth } from "@/contexts/AuthContext";
 
-type ProjectArea = Database["public"]["Tables"]["project_areas"]["Row"];
+// Remova também o tipo ProjectArea do Supabase:
+type ProjectArea = {
+  id: string;
+  name: string;
+  budget: number;
+  created_at: string;
+  description: string;
+  project_id: string;
+  spent: number;
+  workspace_id: string;
+};
 
 const statusColors = {
   planning: "bg-blue-500/10 text-blue-600 border-blue-200",
@@ -83,6 +94,8 @@ function ProjectDetails() {
   const [budgetItems, setBudgetItems] = useState<BudgetItemWithRelations[]>([]);
   const [budgetItemDialogOpen, setBudgetItemDialogOpen] = useState(false);
   const [budgetItemToEdit, setBudgetItemToEdit] = useState<BudgetItemWithRelations | null>(null);
+
+  const { user } = useAuth();
 
   useEffect(() => {
     if (currentWorkspace) {
@@ -228,23 +241,40 @@ function ProjectDetails() {
   const handleCreateBudgetItem = async (data: BudgetItemFormData) => {
     if (!id || !currentWorkspace) return;
     try {
-      const { data: user } = await supabase.auth.getUser();
       let measurementWithMargin = data.measurement_base ? parseFloat(data.measurement_base) : null;
       if (data.add_margin && measurementWithMargin) measurementWithMargin *= 1.1;
       const qty = data.quantity ? parseFloat(data.quantity) : 0;
-      const selectedPrice = data.selected_store === "main" ? (data.unit_price ? parseFloat(data.unit_price) : 0) : (data.alternative_unit_price ? parseFloat(data.alternative_unit_price) : 0);
+      const selectedPrice = data.selected_store === "main"
+        ? (data.unit_price ? parseFloat(data.unit_price) : 0)
+        : (data.alternative_unit_price ? parseFloat(data.alternative_unit_price) : 0);
       const total = qty * selectedPrice;
       const { error } = await budgetItemsService.create({
-        workspace_id: currentWorkspace.id, project_id: id, category_id: data.category_id, area_id: data.area_id || null,
-        item_name: data.item_name, executor: data.executor || null, description: data.description || null, status: data.status,
-        measurement_unit: data.measurement_unit, measurement_base: data.measurement_base ? parseFloat(data.measurement_base) : null,
-        measurement_with_margin: measurementWithMargin, measurement_purchased: data.measurement_purchased ? parseFloat(data.measurement_purchased) : null,
-        quantity: qty || null, store_name: data.store_name || null, product_code: data.product_code || null,
-        unit_price: data.unit_price ? parseFloat(data.unit_price) : null, store_link: data.store_link || null,
-        alternative_store_name: data.alternative_store_name || null, alternative_product_code: data.alternative_product_code || null,
+        workspace_id: currentWorkspace.id,
+        project_id: id,
+        category_id: data.category_id,
+        area_id: data.area_id || null,
+        item_name: data.item_name,
+        executor: data.executor || null,
+        description: data.description || null,
+        status: data.status,
+        measurement_unit: data.measurement_unit,
+        measurement_base: data.measurement_base ? parseFloat(data.measurement_base) : null,
+        measurement_with_margin: measurementWithMargin,
+        measurement_purchased: data.measurement_purchased ? parseFloat(data.measurement_purchased) : null,
+        quantity: qty || null,
+        store_name: data.store_name || null,
+        product_code: data.product_code || null,
+        unit_price: data.unit_price ? parseFloat(data.unit_price) : null,
+        store_link: data.store_link || null,
+        alternative_store_name: data.alternative_store_name || null,
+        alternative_product_code: data.alternative_product_code || null,
         alternative_unit_price: data.alternative_unit_price ? parseFloat(data.alternative_unit_price) : null,
-        alternative_store_link: data.alternative_store_link || null, selected_store: data.selected_store, total_price: total || null,
-        deadline: data.deadline || null, notes: data.notes || null, created_by: user?.user?.id || null,
+        alternative_store_link: data.alternative_store_link || null,
+        selected_store: data.selected_store,
+        total_price: total || null,
+        deadline: data.deadline || null,
+        notes: data.notes || null,
+        created_by: user?.id || null, // <-- Usando o contexto
       });
       if (error) throw error;
       toast.success("Item criado");

@@ -136,7 +136,7 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
       try {
         setIsSubmitting(true);
         const formData = form.getValues();
-        
+
         if (!currentWorkspace) {
           toast.error("Workspace não selecionado");
           return;
@@ -157,9 +157,30 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
         };
 
         const { data, error } = await projectsService.create(projectData, currentWorkspace.id);
-        
         if (error) throw error;
-        
+
+        try {
+          await fetch("https://archestra-backend.onrender.com/projects", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: projectData.name,
+              description: projectData.description,
+              client_id: projectData.client_id,
+              status: projectData.status,
+              start_date: projectData.start_date,
+              end_date: projectData.end_date,
+              budget: projectData.budget,
+              progress: projectData.progress,
+              type: projectData.type,
+              location: projectData.location,
+              workspace_id: projectData.workspace_id,
+            }),
+          });
+        } catch (err) {
+          toast.error("Erro ao criar projeto no backend DynamoDB.");
+        }
+
         setCreatedProjectId(data.id);
         toast.success("Projeto criado! Continue preenchendo os detalhes.");
       } catch (error: any) {
