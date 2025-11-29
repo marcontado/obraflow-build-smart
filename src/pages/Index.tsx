@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { FolderKanban, TrendingUp, Clock, CheckCircle2 } from "lucide-react";
+import { FolderKanban, TrendingUp, Clock, CheckCircle2, CreditCard } from "lucide-react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { ProjectCard } from "@/components/projects/ProjectCard";
+import { Button } from "@/components/ui/button";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -168,6 +169,18 @@ const Index = () => {
           subtitle="Visão geral dos seus projetos e métricas"
         />
         <main className="flex-1 overflow-y-auto p-6">
+          {/* Botão de Teste Stripe */}
+          <div className="mb-6">
+            <Button
+              onClick={() => navigate("/app/stripe-test")}
+              variant="outline"
+              className="w-full border-primary/20 bg-primary/5 hover:bg-primary/10"
+            >
+              <CreditCard className="mr-2 h-4 w-4" />
+              Testar Stripe (Desenvolvimento)
+            </Button>
+          </div>
+
           <div className="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 <StatsCard
                   title="Total de Projetos"

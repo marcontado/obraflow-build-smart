@@ -22,32 +22,40 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     );
 
-    const { priceId, workspaceId } = await req.json();
+    const { priceId, workspaceId, skipTrial } = await req.json();
 
     if (!priceId || !workspaceId) {
       throw new Error('Price ID and Workspace ID are required');
     }
 
-    console.log('Creating checkout session for:', { priceId, workspaceId });
+    console.log('Creating checkout session for:', { priceId, workspaceId, skipTrial });
 
-    // Get workspace details
-    const { data: workspace, error: workspaceError } = await supabaseClient
-      .from('workspaces')
-      .select('*, workspace_members!inner(user_id, profiles!inner(email))')
-      .eq('id', workspaceId)
-      .eq('workspace_members.role', 'owner')
+    // Get workspace owner
+    const { data: workspaceMember, error: memberError } = await supabaseClient
+      .from('workspace_members')
+      .select('user_id')
+      .eq('workspace_id', workspaceId)
+      .eq('role', 'owner')
       .single();
 
-    if (workspaceError || !workspace) {
-      console.error('Workspace error:', workspaceError);
-      throw new Error('Workspace not found');
+    if (memberError || !workspaceMember) {
+      console.error('Workspace member error:', memberError);
+      throw new Error('Workspace owner not found');
     }
 
-    const ownerEmail = workspace.workspace_members[0]?.profiles?.email;
-    if (!ownerEmail) {
-      throw new Error('Owner email not found');
+    // Get owner profile
+    const { data: profile, error: profileError } = await supabaseClient
+      .from('profiles')
+      .select('email')
+      .eq('id', workspaceMember.user_id)
+      .single();
+
+    if (profileError || !profile) {
+      console.error('Profile error:', profileError);
+      throw new Error('Owner profile not found');
     }
 
+    const ownerEmail = profile.email;
     console.log('Owner email:', ownerEmail);
 
     // Check if customer already exists
@@ -80,8 +88,8 @@ serve(async (req) => {
       });
     }
 
-    // Create checkout session
-    const session = await stripe.checkout.sessions.create({
+    // Create checkout session with conditional trial
+    const sessionConfig: any = {
       customer: customerId,
       line_items: [
         {
@@ -95,7 +103,19 @@ serve(async (req) => {
       metadata: {
         workspace_id: workspaceId,
       },
-    });
+    };
+
+    // Add trial period if not skipped
+    if (!skipTrial) {
+      sessionConfig.subscription_data = {
+        trial_period_days: 15,
+      };
+      console.log('Adding 15-day trial period');
+    } else {
+      console.log('Skipping trial period - immediate payment');
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionConfig);
 
     console.log('Checkout session created:', session.id);
 

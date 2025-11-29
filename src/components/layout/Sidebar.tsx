@@ -1,10 +1,13 @@
-import { Home, FolderKanban, Users, BarChart3, LogOut, Lock, Handshake, MessageCircle, FileText, DollarSign } from "lucide-react";
+import { Home, FolderKanban, Users, BarChart3, LogOut, Lock, Handshake, MessageCircle, FileText, DollarSign, Zap } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { authService } from "@/services/auth.service";
 import { toast } from "sonner";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { Button } from "@/components/ui/button";
+import { SUBSCRIPTION_PLANS } from "@/constants/plans";
 
 const navigation = [
   { name: "Dashboard", href: "/app", icon: Home },
@@ -20,6 +23,7 @@ const navigation = [
 export function Sidebar() {
   const navigate = useNavigate();
   const { hasFeature } = useFeatureAccess();
+  const { currentWorkspace } = useWorkspace();
 
   const handleLogout = async () => {
     const { error } = await authService.signOut();
@@ -91,10 +95,20 @@ export function Sidebar() {
         </TooltipProvider>
       </nav>
 
-      <div className="border-t p-3">
+      <div className="border-t p-3 space-y-2">
+        {currentWorkspace?.subscription_plan === SUBSCRIPTION_PLANS.ATELIER && (
+          <Button
+            onClick={() => navigate('/app/plan-upgrade')}
+            className="w-full"
+            variant="default"
+          >
+            <Zap className="h-4 w-4 mr-2" />
+            Fazer Upgrade
+          </Button>
+        )}
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted"
         >
           <LogOut className="h-5 w-5" />
           Sair

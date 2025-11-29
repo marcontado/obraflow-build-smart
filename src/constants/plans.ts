@@ -4,6 +4,8 @@ export const SUBSCRIPTION_PLANS = {
   DOMUS: "domus",
 } as const;
 
+export const TRIAL_DAYS = 15;
+
 export type SubscriptionPlan = typeof SUBSCRIPTION_PLANS[keyof typeof SUBSCRIPTION_PLANS];
 
 export interface PlanLimits {

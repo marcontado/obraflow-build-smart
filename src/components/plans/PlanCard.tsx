@@ -31,6 +31,13 @@ export function PlanCard({ plan, currentPlan, onSelect, billingCycle }: PlanCard
   if (limits.features.clientPortal) extraFeatures.push("Portal do cliente");
   if (limits.features.customization) extraFeatures.push("Customização avançada");
 
+  // Recomendações por plano
+  const recommendations: Record<SubscriptionPlan, string> = {
+    atelier: "Perfeito para testar a plataforma",
+    studio: "Ideal para autônomos e profissionais independentes",
+    domus: "Para escritórios ou equipes maiores",
+  };
+
   return (
     <Card className={isCurrentPlan ? "border-primary" : ""}>
       <CardHeader>
@@ -38,6 +45,7 @@ export function PlanCard({ plan, currentPlan, onSelect, billingCycle }: PlanCard
           <CardTitle>{PLAN_NAMES[plan]}</CardTitle>
           {isCurrentPlan && <Badge>Plano Atual</Badge>}
         </div>
+        <p className="text-sm text-muted-foreground italic">{recommendations[plan]}</p>
         <CardDescription className="text-3xl font-bold">
           R$ {price}
           <span className="text-base font-normal text-muted-foreground">

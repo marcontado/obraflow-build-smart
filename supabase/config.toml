@@ -6,6 +6,18 @@ verify_jwt = false
 [functions.stripe-webhook]
 verify_jwt = false
 
+[functions.create-portal-session]
+verify_jwt = false
+
+[functions.update-subscription]
+verify_jwt = false
+
+[functions.reactivate-subscription]
+verify_jwt = false
+
+[functions.send-invoice-email]
+verify_jwt = false
+
 [functions.admin-auth]
 verify_jwt = false
 

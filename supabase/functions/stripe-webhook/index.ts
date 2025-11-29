@@ -56,14 +56,14 @@ serve(async (req) => {
         let plan = 'atelier';
         if (priceId?.includes('Studio') || priceId === 'price_1SJo9VR2sSXsKMlD3JF3b9ti' || priceId === 'price_1SJoJpR2sSXsKMlDgwa3VuZ9') {
           plan = 'studio';
-        } else if (priceId?.includes('Dommus') || priceId === 'price_1SJo9VR2sSXsKMlDMXxkrEAE' || priceId === 'price_1SJoKdR2sSXsKMlDb1Vu6m6F') {
-          plan = 'dommus';
+        } else if (priceId?.includes('Domus') || priceId === 'price_1SJo9VR2sSXsKMlDMXxkrEAE' || priceId === 'price_1SJoKdR2sSXsKMlDb1Vu6m6F') {
+          plan = 'domus';
         }
 
         console.log('Determined plan:', plan);
 
-        // Update subscription
-        await supabaseClient.from('subscriptions').upsert({
+        // Update subscription with onConflict to handle existing records
+        const { data: subData, error: subError } = await supabaseClient.from('subscriptions').upsert({
           workspace_id: workspaceId,
           stripe_customer_id: customerId,
           stripe_subscription_id: subscriptionId,
@@ -72,15 +72,27 @@ serve(async (req) => {
           current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
           current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
           cancel_at_period_end: subscription.cancel_at_period_end,
+        }, { 
+          onConflict: 'workspace_id'
         });
 
+        if (subError) {
+          console.error('Error updating subscription:', subError);
+        } else {
+          console.log('✅ Subscription updated successfully:', subData);
+        }
+
         // Update workspace plan
-        await supabaseClient
+        const { data: workspaceData, error: workspaceError } = await supabaseClient
           .from('workspaces')
           .update({ subscription_plan: plan })
           .eq('id', workspaceId);
 
-        console.log('Subscription and workspace updated');
+        if (workspaceError) {
+          console.error('Error updating workspace:', workspaceError);
+        } else {
+          console.log('✅ Workspace plan updated to:', plan);
+        }
         break;
       }
 
@@ -160,13 +172,85 @@ serve(async (req) => {
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object as Stripe.Invoice;
         console.log('Payment succeeded for:', invoice.customer);
+        
+        // Get workspace and user info
+        const { data: sub } = await supabaseClient
+          .from('subscriptions')
+          .select('workspace_id')
+          .eq('stripe_customer_id', invoice.customer as string)
+          .maybeSingle();
+        
+        if (sub) {
+          const { data: workspace } = await supabaseClient
+            .from('workspaces')
+            .select('name, created_by')
+            .eq('id', sub.workspace_id)
+            .single();
+          
+          if (workspace) {
+            const { data: profile } = await supabaseClient
+              .from('profiles')
+              .select('email')
+              .eq('id', workspace.created_by)
+              .single();
+            
+            if (profile) {
+              // Send payment success email
+              await supabaseClient.functions.invoke('send-invoice-email', {
+                body: {
+                  email: profile.email,
+                  workspaceName: workspace.name,
+                  amount: invoice.amount_paid / 100,
+                  currency: invoice.currency,
+                  invoiceUrl: invoice.invoice_pdf,
+                  type: 'success'
+                }
+              });
+            }
+          }
+        }
         break;
       }
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice;
         console.error('Payment failed for:', invoice.customer);
-        // TODO: Send notification to user
+        
+        // Get workspace and user info
+        const { data: sub } = await supabaseClient
+          .from('subscriptions')
+          .select('workspace_id')
+          .eq('stripe_customer_id', invoice.customer as string)
+          .maybeSingle();
+        
+        if (sub) {
+          const { data: workspace } = await supabaseClient
+            .from('workspaces')
+            .select('name, created_by')
+            .eq('id', sub.workspace_id)
+            .single();
+          
+          if (workspace) {
+            const { data: profile } = await supabaseClient
+              .from('profiles')
+              .select('email')
+              .eq('id', workspace.created_by)
+              .single();
+            
+            if (profile) {
+              // Send payment failed email
+              await supabaseClient.functions.invoke('send-invoice-email', {
+                body: {
+                  email: profile.email,
+                  workspaceName: workspace.name,
+                  amount: invoice.amount_due / 100,
+                  currency: invoice.currency,
+                  type: 'failed'
+                }
+              });
+            }
+          }
+        }
         break;
       }
 

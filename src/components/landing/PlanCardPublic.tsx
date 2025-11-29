@@ -2,6 +2,7 @@ import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
+import { TRIAL_DAYS } from "@/constants/plans";
 
 interface PlanCardPublicProps {
   name: string;
@@ -10,9 +11,12 @@ interface PlanCardPublicProps {
   features: string[];
   planId: string;
   highlighted?: boolean;
+  recommendation?: string;
 }
 
-export function PlanCardPublic({ name, price, description, features, planId, highlighted }: PlanCardPublicProps) {
+export function PlanCardPublic({ name, price, description, features, planId, highlighted, recommendation }: PlanCardPublicProps) {
+  const isFree = price === 0;
+  
   return (
     <Card className={highlighted ? "border-primary/60 shadow-elegant relative scale-105" : "border-border/50"}>
       {highlighted && (
@@ -23,6 +27,9 @@ export function PlanCardPublic({ name, price, description, features, planId, hig
       <CardHeader className="pb-6">
         <CardTitle className="text-2xl font-heading">{name}</CardTitle>
         <CardDescription className="text-base">{description}</CardDescription>
+        {recommendation && (
+          <p className="text-sm font-medium text-accent-foreground mt-2">{recommendation}</p>
+        )}
         <div className="mt-6 pt-4 border-t border-border/30">
           <span className="text-5xl font-heading font-bold text-primary">R$ {price}</span>
           <span className="text-muted-foreground text-lg">/mês</span>
@@ -38,10 +45,25 @@ export function PlanCardPublic({ name, price, description, features, planId, hig
           ))}
         </ul>
       </CardContent>
-      <CardFooter>
-        <Button asChild className="w-full" variant={highlighted ? "default" : "outline"} size="lg">
-          <Link to={`/auth?tab=signup&plan=${planId}`}>Começar Agora</Link>
-        </Button>
+      <CardFooter className="flex flex-col gap-2">
+        {isFree ? (
+          <Button asChild className="w-full" size="lg">
+            <Link to={`/auth?tab=signup&plan=${planId}`}>Começar Grátis</Link>
+          </Button>
+        ) : (
+          <>
+            <Button asChild className="w-full" variant={highlighted ? "default" : "outline"} size="lg">
+              <Link to={`/auth?tab=signup&plan=${planId}&trial=true`}>
+                Testar {TRIAL_DAYS} Dias Grátis
+              </Link>
+            </Button>
+            <Button asChild className="w-full" variant="ghost" size="sm">
+              <Link to={`/auth?tab=signup&plan=${planId}&trial=false`}>
+                Assinar Agora (sem trial)
+              </Link>
+            </Button>
+          </>
+        )}
       </CardFooter>
     </Card>
   );
