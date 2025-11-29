@@ -127,14 +127,16 @@ export function ProjectFormDialog({
         status: data.status,
         start_date: data.start_date || null,
         end_date: data.end_date || null,
-        budget: data.budget ? parseFloat(data.budget) : null,
-        progress: data.progress || 0,
+        budget: data.budget ? parseFloat(data.budget) : null, // number para o backend
+        progress: data.progress !== undefined ? data.progress.toString() : "0", // string para o backend
+        type: initialData?.type || null,
+        location: initialData?.location || null,
         workspace_id: currentWorkspace.id,
       };
 
       if (projectId) {
         // Atualizar no Supabase
-        const { error: supabaseError } = await projectsService.update(projectId, cleanData, currentWorkspace.id);
+        const { error: supabaseError } = await projectsService.update(projectId, { ...cleanData, progress: data.progress || 0 }, currentWorkspace.id);
         if (supabaseError) throw supabaseError;
 
         // Atualizar no DynamoDB usando o mesmo id
@@ -149,7 +151,11 @@ export function ProjectFormDialog({
         toast.success("Projeto atualizado com sucesso!");
       } else {
         // Criar no Supabase
-        const { data: newProject, error } = await projectsService.create(cleanData, currentWorkspace.id);
+        const { data: newProject, error } = await projectsService.create({
+          ...cleanData,
+          budget: data.budget ? parseFloat(data.budget) : null, // number para Supabase
+          progress: data.progress || 0, // number para Supabase
+        }, currentWorkspace.id);
         if (error) throw error;
         const supabaseId = newProject.id;
 
