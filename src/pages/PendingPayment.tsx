@@ -8,6 +8,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AlertCircle, CreditCard, Loader2, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { STRIPE_PRICE_IDS } from "@/constants/plans";
+import { PaymentProgress } from "@/components/subscription/PaymentProgress";
+
+const PAYMENT_STEPS = [
+  { label: "Plano Selecionado", description: "Escolha feita" },
+  { label: "Cadastro", description: "Conta criada" },
+  { label: "Checkout", description: "Aguardando pagamento" },
+  { label: "Verificação", description: "Confirmando pagamento" },
+  { label: "Acesso Liberado", description: "Entrando no sistema" },
+];
 
 export default function PendingPayment() {
   const navigate = useNavigate();
@@ -81,7 +90,7 @@ export default function PendingPayment() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-6">
-      <Card className="w-full max-w-lg shadow-lg border-destructive/20">
+      <Card className="w-full max-w-4xl shadow-lg border-destructive/20">
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
             <div className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center">
@@ -96,6 +105,9 @@ export default function PendingPayment() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Progress Stepper */}
+          <PaymentProgress currentStep={2} steps={PAYMENT_STEPS} />
+
           <div className="p-4 bg-accent/50 rounded-lg border border-border">
             <p className="text-sm text-muted-foreground text-center">
               Seu workspace foi criado, mas ainda precisamos confirmar seu pagamento para liberar o acesso completo ao sistema.
