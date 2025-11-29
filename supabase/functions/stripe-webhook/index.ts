@@ -62,8 +62,8 @@ serve(async (req) => {
 
         console.log('Determined plan:', plan);
 
-        // Update subscription
-        await supabaseClient.from('subscriptions').upsert({
+        // Update subscription with onConflict to handle existing records
+        const { data: subData, error: subError } = await supabaseClient.from('subscriptions').upsert({
           workspace_id: workspaceId,
           stripe_customer_id: customerId,
           stripe_subscription_id: subscriptionId,
@@ -72,15 +72,27 @@ serve(async (req) => {
           current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
           current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
           cancel_at_period_end: subscription.cancel_at_period_end,
+        }, { 
+          onConflict: 'workspace_id'
         });
 
+        if (subError) {
+          console.error('Error updating subscription:', subError);
+        } else {
+          console.log('✅ Subscription updated successfully:', subData);
+        }
+
         // Update workspace plan
-        await supabaseClient
+        const { data: workspaceData, error: workspaceError } = await supabaseClient
           .from('workspaces')
           .update({ subscription_plan: plan })
           .eq('id', workspaceId);
 
-        console.log('Subscription and workspace updated');
+        if (workspaceError) {
+          console.error('Error updating workspace:', workspaceError);
+        } else {
+          console.log('✅ Workspace plan updated to:', plan);
+        }
         break;
       }
 
