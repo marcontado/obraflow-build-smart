@@ -30,24 +30,32 @@ serve(async (req) => {
 
     console.log('Creating checkout session for:', { priceId, workspaceId });
 
-    // Get workspace details
-    const { data: workspace, error: workspaceError } = await supabaseClient
-      .from('workspaces')
-      .select('*, workspace_members!inner(user_id, profiles!inner(email))')
-      .eq('id', workspaceId)
-      .eq('workspace_members.role', 'owner')
+    // Get workspace owner
+    const { data: workspaceMember, error: memberError } = await supabaseClient
+      .from('workspace_members')
+      .select('user_id')
+      .eq('workspace_id', workspaceId)
+      .eq('role', 'owner')
       .single();
 
-    if (workspaceError || !workspace) {
-      console.error('Workspace error:', workspaceError);
-      throw new Error('Workspace not found');
+    if (memberError || !workspaceMember) {
+      console.error('Workspace member error:', memberError);
+      throw new Error('Workspace owner not found');
     }
 
-    const ownerEmail = workspace.workspace_members[0]?.profiles?.email;
-    if (!ownerEmail) {
-      throw new Error('Owner email not found');
+    // Get owner profile
+    const { data: profile, error: profileError } = await supabaseClient
+      .from('profiles')
+      .select('email')
+      .eq('id', workspaceMember.user_id)
+      .single();
+
+    if (profileError || !profile) {
+      console.error('Profile error:', profileError);
+      throw new Error('Owner profile not found');
     }
 
+    const ownerEmail = profile.email;
     console.log('Owner email:', ownerEmail);
 
     // Check if customer already exists
