@@ -1,8 +1,10 @@
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { TRIAL_DAYS } from "@/constants/plans";
+import { useAuth } from "@/contexts/AuthContext";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 
 interface PlanCardPublicProps {
   name: string;
@@ -25,6 +27,23 @@ export function PlanCardPublic({
   recommendation,
   billingCycle = "monthly" 
 }: PlanCardPublicProps) {
+  const { user } = useAuth();
+  const { hasWorkspaces } = useWorkspace();
+  const navigate = useNavigate();
+
+  const handleSelectPlan = () => {
+    // Salvar plano e ciclo no localStorage
+    localStorage.setItem("pending_plan_selection", planId);
+    localStorage.setItem("pending_billing_cycle", billingCycle);
+    
+    // Se usuário já está autenticado e tem workspace, ir direto para pending-payment
+    if (user && hasWorkspaces()) {
+      navigate("/app/pending-payment");
+    } else {
+      // Se não está autenticado, ir para cadastro
+      navigate(`/auth?tab=signup&plan=${planId}&cycle=${billingCycle}`);
+    }
+  };
   
   return (
     <Card className={highlighted ? "border-primary/60 shadow-elegant relative scale-105" : "border-border/50"}>
@@ -60,10 +79,13 @@ export function PlanCardPublic({
         </ul>
       </CardContent>
       <CardFooter>
-        <Button asChild className="w-full" variant={highlighted ? "default" : "outline"} size="lg">
-          <Link to={`/auth?tab=signup&plan=${planId}&cycle=${billingCycle}`}>
-            Testar {TRIAL_DAYS} Dias Grátis
-          </Link>
+        <Button 
+          onClick={handleSelectPlan}
+          className="w-full" 
+          variant={highlighted ? "default" : "outline"} 
+          size="lg"
+        >
+          Testar {TRIAL_DAYS} Dias Grátis
         </Button>
       </CardFooter>
     </Card>
