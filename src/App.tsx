@@ -48,6 +48,7 @@ import PlanUpgrade from "./pages/PlanUpgrade";
 import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import SubscriptionCancel from "./pages/SubscriptionCancel";
 import UserSettings from "./pages/UserSettings";
+import StripeTest from "./pages/StripeTest";
 
 const queryClient = new QueryClient();
 
@@ -103,6 +104,7 @@ const App = () => (
                 <Route path="/app/templates/:id/generate" element={<ProtectedRoute><DocumentGenerator /></ProtectedRoute>} />
                 <Route path="/app/suporte" element={<ProtectedRoute><Suporte /></ProtectedRoute>} />
                 <Route path="/app/plan-upgrade" element={<ProtectedRoute><PlanUpgrade /></ProtectedRoute>} />
+                <Route path="/app/stripe-test" element={<ProtectedRoute><StripeTest /></ProtectedRoute>} />
                 <Route path="/app/settings" element={<ProtectedRoute><UserSettings /></ProtectedRoute>} />
                 
                 {/* Protected Routes - Subscription */}
