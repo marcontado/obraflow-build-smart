@@ -341,6 +341,20 @@ export default function StripeTest() {
         </AlertDescription>
       </Alert>
 
+      <Alert className="mb-6 border-accent/50 bg-accent/5">
+        <AlertDescription>
+          <div className="space-y-2">
+            <p className="font-semibold">📍 Informações Importantes:</p>
+            <ul className="list-disc ml-5 space-y-1 text-sm">
+              <li><strong>Portal do Cliente:</strong> Após criar assinatura, abre o Stripe Customer Portal para gerenciar pagamento, ver faturas e cancelar.</li>
+              <li><strong>Visualizar Invoices no App:</strong> Acesse <strong>Menu Lateral → Configurações → Aba "Assinatura"</strong> para ver histórico de faturas.</li>
+              <li><strong>Página Pública de Planos (<code>/plans</code>):</strong> Página de marketing para novos usuários. Links levam para signup com plano pré-selecionado.</li>
+              <li><strong>Upgrade/Downgrade:</strong> Use os botões "Atualizar Plano" nesta página para testar mudanças após criar assinatura.</li>
+            </ul>
+          </div>
+        </AlertDescription>
+      </Alert>
+
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-6">
           <Card>
