@@ -5,6 +5,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { TRIAL_DAYS } from "@/constants/plans";
 
 interface FAQItem {
   question: string;
@@ -14,7 +15,7 @@ interface FAQItem {
 const faqs: FAQItem[] = [
   {
     question: "Como funciona o período de teste gratuito?",
-    answer: "O plano Atelier é 100% gratuito e não requer cartão de crédito. Você pode criar 1 projeto e ter até 3 membros na equipe. É perfeito para testar todas as funcionalidades básicas da plataforma."
+    answer: `O plano Atelier é 100% gratuito e não requer cartão de crédito. Nos planos pagos (Studio e Domus), você pode testar por ${TRIAL_DAYS} dias grátis antes de ser cobrado, ou começar pagando imediatamente se preferir.`
   },
   {
     question: "Posso mudar de plano a qualquer momento?",
