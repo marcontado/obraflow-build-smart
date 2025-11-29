@@ -29,6 +29,7 @@ export default function Onboarding() {
   const [submitting, setSubmitting] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string>("");
   const [step, setStep] = useState<"workspace" | "profile">("workspace");
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   // Guard: Se já tem workspace, redirecionar para /app (movido para useEffect)
   useEffect(() => {
@@ -106,15 +107,21 @@ export default function Onboarding() {
         if (url) {
           window.location.href = url;
           return;
+        } else {
+          setCheckoutError("Não foi possível criar a sessão de checkout. Tente novamente.");
+          setSubmitting(false);
+          return;
         }
       } catch (error: any) {
         console.error('Error creating checkout:', error);
+        setCheckoutError(error.message || "Erro ao processar pagamento. Tente novamente.");
         toast({
           title: "Erro ao criar checkout",
           description: error.message || "Tente novamente mais tarde",
           variant: "destructive",
         });
-        // Continuar para dashboard mesmo com erro
+        setSubmitting(false);
+        return;
       }
     }
 
@@ -203,14 +210,33 @@ export default function Onboarding() {
                   <Button type="submit" disabled={submitting} className="w-full h-11">
                     {submitting ? "Criando seu workspace..." : "Criar Workspace e Começar"}
                   </Button>
+
+                  {checkoutError && (
+                    <div className="mt-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                      <p className="text-sm text-destructive text-center mb-3">{checkoutError}</p>
+                      <Button 
+                        type="button" 
+                        onClick={() => {
+                          setCheckoutError(null);
+                          form.handleSubmit(onSubmit)();
+                        }} 
+                        className="w-full"
+                        variant="destructive"
+                      >
+                        Tentar Novamente
+                      </Button>
+                    </div>
+                  )}
                 </form>
               </Form>
 
-              <div className="mt-6 p-4 bg-accent/50 rounded-lg">
-                <p className="text-sm text-muted-foreground text-center">
-                  Após criar seu workspace, você será direcionado para finalizar a configuração da sua conta
-                </p>
-              </div>
+              {!checkoutError && (
+                <div className="mt-6 p-4 bg-accent/50 rounded-lg">
+                  <p className="text-sm text-muted-foreground text-center">
+                    Após criar seu workspace, você será direcionado para finalizar a configuração da sua conta
+                  </p>
+                </div>
+              )}
             </>
           )}
         </CardContent>

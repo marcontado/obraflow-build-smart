@@ -27,6 +27,7 @@ export default function Auth() {
   
   const defaultTab = searchParams.get("tab") || "signin";
   const selectedPlan = searchParams.get("plan");
+  const selectedCycle = searchParams.get("cycle") || "monthly";
 
   // Forçar tema claro na página de Auth
   useEffect(() => {
@@ -139,9 +140,10 @@ export default function Auth() {
 
     setLoading(true);
 
-    // Save selected plan if present in URL
+    // Save selected plan and cycle if present in URL
     if (selectedPlan) {
       localStorage.setItem("pending_plan_selection", selectedPlan);
+      localStorage.setItem("pending_billing_cycle", selectedCycle);
     }
 
     // 1. Cadastro no Supabase
