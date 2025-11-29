@@ -59,15 +59,10 @@ export function PlanCardPublic({
           ))}
         </ul>
       </CardContent>
-      <CardFooter className="flex flex-col gap-2">
+      <CardFooter>
         <Button asChild className="w-full" variant={highlighted ? "default" : "outline"} size="lg">
-          <Link to={`/auth?tab=signup&plan=${planId}&trial=true&cycle=${billingCycle}`}>
+          <Link to={`/auth?tab=signup&plan=${planId}&cycle=${billingCycle}`}>
             Testar {TRIAL_DAYS} Dias Grátis
-          </Link>
-        </Button>
-        <Button asChild className="w-full" variant="ghost" size="sm">
-          <Link to={`/auth?tab=signup&plan=${planId}&trial=false&cycle=${billingCycle}`}>
-            Assinar Agora (sem trial)
           </Link>
         </Button>
       </CardFooter>
