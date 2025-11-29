@@ -15,7 +15,7 @@ interface FAQItem {
 const faqs: FAQItem[] = [
   {
     question: "Como funciona o período de teste gratuito?",
-    answer: `O plano Atelier é 100% gratuito e não requer cartão de crédito. Nos planos pagos (Studio e Domus), você pode testar por ${TRIAL_DAYS} dias grátis antes de ser cobrado, ou começar pagando imediatamente se preferir.`
+    answer: `Todos os planos oferecem ${TRIAL_DAYS} dias grátis para você testar todos os recursos antes de ser cobrado. Você também pode optar por começar pagando imediatamente, sem período de teste, se preferir.`
   },
   {
     question: "Posso mudar de plano a qualquer momento?",

@@ -17,6 +17,7 @@ import { useEffect, useState } from "react";
 
 export default function Landing() {
   const [showWhatsappLabel, setShowWhatsappLabel] = useState(true);
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   
   // Forçar tema claro na Landing Page
   useEffect(() => {
@@ -245,15 +246,35 @@ export default function Landing() {
             <h2 className="text-4xl md:text-5xl font-heading font-bold text-foreground">
               Planos para Cada Ateliê
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
               Do freelancer ao grande escritório, temos o plano perfeito para você
             </p>
+
+            <div className="inline-flex items-center gap-4 bg-white p-1 rounded-lg shadow-sm">
+              <Button
+                variant={billingCycle === "monthly" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setBillingCycle("monthly")}
+              >
+                Mensal
+              </Button>
+              <Button
+                variant={billingCycle === "yearly" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setBillingCycle("yearly")}
+              >
+                Anual
+                <span className="ml-2 text-xs bg-accent text-accent-foreground px-2 py-0.5 rounded-full">
+                  -10%
+                </span>
+              </Button>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             <PlanCardPublic
               name="Atelier"
-              price={0}
+              price={billingCycle === "monthly" ? 39.90 : 35.91}
               description="Perfeito para arquitetos iniciantes"
               recommendation="Ideal para testar a plataforma"
               features={[
@@ -263,11 +284,12 @@ export default function Landing() {
                 "5GB de armazenamento"
               ]}
               planId="atelier"
+              billingCycle={billingCycle}
               highlighted={false}
             />
             <PlanCardPublic
               name="Studio"
-              price={149}
+              price={billingCycle === "monthly" ? 149.90 : 134.91}
               description="Para escritórios em crescimento"
               recommendation="Ideal para autônomos e profissionais independentes"
               features={[
@@ -278,11 +300,12 @@ export default function Landing() {
                 "Relatórios personalizados"
               ]}
               planId="studio"
+              billingCycle={billingCycle}
               highlighted={true}
             />
             <PlanCardPublic
               name="Domus"
-              price={399}
+              price={billingCycle === "monthly" ? 399.90 : 359.91}
               description="Solução empresarial completa"
               recommendation="Para escritórios ou equipes maiores"
               features={[
@@ -294,6 +317,7 @@ export default function Landing() {
                 "API de integração"
               ]}
               planId="domus"
+              billingCycle={billingCycle}
               highlighted={false}
             />
           </div>

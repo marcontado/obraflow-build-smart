@@ -14,7 +14,7 @@ export default function Plans() {
     {
       name: "Atelier",
       planId: "atelier",
-      price: 0,
+      price: billingCycle === "monthly" ? 39.90 : 35.91,
       description: "Para começar sua jornada",
       recommendation: "Perfeito para testar a plataforma",
       features: [
@@ -31,7 +31,7 @@ export default function Plans() {
     {
       name: "Studio",
       planId: "studio",
-      price: billingCycle === "monthly" ? 149 : 134,
+      price: billingCycle === "monthly" ? 149.90 : 134.91,
       description: "Para designers e pequenos escritórios",
       recommendation: "Ideal para autônomos e profissionais independentes",
       features: [
@@ -49,7 +49,7 @@ export default function Plans() {
     {
       name: "Domus",
       planId: "domus",
-      price: billingCycle === "monthly" ? 399 : 359,
+      price: billingCycle === "monthly" ? 399.90 : 359.91,
       description: "Para escritórios estabelecidos",
       recommendation: "Para escritórios ou equipes maiores",
       features: [
@@ -78,7 +78,7 @@ export default function Plans() {
     {
       question: "Como funciona o período gratuito?",
       answer:
-        `O plano Atelier é totalmente gratuito para sempre. Nos planos pagos, você tem ${TRIAL_DAYS} dias grátis para testar todos os recursos antes de ser cobrado, ou pode optar por começar pagando imediatamente.`,
+        `Todos os planos oferecem ${TRIAL_DAYS} dias grátis para você testar todos os recursos antes de ser cobrado. Você também pode optar por começar pagando imediatamente, sem período de teste.`,
     },
     {
       question: "Posso começar pagando sem período de teste?",
@@ -152,7 +152,7 @@ export default function Plans() {
 
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-20">
             {plans.map((plan, index) => (
-              <PlanCardPublic key={index} {...plan} />
+              <PlanCardPublic key={index} {...plan} billingCycle={billingCycle} />
             ))}
           </div>
 
