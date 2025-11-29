@@ -110,12 +110,25 @@ export default function StripeTest() {
       
       setTimeout(() => window.location.reload(), 2000);
     } catch (error: any) {
-      addResult(`❌ Erro: ${error.message}`);
-      toast({
-        title: "Erro",
-        description: error.message,
-        variant: "destructive",
-      });
+      const errorMessage = error.message || 'Erro desconhecido';
+      const isNoSubscription = errorMessage.includes('No active subscription');
+      
+      if (isNoSubscription) {
+        addResult(`⚠️ Nenhuma assinatura ativa encontrada`);
+        addResult(`💡 Dica: Primeiro crie uma assinatura usando os botões de "Criar Checkout"`);
+        toast({
+          title: "Assinatura necessária",
+          description: "Você precisa criar uma assinatura primeiro. Use os botões 'Criar Checkout' acima.",
+          variant: "destructive",
+        });
+      } else {
+        addResult(`❌ Erro: ${errorMessage}`);
+        toast({
+          title: "Erro",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -138,12 +151,25 @@ export default function StripeTest() {
         description: "A assinatura será cancelada no fim do período",
       });
     } catch (error: any) {
-      addResult(`❌ Erro: ${error.message}`);
-      toast({
-        title: "Erro",
-        description: error.message,
-        variant: "destructive",
-      });
+      const errorMessage = error.message || 'Erro desconhecido';
+      const isNoSubscription = errorMessage.includes('No active subscription') || errorMessage.includes('not found');
+      
+      if (isNoSubscription) {
+        addResult(`⚠️ Nenhuma assinatura ativa encontrada`);
+        addResult(`💡 Dica: Primeiro crie uma assinatura usando os botões de "Criar Checkout"`);
+        toast({
+          title: "Assinatura necessária",
+          description: "Você precisa criar uma assinatura primeiro. Use os botões 'Criar Checkout' acima.",
+          variant: "destructive",
+        });
+      } else {
+        addResult(`❌ Erro: ${errorMessage}`);
+        toast({
+          title: "Erro",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -165,12 +191,25 @@ export default function StripeTest() {
         description: "A assinatura continuará ativa",
       });
     } catch (error: any) {
-      addResult(`❌ Erro: ${error.message}`);
-      toast({
-        title: "Erro",
-        description: error.message,
-        variant: "destructive",
-      });
+      const errorMessage = error.message || 'Erro desconhecido';
+      const isNoSubscription = errorMessage.includes('No active subscription') || errorMessage.includes('not found');
+      
+      if (isNoSubscription) {
+        addResult(`⚠️ Nenhuma assinatura ativa encontrada`);
+        addResult(`💡 Dica: Primeiro crie uma assinatura usando os botões de "Criar Checkout"`);
+        toast({
+          title: "Assinatura necessária",
+          description: "Você precisa criar uma assinatura primeiro. Use os botões 'Criar Checkout' acima.",
+          variant: "destructive",
+        });
+      } else {
+        addResult(`❌ Erro: ${errorMessage}`);
+        toast({
+          title: "Erro",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -223,6 +262,23 @@ export default function StripeTest() {
         <AlertDescription>
           <strong>Workspace atual:</strong> {currentWorkspace?.name || 'Nenhum'} | 
           <strong> Plano:</strong> <Badge className="ml-2">{PLAN_NAMES[currentWorkspace?.subscription_plan as keyof typeof PLAN_NAMES]}</Badge>
+        </AlertDescription>
+      </Alert>
+
+      <Alert className="mb-6 border-primary/50 bg-primary/5">
+        <AlertDescription>
+          <div className="space-y-2">
+            <p className="font-semibold">📋 Fluxo de Teste:</p>
+            <ol className="list-decimal ml-5 space-y-1 text-sm">
+              <li>Clique em um dos botões de <strong>Criar Checkout</strong> (Studio ou Domus)</li>
+              <li>Complete o pagamento no Stripe usando cartão de teste: <code className="bg-muted px-1 rounded">4242 4242 4242 4242</code></li>
+              <li>Após o pagamento, o webhook criará a assinatura automaticamente</li>
+              <li>Então você poderá testar Update, Cancel e Reactivate</li>
+            </ol>
+            <p className="text-xs text-muted-foreground mt-2">
+              💡 Os botões Update/Cancel/Reactivate só funcionam após criar uma assinatura válida
+            </p>
+          </div>
         </AlertDescription>
       </Alert>
 
