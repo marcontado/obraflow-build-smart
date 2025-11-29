@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { LandingFooter } from "@/components/landing/LandingFooter";
@@ -10,11 +10,24 @@ import { TRIAL_DAYS } from "@/constants/plans";
 export default function Plans() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
 
+  // Forçar tema claro na página de planos
+  useEffect(() => {
+    const htmlElement = document.documentElement;
+    const hadDarkClass = htmlElement.classList.contains('dark');
+    htmlElement.classList.remove('dark');
+    
+    return () => {
+      if (hadDarkClass) {
+        htmlElement.classList.add('dark');
+      }
+    };
+  }, []);
+
   const plans = [
     {
       name: "Atelier",
       planId: "atelier",
-      price: billingCycle === "monthly" ? 39.90 : 35.91,
+      price: billingCycle === "monthly" ? 39.90 : 430.92,
       description: "Para começar sua jornada",
       recommendation: "Perfeito para testar a plataforma",
       features: [
@@ -31,7 +44,7 @@ export default function Plans() {
     {
       name: "Studio",
       planId: "studio",
-      price: billingCycle === "monthly" ? 149.90 : 134.91,
+      price: billingCycle === "monthly" ? 149.90 : 1618.92,
       description: "Para designers e pequenos escritórios",
       recommendation: "Ideal para autônomos e profissionais independentes",
       features: [
@@ -49,7 +62,7 @@ export default function Plans() {
     {
       name: "Domus",
       planId: "domus",
-      price: billingCycle === "monthly" ? 399.90 : 359.91,
+      price: billingCycle === "monthly" ? 399.90 : 4318.92,
       description: "Para escritórios estabelecidos",
       recommendation: "Para escritórios ou equipes maiores",
       features: [

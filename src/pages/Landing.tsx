@@ -274,7 +274,7 @@ export default function Landing() {
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             <PlanCardPublic
               name="Atelier"
-              price={billingCycle === "monthly" ? 39.90 : 35.91}
+              price={billingCycle === "monthly" ? 39.90 : 430.92}
               description="Perfeito para arquitetos iniciantes"
               recommendation="Ideal para testar a plataforma"
               features={[
@@ -289,7 +289,7 @@ export default function Landing() {
             />
             <PlanCardPublic
               name="Studio"
-              price={billingCycle === "monthly" ? 149.90 : 134.91}
+              price={billingCycle === "monthly" ? 149.90 : 1618.92}
               description="Para escritórios em crescimento"
               recommendation="Ideal para autônomos e profissionais independentes"
               features={[
@@ -305,7 +305,7 @@ export default function Landing() {
             />
             <PlanCardPublic
               name="Domus"
-              price={billingCycle === "monthly" ? 399.90 : 359.91}
+              price={billingCycle === "monthly" ? 399.90 : 4318.92}
               description="Solução empresarial completa"
               recommendation="Para escritórios ou equipes maiores"
               features={[
