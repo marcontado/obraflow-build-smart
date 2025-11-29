@@ -291,7 +291,7 @@ export default function Landing() {
               name="Studio"
               price={billingCycle === "monthly" ? 149.90 : 1618.92}
               description="Para escritórios em crescimento"
-              recommendation="Ideal para autônomos e profissionais independentes"
+              recommendation="Ideal para autonômos e profissionais independetes"
               features={[
                 "10 projetos simultâneos",
                 "10 membros da equipe",
