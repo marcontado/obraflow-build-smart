@@ -79,12 +79,13 @@ export default function Onboarding() {
       description: "Seu workspace foi criado com sucesso.",
     });
 
-    // Verificar se há checkout pendente
+    // Verificar se há checkout pendente - TODOS os planos agora requerem checkout
     const pendingPlan = localStorage.getItem("pending_plan_selection");
     const skipTrialStr = localStorage.getItem("pending_skip_trial");
+    const billingCycle = localStorage.getItem("pending_billing_cycle") || "monthly";
     const skipTrial = skipTrialStr === "true";
     
-    if (pendingPlan && pendingPlan !== "atelier" && workspace) {
+    if (pendingPlan && workspace) {
       try {
         // Aguardar refresh completar
         await refreshWorkspaces();
@@ -94,8 +95,8 @@ export default function Onboarding() {
           description: "Vamos finalizar sua assinatura...",
         });
         
-        // Obter priceId correto (defaultando para mensal)
-        const priceId = STRIPE_PRICE_IDS[pendingPlan as keyof typeof STRIPE_PRICE_IDS].monthly;
+        // Obter priceId correto baseado no billing cycle
+        const priceId = STRIPE_PRICE_IDS[pendingPlan as keyof typeof STRIPE_PRICE_IDS][billingCycle as "monthly" | "yearly"];
         
         // Criar checkout session com ou sem trial
         const { url } = await subscriptionsService.createCheckout(workspace.id, priceId, skipTrial);
@@ -103,6 +104,7 @@ export default function Onboarding() {
         // Limpar localStorage
         localStorage.removeItem("pending_plan_selection");
         localStorage.removeItem("pending_skip_trial");
+        localStorage.removeItem("pending_billing_cycle");
         
         if (url) {
           window.location.href = url;
@@ -136,11 +138,11 @@ export default function Onboarding() {
             </div>
           </div>
           <div>
-            <CardTitle className="text-3xl">Bem-vindo ao Archestra!</CardTitle>
+            <CardTitle className="text-3xl">Bem-vindo ao Archestra! 🎉</CardTitle>
             <CardDescription className="text-base mt-2">
               {step === "profile" 
                 ? "Personalize seu perfil (opcional)"
-                : "Vamos criar seu primeiro workspace"}
+                : "Estamos felizes em ter você conosco. Vamos configurar seu espaço de trabalho"}
             </CardDescription>
           </div>
         </CardHeader>

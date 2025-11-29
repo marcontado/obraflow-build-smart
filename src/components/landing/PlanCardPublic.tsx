@@ -12,10 +12,19 @@ interface PlanCardPublicProps {
   planId: string;
   highlighted?: boolean;
   recommendation?: string;
+  billingCycle?: "monthly" | "yearly";
 }
 
-export function PlanCardPublic({ name, price, description, features, planId, highlighted, recommendation }: PlanCardPublicProps) {
-  const isFree = price === 0;
+export function PlanCardPublic({ 
+  name, 
+  price, 
+  description, 
+  features, 
+  planId, 
+  highlighted = false, 
+  recommendation,
+  billingCycle = "monthly" 
+}: PlanCardPublicProps) {
   
   return (
     <Card className={highlighted ? "border-primary/60 shadow-elegant relative scale-105" : "border-border/50"}>
@@ -31,8 +40,13 @@ export function PlanCardPublic({ name, price, description, features, planId, hig
           <p className="text-sm font-medium text-accent-foreground mt-2">{recommendation}</p>
         )}
         <div className="mt-6 pt-4 border-t border-border/30">
-          <span className="text-5xl font-heading font-bold text-primary">R$ {price}</span>
-          <span className="text-muted-foreground text-lg">/mês</span>
+          <span className="text-5xl font-heading font-bold text-primary">R$ {price.toFixed(2)}</span>
+          <span className="text-muted-foreground text-lg">/{billingCycle === "monthly" ? "mês" : "ano"}</span>
+          {billingCycle === "yearly" && (
+            <div className="text-sm text-muted-foreground mt-1">
+              Economize 10% no plano anual
+            </div>
+          )}
         </div>
       </CardHeader>
       <CardContent className="pb-8">
@@ -46,24 +60,16 @@ export function PlanCardPublic({ name, price, description, features, planId, hig
         </ul>
       </CardContent>
       <CardFooter className="flex flex-col gap-2">
-        {isFree ? (
-          <Button asChild className="w-full" size="lg">
-            <Link to={`/auth?tab=signup&plan=${planId}`}>Começar Grátis</Link>
-          </Button>
-        ) : (
-          <>
-            <Button asChild className="w-full" variant={highlighted ? "default" : "outline"} size="lg">
-              <Link to={`/auth?tab=signup&plan=${planId}&trial=true`}>
-                Testar {TRIAL_DAYS} Dias Grátis
-              </Link>
-            </Button>
-            <Button asChild className="w-full" variant="ghost" size="sm">
-              <Link to={`/auth?tab=signup&plan=${planId}&trial=false`}>
-                Assinar Agora (sem trial)
-              </Link>
-            </Button>
-          </>
-        )}
+        <Button asChild className="w-full" variant={highlighted ? "default" : "outline"} size="lg">
+          <Link to={`/auth?tab=signup&plan=${planId}&trial=true&cycle=${billingCycle}`}>
+            Testar {TRIAL_DAYS} Dias Grátis
+          </Link>
+        </Button>
+        <Button asChild className="w-full" variant="ghost" size="sm">
+          <Link to={`/auth?tab=signup&plan=${planId}&trial=false&cycle=${billingCycle}`}>
+            Assinar Agora (sem trial)
+          </Link>
+        </Button>
       </CardFooter>
     </Card>
   );

@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { passwordSchema } from "@/schemas/password.schema";
 import heroImage from "@/assets/hero-workspace.jpg";
-import { PlanComparison } from "@/components/auth/PlanComparison";
+
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -274,17 +274,16 @@ export default function Auth() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-            {selectedPlan && defaultTab === "signup" && (
-              <div className="mb-6">
-                <div className="mb-4 p-3 bg-accent/10 rounded-md text-sm text-center">
-                  Você selecionou o plano <strong className="uppercase">{selectedPlan}</strong>
-                  {skipTrial && selectedPlan !== "atelier" && (
-                    <span className="block text-xs mt-1">Assinatura sem período de teste</span>
-                  )}
-                </div>
-                <PlanComparison selectedPlan={selectedPlan} />
-              </div>
-            )}
+          {selectedPlan && (
+            <div className="mb-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
+              <p className="text-sm text-muted-foreground text-center">
+                Você selecionou o plano: <span className="font-semibold text-primary">{selectedPlan.toUpperCase()}</span>
+                {skipTrial && (
+                  <span className="block text-xs mt-1">Assinatura sem período de teste</span>
+                )}
+              </p>
+            </div>
+          )}
             <Tabs defaultValue={defaultTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-4">
                 <TabsTrigger value="signin">Entrar</TabsTrigger>
