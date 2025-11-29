@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ArrowLeft, CreditCard, RefreshCw, XCircle, CheckCircle, Zap } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, CreditCard, RefreshCw, XCircle, CheckCircle, Zap, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,9 +17,31 @@ export default function StripeTest() {
   const { currentWorkspace } = useWorkspace();
   const [loading, setLoading] = useState(false);
   const [testResults, setTestResults] = useState<string[]>([]);
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string>('');
 
   const addResult = (message: string) => {
     setTestResults(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
+  };
+
+  const checkSubscriptionStatus = async () => {
+    if (!currentWorkspace) return;
+    
+    try {
+      const data = await subscriptionsService.getSubscription(currentWorkspace.id);
+      const hasSubscription = !!data.subscription?.stripe_subscription_id;
+      setHasActiveSubscription(hasSubscription);
+      setSubscriptionStatus(data.subscription?.status || 'Nenhuma');
+      
+      if (hasSubscription) {
+        addResult(`✅ Assinatura ativa detectada: ${data.subscription?.status}`);
+      } else {
+        addResult(`⚠️ Nenhuma assinatura ativa. Use "Criar Checkout" primeiro.`);
+      }
+    } catch (error) {
+      setHasActiveSubscription(false);
+      setSubscriptionStatus('Nenhuma');
+    }
   };
 
   const testCheckout = async (plan: 'studio' | 'domus', billing: 'monthly' | 'yearly') => {
@@ -69,6 +91,10 @@ export default function StripeTest() {
       
       const data = await subscriptionsService.getSubscription(currentWorkspace.id);
       
+      const hasSubscription = !!data.subscription?.stripe_subscription_id;
+      setHasActiveSubscription(hasSubscription);
+      setSubscriptionStatus(data.subscription?.status || 'Nenhuma');
+      
       addResult("✅ Assinatura encontrada!");
       addResult(`Status: ${data.subscription?.status || 'N/A'}`);
       addResult(`Plano: ${currentWorkspace.subscription_plan}`);
@@ -89,6 +115,11 @@ export default function StripeTest() {
       setLoading(false);
     }
   };
+
+  // Verificar status da assinatura ao carregar
+  useEffect(() => {
+    checkSubscriptionStatus();
+  }, [currentWorkspace]);
 
   const testUpdateSubscription = async (newPlan: 'studio' | 'domus', billing: 'monthly' | 'yearly') => {
     if (!currentWorkspace) return;
@@ -258,12 +289,40 @@ export default function StripeTest() {
         </p>
       </div>
 
-      <Alert className="mb-6">
-        <AlertDescription>
-          <strong>Workspace atual:</strong> {currentWorkspace?.name || 'Nenhum'} | 
-          <strong> Plano:</strong> <Badge className="ml-2">{PLAN_NAMES[currentWorkspace?.subscription_plan as keyof typeof PLAN_NAMES]}</Badge>
-        </AlertDescription>
-      </Alert>
+      <div className="grid gap-4 md:grid-cols-2 mb-6">
+        <Alert>
+          <AlertDescription>
+            <div className="space-y-1">
+              <p><strong>Workspace:</strong> {currentWorkspace?.name || 'Nenhum'}</p>
+              <p><strong>Plano:</strong> <Badge className="ml-2">{PLAN_NAMES[currentWorkspace?.subscription_plan as keyof typeof PLAN_NAMES]}</Badge></p>
+            </div>
+          </AlertDescription>
+        </Alert>
+
+        <Alert className={hasActiveSubscription ? "border-green-500/50 bg-green-500/5" : "border-orange-500/50 bg-orange-500/5"}>
+          <AlertDescription>
+            <div className="flex items-center gap-2">
+              {hasActiveSubscription ? (
+                <>
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <div>
+                    <p className="font-semibold text-green-600">Assinatura Ativa</p>
+                    <p className="text-sm">Status: {subscriptionStatus}</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <AlertTriangle className="h-4 w-4 text-orange-600" />
+                  <div>
+                    <p className="font-semibold text-orange-600">Sem Assinatura</p>
+                    <p className="text-sm">Crie um checkout primeiro</p>
+                  </div>
+                </>
+              )}
+            </div>
+          </AlertDescription>
+        </Alert>
+      </div>
 
       <Alert className="mb-6 border-primary/50 bg-primary/5">
         <AlertDescription>
@@ -361,31 +420,34 @@ export default function StripeTest() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
+              {!hasActiveSubscription && (
+                <p className="text-sm text-orange-600 mb-2">⚠️ Requer assinatura ativa</p>
+              )}
               <div className="grid grid-cols-2 gap-2">
                 <Button 
                   onClick={() => testUpdateSubscription('studio', 'monthly')}
-                  disabled={loading || currentWorkspace?.subscription_plan === SUBSCRIPTION_PLANS.ATELIER}
+                  disabled={loading || !hasActiveSubscription}
                   variant="outline"
                 >
                   → Studio Mensal
                 </Button>
                 <Button 
                   onClick={() => testUpdateSubscription('studio', 'yearly')}
-                  disabled={loading || currentWorkspace?.subscription_plan === SUBSCRIPTION_PLANS.ATELIER}
+                  disabled={loading || !hasActiveSubscription}
                   variant="outline"
                 >
                   → Studio Anual
                 </Button>
                 <Button 
                   onClick={() => testUpdateSubscription('domus', 'monthly')}
-                  disabled={loading || currentWorkspace?.subscription_plan === SUBSCRIPTION_PLANS.ATELIER}
+                  disabled={loading || !hasActiveSubscription}
                   variant="outline"
                 >
                   → Domus Mensal
                 </Button>
                 <Button 
                   onClick={() => testUpdateSubscription('domus', 'yearly')}
-                  disabled={loading || currentWorkspace?.subscription_plan === SUBSCRIPTION_PLANS.ATELIER}
+                  disabled={loading || !hasActiveSubscription}
                   variant="outline"
                 >
                   → Domus Anual
@@ -405,9 +467,12 @@ export default function StripeTest() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
+              {!hasActiveSubscription && (
+                <p className="text-sm text-orange-600 mb-2">⚠️ Requer assinatura ativa</p>
+              )}
               <Button 
                 onClick={testCancelSubscription}
-                disabled={loading || currentWorkspace?.subscription_plan === SUBSCRIPTION_PLANS.ATELIER}
+                disabled={loading || !hasActiveSubscription}
                 variant="destructive"
                 className="w-full"
               >
@@ -415,7 +480,7 @@ export default function StripeTest() {
               </Button>
               <Button 
                 onClick={testReactivateSubscription}
-                disabled={loading || currentWorkspace?.subscription_plan === SUBSCRIPTION_PLANS.ATELIER}
+                disabled={loading || !hasActiveSubscription}
                 variant="default"
                 className="w-full"
               >
