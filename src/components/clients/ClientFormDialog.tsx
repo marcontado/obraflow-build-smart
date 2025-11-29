@@ -253,27 +253,51 @@ export function ClientFormDialog({
       let savedClientId = clientId;
 
       if (clientId) {
-        const { error } = await clientsService.update(clientId, cleanData, currentWorkspace.id);
-        if (error) throw error;
+        // Atualizar no Supabase
+        const { error: supabaseError } = await clientsService.update(clientId, cleanData, currentWorkspace.id);
+        if (supabaseError) throw supabaseError;
+
+        // Atualizar no DynamoDB
+        await fetch(`https://archestra-backend.onrender.com/clients/${clientId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...cleanData,
+            id: clientId, 
+            representative_ids: selectedRepresentatives,
+          }),
+        });
+
         toast.success("Cliente atualizado com sucesso!");
       } else {
+        // 1. Criar no Supabase
         const { data: newClient, error } = await clientsService.create(cleanData, currentWorkspace.id);
         if (error) throw error;
-        savedClientId = newClient.id;
-        toast.success("Cliente criado com sucesso!");
-      }
+        const supabaseId = newClient.id; // ID gerado pelo Supabase
 
-      // Vincular representantes se for PJ
-      if (data.client_type === "PJ" && savedClientId) {
-        await clientRepresentativesService.sync(
-          savedClientId,
-          selectedRepresentatives,
-          currentWorkspace.id
-        );
-      }
+        // 2. Criar no DynamoDB usando o mesmo ID
+        await fetch("https://archestra-backend.onrender.com/clients", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...cleanData,
+            id: supabaseId, // Use o mesmo ID do Supabase como PK no DynamoDB
+            representative_ids: selectedRepresentatives,
+          }),
+        });
 
-      onSuccess();
-      onClose();
+        // Vincular representantes se for PJ
+        if (data.client_type === "PJ" && savedClientId) {
+          await clientRepresentativesService.sync(
+            savedClientId,
+            selectedRepresentatives,
+            currentWorkspace.id
+          );
+        }
+
+        onSuccess();
+        onClose();
+      }
     } catch (error: any) {
       console.error("Erro ao salvar cliente:", error);
       toast.error(error.message || "Erro ao salvar cliente");

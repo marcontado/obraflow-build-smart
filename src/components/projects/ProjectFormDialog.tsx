@@ -133,12 +133,36 @@ export function ProjectFormDialog({
       };
 
       if (projectId) {
-        const { error } = await projectsService.update(projectId, cleanData, currentWorkspace.id);
-        if (error) throw error;
+        // Atualizar no Supabase
+        const { error: supabaseError } = await projectsService.update(projectId, cleanData, currentWorkspace.id);
+        if (supabaseError) throw supabaseError;
+
+        // Atualizar no DynamoDB usando o mesmo id
+        await fetch(`https://archestra-backend.onrender.com/projects/${projectId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...cleanData,
+          }),
+        });
+
         toast.success("Projeto atualizado com sucesso!");
       } else {
-        const { error } = await projectsService.create(cleanData, currentWorkspace.id);
+        // Criar no Supabase
+        const { data: newProject, error } = await projectsService.create(cleanData, currentWorkspace.id);
         if (error) throw error;
+        const supabaseId = newProject.id;
+
+        // Criar no DynamoDB usando o mesmo id
+        await fetch("https://archestra-backend.onrender.com/projects", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...cleanData,
+            id: supabaseId, // Garante que o id seja igual nas duas bases
+          }),
+        });
+
         toast.success("Projeto criado com sucesso!");
       }
 

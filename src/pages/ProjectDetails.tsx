@@ -159,8 +159,22 @@ function ProjectDetails() {
 
     try {
       setDeleting(true);
+
+      // 1. Deletar no Supabase
       const { error } = await projectsService.delete(id, currentWorkspace.id);
       if (error) throw error;
+
+      // 2. Deletar no DynamoDB
+      const response = await fetch(`https://archestra-backend.onrender.com/projects/${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast.error(result.detail || "Erro ao excluir projeto no backend");
+        return;
+      }
 
       toast.success("Projeto excluído com sucesso!");
       navigate("/app/projects");

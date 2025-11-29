@@ -149,39 +149,30 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
           status: formData.status,
           start_date: formData.start_date || null,
           end_date: formData.end_date || null,
-          budget: formData.budget ? parseFloat(formData.budget) : null,
+          budget: formData.budget ? parseFloat(formData.budget) : null, // <-- number para Supabase
           progress: formData.progress || 0,
           type: formData.type || null,
           location: formData.location || null,
           workspace_id: currentWorkspace.id,
         };
 
+        // 1. Cria no Supabase e pega o id
         const { data, error } = await projectsService.create(projectData, currentWorkspace.id);
         if (error) throw error;
+        const supabaseId = data.id;
 
-        try {
-          await fetch("https://archestra-backend.onrender.com/projects", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              name: projectData.name,
-              description: projectData.description,
-              client_id: projectData.client_id,
-              status: projectData.status,
-              start_date: projectData.start_date,
-              end_date: projectData.end_date,
-              budget: projectData.budget,
-              progress: projectData.progress,
-              type: projectData.type,
-              location: projectData.location,
-              workspace_id: projectData.workspace_id,
-            }),
-          });
-        } catch (err) {
-          toast.error("Erro ao criar projeto no backend DynamoDB.");
-        }
+        // 2. Cria no DynamoDB usando o mesmo id
+        await fetch("https://archestra-backend.onrender.com/projects", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...projectData,
+            budget: projectData.budget !== null ? projectData.budget.toString() : null, // <-- string para DynamoDB
+            id: supabaseId,
+          }),
+        });
 
-        setCreatedProjectId(data.id);
+        setCreatedProjectId(supabaseId);
         toast.success("Projeto criado! Continue preenchendo os detalhes.");
       } catch (error: any) {
         toast.error("Erro ao criar projeto");
@@ -267,28 +258,58 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
 
     try {
       const finalProjectId = createdProjectId || projectId;
-      
       if (!finalProjectId) {
         toast.error("Erro: ID do projeto não encontrado");
         return;
       }
 
-      // Atualizar projeto com briefing, site_photos, moodboard e technical_files
+      // Envie todos os campos relevantes
       const updateData = {
+        name: data.name,
+        description: data.description,
+        client_id: data.client_id || null,
+        status: data.status,
+        start_date: data.start_date || null,
+        end_date: data.end_date || null,
+        budget: data.budget ? parseFloat(data.budget) : null, // <-- convert to number for Supabase
+        progress: data.progress || 0,
+        type: data.type || null,
+        location: data.location || null,
         briefing: data.briefing,
-        site_photos: sitePhotos as any,
-        moodboard: moodboardItems as any,
-        technical_files: technicalFiles as any,
+        site_photos: JSON.parse(JSON.stringify(sitePhotos)),
+        moodboard: JSON.parse(JSON.stringify(moodboardItems)),
+        technical_files: JSON.parse(JSON.stringify(technicalFiles)),
       };
 
+      console.log("Dados enviados para atualização:", updateData);
+
+      // Atualizar no Supabase
       const { error } = await projectsService.update(
         finalProjectId,
         updateData,
         currentWorkspace.id
       );
-      
       if (error) throw error;
-      
+
+      // Atualizar no DynamoDB
+      const response = await fetch(`https://archestra-backend.onrender.com/projects/${finalProjectId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updateData),
+      });
+
+      let result;
+      try {
+        result = await response.json();
+      } catch {
+        result = {};
+      }
+
+      if (!response.ok) {
+        toast.error(result.detail || "Erro ao atualizar projeto no backend");
+        return;
+      }
+
       toast.success(projectId ? "Projeto atualizado!" : "Projeto criado com sucesso!");
       setHasUnsavedChanges(false);
       handleClose();

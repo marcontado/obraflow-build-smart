@@ -111,12 +111,19 @@ export default function Partners() {
   const confirmDelete = async () => {
     if (!partnerToDelete || !currentWorkspace) return;
 
+    // Deletar no Supabase
     const { error } = await partnersService.delete(partnerToDelete.id, currentWorkspace.id);
 
     if (error) {
       toast.error("Erro ao excluir parceiro");
       console.error(error);
     } else {
+      // Deletar também no DynamoDB
+      await fetch(`https://archestra-backend.onrender.com/partners/${partnerToDelete.id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+
       toast.success("Parceiro excluído com sucesso");
       setPartners(partners.filter((p) => p.id !== partnerToDelete.id));
     }
@@ -129,7 +136,7 @@ export default function Partners() {
     if (!currentWorkspace) return;
 
     if (editingPartner) {
-      // Atualizar
+      // Atualizar no Supabase
       const { data: updated, error } = await partnersService.update(
         editingPartner.id,
         data,
@@ -140,13 +147,26 @@ export default function Partners() {
         toast.error("Erro ao atualizar parceiro");
         console.error(error);
       } else if (updated) {
+        await fetch(`https://archestra-backend.onrender.com/partners/${editingPartner.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...data,
+            workspace_id: currentWorkspace.id,
+          }),
+        });
+
         toast.success("Parceiro atualizado com sucesso");
         setPartners(partners.map((p) => (p.id === updated.id ? updated : p)));
       }
     } else {
-      // Criar - garantir que campos required estão presentes
+      // Criar no Supabase
       const { data: created, error } = await partnersService.create(
-        data as Required<Pick<PartnerFormData, "name" | "category">> & Partial<PartnerFormData>,
+        {
+          ...data,
+          category: data.category!,
+          name: data.name!,
+        },
         currentWorkspace.id
       );
 
@@ -154,6 +174,18 @@ export default function Partners() {
         toast.error("Erro ao criar parceiro");
         console.error(error);
       } else if (created) {
+        // Criar também no DynamoDB usando o mesmo id
+        await fetch("https://archestra-backend.onrender.com/partners", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...data,
+            id: created.id, 
+            workspace_id: currentWorkspace.id,
+            status: "ativo",
+          }),
+        });
+
         toast.success("Parceiro adicionado com sucesso");
         setPartners([...partners, created]);
       }

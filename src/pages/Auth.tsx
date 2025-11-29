@@ -143,16 +143,23 @@ export default function Auth() {
       localStorage.setItem("pending_plan_selection", selectedPlan);
     }
 
-    // Cadastro no Supabase
-    const { error } = await authService.signUp(email, password);
+    // 1. Cadastro no Supabase
+    const { data, error } = await authService.signUp(email, password);
 
-    // Cadastro no backend DynamoDB (ajustado para enviar name)
+    // 2. Se não houver erro, pega o id do usuário criado
+    let supabaseId;
+    if (!error && data?.user?.id) {
+      supabaseId = data.user.id;
+    }
+
+    // 3. Cadastro no backend DynamoDB usando o mesmo id
     try {
       const response = await fetch("https://archestra-backend.onrender.com/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: fullName, 
+          id: supabaseId, 
+          name: fullName,
           email,
           password,
           plan: selectedPlan,

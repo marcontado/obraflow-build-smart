@@ -106,13 +106,32 @@ function Clients() {
 
     try {
       setDeleting(true);
-      const { error } = await clientsService.delete(selectedClient.id, currentWorkspace.id);
-      if (error) throw error;
 
-      toast.success("Cliente excluído com sucesso!");
-      fetchClients();
-      setDeleteDialogOpen(false);
-      setSelectedClient(null);
+      // Excluir do Supabase
+      const { error: supabaseError } = await clientsService.delete(selectedClient.id, currentWorkspace.id);
+      if (supabaseError) {
+        toast.error("Erro ao excluir cliente no Supabase");
+        return;
+      }
+
+      // Excluir do DynamoDB
+      const response = await fetch(
+        `https://archestra-backend.onrender.com/clients/${selectedClient.id}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      const result = await response.json();
+
+      if (response.ok) {
+        toast.success("Cliente excluído com sucesso!");
+        fetchClients();
+        setDeleteDialogOpen(false);
+        setSelectedClient(null);
+      } else {
+        toast.error(result.detail || "Erro ao excluir cliente no backend");
+      }
     } catch (error: any) {
       toast.error(error.message || "Erro ao excluir cliente");
     } finally {
