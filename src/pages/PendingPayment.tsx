@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { subscriptionsService } from "@/services/subscriptions.service";
 import { authService } from "@/services/auth.service";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, CreditCard, Loader2, LogOut } from "lucide-react";
+import { AlertCircle, CreditCard, Loader2, LogOut, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { STRIPE_PRICE_IDS } from "@/constants/plans";
 import { PaymentProgress } from "@/components/subscription/PaymentProgress";
+import { supabase } from "@/integrations/supabase/client";
 
 const PAYMENT_STEPS = [
   { label: "Plano Selecionado", description: "Escolha feita" },
@@ -21,7 +23,9 @@ const PAYMENT_STEPS = [
 export default function PendingPayment() {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspace();
+  const { refetch } = useSubscriptionStatus();
   const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [hasPlansInStorage, setHasPlansInStorage] = useState(false);
 
   useEffect(() => {
@@ -30,6 +34,80 @@ export default function PendingPayment() {
     setHasPlansInStorage(!!pendingPlan);
     console.log("PendingPayment - Plano no localStorage:", pendingPlan);
   }, []);
+
+  // Polling automático para verificar status da assinatura
+  useEffect(() => {
+    if (!currentWorkspace?.id) return;
+
+    const checkSubscription = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("subscriptions")
+          .select("status")
+          .eq("workspace_id", currentWorkspace.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error("Error checking subscription:", error);
+          return;
+        }
+
+        if (data?.status === "active" || data?.status === "trialing") {
+          console.log("✅ Assinatura ativa detectada! Status:", data.status);
+          toast.success("Pagamento confirmado! Bem-vindo!");
+          // Limpar localStorage
+          localStorage.removeItem("pending_plan_selection");
+          localStorage.removeItem("pending_billing_cycle");
+          navigate("/app");
+        }
+      } catch (error) {
+        console.error("Error in polling:", error);
+      }
+    };
+
+    // Verificação imediata
+    checkSubscription();
+
+    // Verificação a cada 2 segundos
+    const interval = setInterval(checkSubscription, 2000);
+
+    return () => clearInterval(interval);
+  }, [currentWorkspace?.id, navigate]);
+
+  const handleVerifyPayment = async () => {
+    if (!currentWorkspace?.id) {
+      toast.error("Workspace não encontrado");
+      return;
+    }
+
+    setVerifying(true);
+    try {
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("status")
+        .eq("workspace_id", currentWorkspace.id)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      console.log("Verificação manual - Status:", data?.status);
+
+      if (data?.status === "active" || data?.status === "trialing") {
+        toast.success("Pagamento confirmado! Redirecionando...");
+        localStorage.removeItem("pending_plan_selection");
+        localStorage.removeItem("pending_billing_cycle");
+        await refetch();
+        navigate("/app");
+      } else {
+        toast.info("Pagamento ainda não confirmado. Aguarde ou tente novamente.");
+      }
+    } catch (error) {
+      console.error("Erro ao verificar pagamento:", error);
+      toast.error("Erro ao verificar pagamento");
+    } finally {
+      setVerifying(false);
+    }
+  };
 
   const handleLogout = async () => {
     setLoading(true);
@@ -130,6 +208,25 @@ export default function PendingPayment() {
                   <>
                     <CreditCard className="mr-2 h-4 w-4" />
                     Ir para Checkout
+                  </>
+                )}
+              </Button>
+
+              <Button 
+                onClick={handleVerifyPayment}
+                variant="secondary" 
+                className="w-full h-12 text-base"
+                disabled={verifying}
+              >
+                {verifying ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Verificando...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Verificar Pagamento
                   </>
                 )}
               </Button>

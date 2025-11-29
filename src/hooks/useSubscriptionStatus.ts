@@ -19,34 +19,35 @@ export function useSubscriptionStatus() {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchSubscription = async () => {
     if (!currentWorkspace?.id) {
       setLoading(false);
       return;
     }
 
-    const fetchSubscription = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("subscriptions")
-          .select("*")
-          .eq("workspace_id", currentWorkspace.id)
-          .maybeSingle();
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("*")
+        .eq("workspace_id", currentWorkspace.id)
+        .maybeSingle();
 
-        if (error) {
-          console.error("Error fetching subscription:", error);
-          setSubscription(null);
-        } else {
-          setSubscription(data);
-        }
-      } catch (error) {
-        console.error("Unexpected error fetching subscription:", error);
+      if (error) {
+        console.error("Error fetching subscription:", error);
         setSubscription(null);
-      } finally {
-        setLoading(false);
+      } else {
+        setSubscription(data);
       }
-    };
+    } catch (error) {
+      console.error("Unexpected error fetching subscription:", error);
+      setSubscription(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchSubscription();
   }, [currentWorkspace?.id]);
 
@@ -58,5 +59,6 @@ export function useSubscriptionStatus() {
     loading,
     hasActiveSubscription,
     isTrialing,
+    refetch: fetchSubscription,
   };
 }
