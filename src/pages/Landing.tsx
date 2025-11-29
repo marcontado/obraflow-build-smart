@@ -255,6 +255,7 @@ export default function Landing() {
               name="Atelier"
               price={0}
               description="Perfeito para arquitetos iniciantes"
+              recommendation="Ideal para testar a plataforma"
               features={[
                 "1 projeto simultâneo",
                 "3 membros da equipe",
@@ -266,8 +267,9 @@ export default function Landing() {
             />
             <PlanCardPublic
               name="Studio"
-              price={97}
+              price={149}
               description="Para escritórios em crescimento"
+              recommendation="Ideal para autônomos e profissionais independentes"
               features={[
                 "10 projetos simultâneos",
                 "10 membros da equipe",
@@ -280,8 +282,9 @@ export default function Landing() {
             />
             <PlanCardPublic
               name="Domus"
-              price={297}
+              price={399}
               description="Solução empresarial completa"
+              recommendation="Para escritórios ou equipes maiores"
               features={[
                 "Projetos ilimitados",
                 "Membros ilimitados",

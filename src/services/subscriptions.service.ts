@@ -1,9 +1,9 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export const subscriptionsService = {
-  async createCheckout(workspaceId: string, priceId: string) {
+  async createCheckout(workspaceId: string, priceId: string, skipTrial?: boolean) {
     const { data, error } = await supabase.functions.invoke('create-checkout-session', {
-      body: { workspaceId, priceId },
+      body: { workspaceId, priceId, skipTrial: skipTrial || false },
     });
 
     if (error) throw error;

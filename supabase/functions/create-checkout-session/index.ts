@@ -22,13 +22,13 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     );
 
-    const { priceId, workspaceId } = await req.json();
+    const { priceId, workspaceId, skipTrial } = await req.json();
 
     if (!priceId || !workspaceId) {
       throw new Error('Price ID and Workspace ID are required');
     }
 
-    console.log('Creating checkout session for:', { priceId, workspaceId });
+    console.log('Creating checkout session for:', { priceId, workspaceId, skipTrial });
 
     // Get workspace owner
     const { data: workspaceMember, error: memberError } = await supabaseClient
@@ -88,8 +88,8 @@ serve(async (req) => {
       });
     }
 
-    // Create checkout session
-    const session = await stripe.checkout.sessions.create({
+    // Create checkout session with conditional trial
+    const sessionConfig: any = {
       customer: customerId,
       line_items: [
         {
@@ -103,7 +103,19 @@ serve(async (req) => {
       metadata: {
         workspace_id: workspaceId,
       },
-    });
+    };
+
+    // Add trial period if not skipped
+    if (!skipTrial) {
+      sessionConfig.subscription_data = {
+        trial_period_days: 15,
+      };
+      console.log('Adding 15-day trial period');
+    } else {
+      console.log('Skipping trial period - immediate payment');
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionConfig);
 
     console.log('Checkout session created:', session.id);
 

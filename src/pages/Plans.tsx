@@ -5,6 +5,7 @@ import { LandingFooter } from "@/components/landing/LandingFooter";
 import { PlanCardPublic } from "@/components/landing/PlanCardPublic";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { TRIAL_DAYS } from "@/constants/plans";
 
 export default function Plans() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
@@ -15,6 +16,7 @@ export default function Plans() {
       planId: "atelier",
       price: 0,
       description: "Para começar sua jornada",
+      recommendation: "Perfeito para testar a plataforma",
       features: [
         "1 workspace",
         "Até 3 membros",
@@ -31,6 +33,7 @@ export default function Plans() {
       planId: "studio",
       price: billingCycle === "monthly" ? 149 : 134,
       description: "Para designers e pequenos escritórios",
+      recommendation: "Ideal para autônomos e profissionais independentes",
       features: [
         "2 workspaces com até 10 membros",
         "Projetos e clientes ilimitados",
@@ -48,6 +51,7 @@ export default function Plans() {
       planId: "domus",
       price: billingCycle === "monthly" ? 399 : 359,
       description: "Para escritórios estabelecidos",
+      recommendation: "Para escritórios ou equipes maiores",
       features: [
         "Workspaces e membros ilimitados",
         "Projetos e clientes ilimitados",
@@ -74,7 +78,17 @@ export default function Plans() {
     {
       question: "Como funciona o período gratuito?",
       answer:
-        "O plano Atelier é totalmente gratuito para sempre. Nos planos pagos, você tem 30 dias grátis para testar todos os recursos antes de ser cobrado.",
+        `O plano Atelier é totalmente gratuito para sempre. Nos planos pagos, você tem ${TRIAL_DAYS} dias grátis para testar todos os recursos antes de ser cobrado, ou pode optar por começar pagando imediatamente.`,
+    },
+    {
+      question: "Posso começar pagando sem período de teste?",
+      answer:
+        "Sim! Ao escolher um plano pago, você pode optar por testar por 15 dias grátis ou começar pagando imediatamente. As duas opções estão disponíveis na página de planos.",
+    },
+    {
+      question: "Qual plano é ideal para mim?",
+      answer:
+        "O plano Studio é ideal para autônomos e profissionais independentes que precisam gerenciar múltiplos projetos. Já o plano Domus é perfeito para escritórios ou equipes maiores que necessitam de recursos avançados como IA Assist e Portal do Cliente.",
     },
     {
       question: "Posso cancelar a qualquer momento?",

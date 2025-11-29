@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { passwordSchema } from "@/schemas/password.schema";
 import heroImage from "@/assets/hero-workspace.jpg";
+import { PlanComparison } from "@/components/auth/PlanComparison";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ export default function Auth() {
   
   const defaultTab = searchParams.get("tab") || "signin";
   const selectedPlan = searchParams.get("plan");
+  const skipTrial = searchParams.get("trial") === "false";
 
   // Forçar tema claro na página de Auth
   useEffect(() => {
@@ -138,9 +140,10 @@ export default function Auth() {
 
     setLoading(true);
 
-    // Save selected plan if present in URL
+    // Save selected plan and trial preference if present in URL
     if (selectedPlan) {
       localStorage.setItem("pending_plan_selection", selectedPlan);
+      localStorage.setItem("pending_skip_trial", skipTrial ? "true" : "false");
     }
 
     // Cadastro no Supabase
@@ -264,9 +267,15 @@ export default function Auth() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-            {selectedPlan && (
-              <div className="mb-4 p-3 bg-accent/10 rounded-md text-sm text-center">
-                Você selecionou o plano <strong>{selectedPlan}</strong>
+            {selectedPlan && defaultTab === "signup" && (
+              <div className="mb-6">
+                <div className="mb-4 p-3 bg-accent/10 rounded-md text-sm text-center">
+                  Você selecionou o plano <strong className="uppercase">{selectedPlan}</strong>
+                  {skipTrial && selectedPlan !== "atelier" && (
+                    <span className="block text-xs mt-1">Assinatura sem período de teste</span>
+                  )}
+                </div>
+                <PlanComparison selectedPlan={selectedPlan} />
               </div>
             )}
             <Tabs defaultValue={defaultTab} className="w-full">
