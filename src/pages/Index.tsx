@@ -169,18 +169,6 @@ const Index = () => {
           subtitle="Visão geral dos seus projetos e métricas"
         />
         <main className="flex-1 overflow-y-auto p-6">
-          {/* Botão de Teste Stripe */}
-          <div className="mb-6">
-            <Button
-              onClick={() => navigate("/app/stripe-test")}
-              variant="outline"
-              className="w-full border-primary/20 bg-primary/5 hover:bg-primary/10"
-            >
-              <CreditCard className="mr-2 h-4 w-4" />
-              Testar Stripe (Desenvolvimento)
-            </Button>
-          </div>
-
           <div className="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 <StatsCard
                   title="Total de Projetos"
