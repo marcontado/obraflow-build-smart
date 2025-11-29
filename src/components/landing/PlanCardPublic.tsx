@@ -52,7 +52,7 @@ export function PlanCardPublic({
       <CardHeader className="pb-6">
         <CardTitle className="text-2xl font-heading">{name}</CardTitle>
         <CardDescription className="text-base">{description}</CardDescription>
-        {recommendation && <p className="text-sm font-medium mt-2 text-destructive">{recommendation}</p>}
+        {recommendation && <p className="text-sm font-medium mt-2 text-secondary">{recommendation}</p>}
         <div className="mt-6 pt-4 border-t border-border/30">
           <span className="text-5xl font-heading font-bold text-primary">R$ {price.toFixed(2)}</span>
           <span className="text-muted-foreground text-lg">/{billingCycle === "monthly" ? "mês" : "ano"}</span>
