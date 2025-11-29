@@ -81,9 +81,7 @@ export default function Onboarding() {
 
     // Verificar se há checkout pendente - TODOS os planos agora requerem checkout
     const pendingPlan = localStorage.getItem("pending_plan_selection");
-    const skipTrialStr = localStorage.getItem("pending_skip_trial");
     const billingCycle = localStorage.getItem("pending_billing_cycle") || "monthly";
-    const skipTrial = skipTrialStr === "true";
     
     if (pendingPlan && workspace) {
       try {
@@ -98,12 +96,11 @@ export default function Onboarding() {
         // Obter priceId correto baseado no billing cycle
         const priceId = STRIPE_PRICE_IDS[pendingPlan as keyof typeof STRIPE_PRICE_IDS][billingCycle as "monthly" | "yearly"];
         
-        // Criar checkout session com ou sem trial
-        const { url } = await subscriptionsService.createCheckout(workspace.id, priceId, skipTrial);
+        // Criar checkout session com 15 dias de trial
+        const { url } = await subscriptionsService.createCheckout(workspace.id, priceId, false);
         
         // Limpar localStorage
         localStorage.removeItem("pending_plan_selection");
-        localStorage.removeItem("pending_skip_trial");
         localStorage.removeItem("pending_billing_cycle");
         
         if (url) {

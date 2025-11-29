@@ -27,7 +27,6 @@ export default function Auth() {
   
   const defaultTab = searchParams.get("tab") || "signin";
   const selectedPlan = searchParams.get("plan");
-  const skipTrial = searchParams.get("trial") === "false";
 
   // Forçar tema claro na página de Auth
   useEffect(() => {
@@ -140,10 +139,9 @@ export default function Auth() {
 
     setLoading(true);
 
-    // Save selected plan and trial preference if present in URL
+    // Save selected plan if present in URL
     if (selectedPlan) {
       localStorage.setItem("pending_plan_selection", selectedPlan);
-      localStorage.setItem("pending_skip_trial", skipTrial ? "true" : "false");
     }
 
     // 1. Cadastro no Supabase
@@ -278,9 +276,7 @@ export default function Auth() {
             <div className="mb-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
               <p className="text-sm text-muted-foreground text-center">
                 Você selecionou o plano: <span className="font-semibold text-primary">{selectedPlan.toUpperCase()}</span>
-                {skipTrial && (
-                  <span className="block text-xs mt-1">Assinatura sem período de teste</span>
-                )}
+                <span className="block text-xs mt-1">Inclui 15 dias de teste grátis</span>
               </p>
             </div>
           )}
