@@ -1,4 +1,4 @@
-import { Bell, LogOut, Settings, Building2, Sun, Moon } from "lucide-react";
+import { Bell, LogOut, Settings, Building2, Sun, Moon, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,8 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
+import { PLAN_NAMES } from "@/constants/plans";
+import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   title: string;
@@ -32,6 +34,12 @@ const roleLabels = {
   owner: "Proprietário",
   admin: "Administrador",
   member: "Membro",
+};
+
+const planColors: Record<string, string> = {
+  atelier: "bg-secondary text-secondary-foreground",
+  studio: "bg-primary text-primary-foreground",
+  domus: "bg-accent text-accent-foreground",
 };
 
 export function Header({ title, subtitle }: HeaderProps) {
@@ -63,6 +71,16 @@ export function Header({ title, subtitle }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-4">
+          {currentWorkspace && (
+            <Badge 
+              className={cn("cursor-pointer", planColors[currentWorkspace.subscription_plan])}
+              onClick={() => navigate('/app/plan-upgrade')}
+            >
+              <Crown className="h-3 w-3 mr-1" />
+              {PLAN_NAMES[currentWorkspace.subscription_plan as keyof typeof PLAN_NAMES]}
+            </Badge>
+          )}
+
           <Button 
             variant="ghost" 
             size="icon" 

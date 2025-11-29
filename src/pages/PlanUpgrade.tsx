@@ -47,18 +47,40 @@ export default function PlanUpgrade() {
     try {
       const priceId = STRIPE_PRICE_IDS[plan as Exclude<SubscriptionPlan, 'atelier'>][billingCycle];
       
-      toast({
-        title: "Redirecionando...",
-        description: "Você será redirecionado para o checkout do Stripe",
-      });
-
-      const { url } = await subscriptionsService.createCheckout(currentWorkspace.id, priceId);
+      // Check if workspace already has a subscription
+      const currentPlan = currentWorkspace.subscription_plan;
       
-      if (url) {
-        window.location.href = url;
+      if (currentPlan !== SUBSCRIPTION_PLANS.ATELIER) {
+        // Update existing subscription
+        toast({
+          title: "Atualizando plano...",
+          description: "Processando alteração do plano",
+        });
+
+        await subscriptionsService.updateSubscription(currentWorkspace.id, priceId);
+        
+        toast({
+          title: "Plano atualizado!",
+          description: "Seu plano foi atualizado com sucesso",
+        });
+        
+        // Refresh page to show updated plan
+        setTimeout(() => window.location.reload(), 1500);
+      } else {
+        // Create new subscription
+        toast({
+          title: "Redirecionando...",
+          description: "Você será redirecionado para o checkout do Stripe",
+        });
+
+        const { url } = await subscriptionsService.createCheckout(currentWorkspace.id, priceId);
+        
+        if (url) {
+          window.location.href = url;
+        }
       }
     } catch (error: any) {
-      console.error('Error creating checkout:', error);
+      console.error('Error processing subscription:', error);
       toast({
         title: "Erro ao processar",
         description: error.message || "Tente novamente mais tarde",

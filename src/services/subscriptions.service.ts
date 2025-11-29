@@ -27,4 +27,31 @@ export const subscriptionsService = {
     if (error) throw error;
     return data;
   },
+
+  async createPortalSession(workspaceId: string) {
+    const { data, error } = await supabase.functions.invoke('create-portal-session', {
+      body: { workspaceId },
+    });
+
+    if (error) throw error;
+    return data;
+  },
+
+  async updateSubscription(workspaceId: string, priceId: string) {
+    const { data, error } = await supabase.functions.invoke('update-subscription', {
+      body: { workspaceId, priceId },
+    });
+
+    if (error) throw error;
+    return data;
+  },
+
+  async reactivateSubscription(workspaceId: string) {
+    const { data, error } = await supabase.functions.invoke('reactivate-subscription', {
+      body: { workspaceId },
+    });
+
+    if (error) throw error;
+    return data;
+  },
 };
