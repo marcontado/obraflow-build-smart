@@ -20,15 +20,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, RefreshCw, Settings, Eye } from "lucide-react";
+import { Search, RefreshCw, Settings, Eye, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ChangePlanDialog } from "@/components/admin/ChangePlanDialog";
 import { useNavigate } from "react-router-dom";
+import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
+import { useAdminPermissions } from "@/hooks/useAdminPermissions";
 
 export default function AdminOrganizations() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { permissions } = useAdminPermissions();
   const [organizations, setOrganizations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -44,6 +47,16 @@ export default function AdminOrganizations() {
     workspaceName: "",
     currentPlan: "",
   });
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean;
+    workspaceId: string;
+    workspaceName: string;
+  }>({
+    open: false,
+    workspaceId: "",
+    workspaceName: "",
+  });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     loadOrganizations();
@@ -71,6 +84,27 @@ export default function AdminOrganizations() {
 
   const handleSearch = () => {
     loadOrganizations();
+  };
+
+  const handleDeleteWorkspace = async () => {
+    setIsDeleting(true);
+    try {
+      await adminService.deleteWorkspace(deleteDialog.workspaceId);
+      toast({
+        title: "Workspace deletado",
+        description: "O workspace foi removido com sucesso.",
+      });
+      setDeleteDialog({ open: false, workspaceId: "", workspaceName: "" });
+      loadOrganizations();
+    } catch (error: any) {
+      toast({
+        title: "Erro ao deletar workspace",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const getPlanBadge = (plan: string) => {
@@ -180,21 +214,39 @@ export default function AdminOrganizations() {
                           <Eye className="h-4 w-4 mr-1" />
                           Detalhes
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() =>
-                            setChangePlanDialog({
-                              open: true,
-                              workspaceId: org.id,
-                              workspaceName: org.name,
-                              currentPlan: org.subscription_plan,
-                            })
-                          }
-                          title="Alterar plano"
-                        >
-                          <Settings className="h-4 w-4" />
-                        </Button>
+                        {permissions.canEditOrganizationPlan && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() =>
+                              setChangePlanDialog({
+                                open: true,
+                                workspaceId: org.id,
+                                workspaceName: org.name,
+                                currentPlan: org.subscription_plan,
+                              })
+                            }
+                            title="Alterar plano"
+                          >
+                            <Settings className="h-4 w-4" />
+                          </Button>
+                        )}
+                        {permissions.canManageAdmins && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() =>
+                              setDeleteDialog({
+                                open: true,
+                                workspaceId: org.id,
+                                workspaceName: org.name,
+                              })
+                            }
+                            title="Deletar workspace"
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -218,6 +270,15 @@ export default function AdminOrganizations() {
           workspaceId={changePlanDialog.workspaceId}
           workspaceName={changePlanDialog.workspaceName}
           currentPlan={changePlanDialog.currentPlan}
+        />
+
+        <DeleteConfirmDialog
+          open={deleteDialog.open}
+          onClose={() => setDeleteDialog({ open: false, workspaceId: "", workspaceName: "" })}
+          onConfirm={handleDeleteWorkspace}
+          title="Deletar Workspace"
+          description={`Tem certeza que deseja deletar o workspace "${deleteDialog.workspaceName}"? Esta ação é irreversível e todos os dados relacionados serão permanentemente removidos.`}
+          isLoading={isDeleting}
         />
       </div>
     </AdminLayout>

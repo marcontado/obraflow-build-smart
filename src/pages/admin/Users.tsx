@@ -14,14 +14,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, RefreshCw, Settings } from "lucide-react";
+import { Search, RefreshCw, Settings, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ChangePlanDialog } from "@/components/admin/ChangePlanDialog";
 import { PLAN_NAMES } from "@/constants/plans";
+import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
+import { useAdminPermissions } from "@/hooks/useAdminPermissions";
 
 export default function AdminUsers() {
   const { toast } = useToast();
+  const { permissions } = useAdminPermissions();
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -36,6 +39,16 @@ export default function AdminUsers() {
     workspaceName: "",
     currentPlan: "",
   });
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean;
+    userId: string;
+    userEmail: string;
+  }>({
+    open: false,
+    userId: "",
+    userEmail: "",
+  });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     loadUsers();
@@ -80,6 +93,27 @@ export default function AdminUsers() {
       workspaceName: "",
       currentPlan: "",
     });
+  };
+
+  const handleDeleteUser = async () => {
+    setIsDeleting(true);
+    try {
+      await adminService.deleteUser(deleteDialog.userId);
+      toast({
+        title: "Usuário deletado",
+        description: "O usuário foi removido com sucesso.",
+      });
+      setDeleteDialog({ open: false, userId: "", userEmail: "" });
+      loadUsers();
+    } catch (error: any) {
+      toast({
+        title: "Erro ao deletar usuário",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const getPlanBadge = (plan: string) => {
@@ -187,23 +221,39 @@ export default function AdminUsers() {
                       {format(new Date(user.created_at), "dd/MM/yyyy", { locale: ptBR })}
                     </TableCell>
                     <TableCell className="text-right">
-                      {user.workspaces && user.workspaces.length > 0 ? (
-                        <div className="flex flex-col gap-1 items-end">
-                          {user.workspaces.map((ws: any) => (
-                            <Button
-                              key={ws.id}
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleChangePlan(ws.id, ws.name, ws.subscription_plan)}
-                            >
-                              <Settings className="h-4 w-4 mr-1" />
-                              Gerenciar
-                            </Button>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">-</span>
-                      )}
+                      <div className="flex gap-2 justify-end">
+                        {user.workspaces && user.workspaces.length > 0 && permissions.canEditOrganizationPlan && (
+                          <div className="flex flex-col gap-1 items-end">
+                            {user.workspaces.map((ws: any) => (
+                              <Button
+                                key={ws.id}
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleChangePlan(ws.id, ws.name, ws.subscription_plan)}
+                              >
+                                <Settings className="h-4 w-4 mr-1" />
+                                Gerenciar
+                              </Button>
+                            ))}
+                          </div>
+                        )}
+                        {permissions.canManageAdmins && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() =>
+                              setDeleteDialog({
+                                open: true,
+                                userId: user.id,
+                                userEmail: user.email,
+                              })
+                            }
+                            title="Deletar usuário"
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -219,6 +269,15 @@ export default function AdminUsers() {
           workspaceId={changePlanDialog.workspaceId}
           workspaceName={changePlanDialog.workspaceName}
           currentPlan={changePlanDialog.currentPlan}
+        />
+
+        <DeleteConfirmDialog
+          open={deleteDialog.open}
+          onClose={() => setDeleteDialog({ open: false, userId: "", userEmail: "" })}
+          onConfirm={handleDeleteUser}
+          title="Deletar Usuário"
+          description={`Tem certeza que deseja deletar o usuário "${deleteDialog.userEmail}"? Esta ação é irreversível e removerá permanentemente todos os dados do usuário.`}
+          isLoading={isDeleting}
         />
       </div>
     </AdminLayout>

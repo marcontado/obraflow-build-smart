@@ -134,4 +134,50 @@ export const adminService = {
     if (error) throw error;
     return data;
   },
+
+  // Deletar workspace
+  async deleteWorkspace(workspaceId: string) {
+    const { data, error } = await supabase.functions.invoke('admin-actions', {
+      headers: getAdminHeaders(),
+      body: {
+        action: 'delete_workspace',
+        workspaceId,
+      },
+    });
+
+    if (error) {
+      console.error('Admin delete workspace error:', error);
+      throw new Error(error.message || 'Erro ao deletar workspace');
+    }
+    
+    if (data?.error) {
+      console.error('Admin delete workspace response error:', data.error);
+      throw new Error(data.error);
+    }
+    
+    return data;
+  },
+
+  // Deletar usuário
+  async deleteUser(userId: string) {
+    const { data, error } = await supabase.functions.invoke('admin-actions', {
+      headers: getAdminHeaders(),
+      body: {
+        action: 'delete_user',
+        userId,
+      },
+    });
+
+    if (error) {
+      console.error('Admin delete user error:', error);
+      throw new Error(error.message || 'Erro ao deletar usuário');
+    }
+    
+    if (data?.error) {
+      console.error('Admin delete user response error:', data.error);
+      throw new Error(data.error);
+    }
+    
+    return data;
+  },
 };
