@@ -76,6 +76,45 @@ export function SubscriptionManager({ workspaceId }: SubscriptionManagerProps) {
     }
   };
 
+  const handleReactivateSubscription = async () => {
+    try {
+      setCanceling(true);
+      await subscriptionsService.reactivateSubscription(workspaceId);
+      
+      toast({
+        title: "Assinatura reativada",
+        description: "Sua assinatura continuará ativa no próximo período",
+      });
+      
+      await loadSubscription();
+    } catch (error: any) {
+      console.error('Error reactivating subscription:', error);
+      toast({
+        title: "Erro ao reativar",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setCanceling(false);
+    }
+  };
+
+  const handleManagePayment = async () => {
+    try {
+      const { url } = await subscriptionsService.createPortalSession(workspaceId);
+      if (url) {
+        window.location.href = url;
+      }
+    } catch (error: any) {
+      console.error('Error creating portal session:', error);
+      toast({
+        title: "Erro ao abrir portal",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <Card>
@@ -149,34 +188,55 @@ export function SubscriptionManager({ workspaceId }: SubscriptionManagerProps) {
             </Alert>
           )}
 
-          {subscription.status === 'active' && !subscription.cancel_at_period_end && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="w-full">
-                  Cancelar Assinatura
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Sua assinatura será cancelada no final do período de cobrança atual.
-                    Você continuará tendo acesso aos recursos até lá.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Manter Assinatura</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleCancelSubscription}
-                    disabled={canceling}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
-                    {canceling ? "Cancelando..." : "Sim, Cancelar"}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              className="flex-1"
+              onClick={handleManagePayment}
+            >
+              Gerenciar Pagamento
+            </Button>
+
+            {subscription.status === 'active' && !subscription.cancel_at_period_end && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" className="flex-1">
+                    Cancelar Assinatura
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Sua assinatura será cancelada no final do período de cobrança atual.
+                      Você continuará tendo acesso aos recursos até lá.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Manter Assinatura</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleCancelSubscription}
+                      disabled={canceling}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {canceling ? "Cancelando..." : "Sim, Cancelar"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+
+            {subscription.cancel_at_period_end && (
+              <Button 
+                variant="default" 
+                className="flex-1"
+                onClick={handleReactivateSubscription}
+                disabled={canceling}
+              >
+                {canceling ? "Reativando..." : "Manter Assinatura"}
+              </Button>
+            )}
+          </div>
         </CardContent>
       </Card>
 
