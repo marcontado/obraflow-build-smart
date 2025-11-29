@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { action, workspaceId, newPlan } = await req.json();
+    const { action, workspaceId, newPlan, userId } = await req.json();
 
     let result;
 
@@ -86,6 +86,55 @@ Deno.serve(async (req) => {
 
         result = { success: true, message: `Plan changed to ${newPlan}` };
         console.log(`Admin ${adminData.email} changed workspace ${workspaceId} plan to ${newPlan}`);
+        break;
+
+      case 'delete_workspace':
+        // Apenas super_admin pode deletar
+        if (adminRole !== 'super_admin') {
+          return new Response(JSON.stringify({ error: 'Only super admins can delete workspaces' }), {
+            status: 403,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+
+        const { error: deleteWsError } = await supabase
+          .from('workspaces')
+          .delete()
+          .eq('id', workspaceId);
+
+        if (deleteWsError) throw deleteWsError;
+        
+        result = { success: true, message: 'Workspace deleted successfully' };
+        console.log(`Admin ${adminData.email} deleted workspace ${workspaceId}`);
+        break;
+
+      case 'delete_user':
+        // Apenas super_admin pode deletar
+        if (adminRole !== 'super_admin') {
+          return new Response(JSON.stringify({ error: 'Only super admins can delete users' }), {
+            status: 403,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+
+        // Primeiro, atualizar referências que não têm CASCADE
+        await supabase
+          .from('document_templates')
+          .update({ created_by: null })
+          .eq('created_by', userId);
+        
+        await supabase
+          .from('generated_documents')
+          .update({ created_by: null })
+          .eq('created_by', userId);
+
+        // Deletar o usuário do auth (isso vai cascatear para profiles)
+        const { error: deleteUserError } = await supabase.auth.admin.deleteUser(userId);
+        
+        if (deleteUserError) throw deleteUserError;
+
+        result = { success: true, message: 'User deleted successfully' };
+        console.log(`Admin ${adminData.email} deleted user ${userId}`);
         break;
 
       default:
