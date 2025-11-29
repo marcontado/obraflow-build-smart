@@ -46,7 +46,7 @@ export default function Plans() {
       planId: "studio",
       price: billingCycle === "monthly" ? 149.90 : 1618.92,
       description: "Para designers e pequenos escritórios",
-      recommendation: "Ideal para autônomos e profissionais independentes",
+      recommendation: "Ideal para autonômos e profissionais independetes",
       features: [
         "2 workspaces com até 10 membros",
         "Projetos e clientes ilimitados",
