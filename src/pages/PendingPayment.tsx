@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { subscriptionsService } from "@/services/subscriptions.service";
+import { authService } from "@/services/auth.service";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, CreditCard, Loader2 } from "lucide-react";
+import { AlertCircle, CreditCard, Loader2, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { STRIPE_PRICE_IDS } from "@/constants/plans";
 
@@ -20,6 +21,19 @@ export default function PendingPayment() {
     setHasPlansInStorage(!!pendingPlan);
     console.log("PendingPayment - Plano no localStorage:", pendingPlan);
   }, []);
+
+  const handleLogout = async () => {
+    setLoading(true);
+    try {
+      await authService.signOut();
+      toast.success("Logout realizado com sucesso!");
+      navigate("/auth");
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+      toast.error("Erro ao fazer logout");
+      setLoading(false);
+    }
+  };
 
   const handleGoToCheckout = async () => {
     if (!currentWorkspace?.id) {
@@ -140,6 +154,18 @@ export default function PendingPayment() {
               ✓ Inclui 15 dias de teste grátis<br />
               ✓ Cancele a qualquer momento
             </p>
+          </div>
+
+          <div className="mt-6 pt-6 border-t border-border">
+            <Button 
+              onClick={handleLogout}
+              variant="ghost" 
+              className="w-full text-muted-foreground hover:text-destructive"
+              disabled={loading}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Sair da Conta
+            </Button>
           </div>
         </CardContent>
       </Card>
