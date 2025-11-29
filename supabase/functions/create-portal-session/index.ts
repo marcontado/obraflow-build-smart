@@ -62,11 +62,14 @@ serve(async (req) => {
       throw new Error('No active subscription');
     }
 
-    // Create portal session
+    // Create portal session with better return URL
+    const origin = req.headers.get('origin') || '';
     const session = await stripe.billingPortal.sessions.create({
       customer: subscription.stripe_customer_id,
-      return_url: `${req.headers.get('origin')}/workspace/${workspaceId}/settings?tab=subscription`,
+      return_url: `${origin}/app/stripe-test`,
     });
+    
+    console.log('✅ Portal session created:', session.id);
 
     return new Response(
       JSON.stringify({ url: session.url }),
