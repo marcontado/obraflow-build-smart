@@ -1,8 +1,15 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Plus, Search } from "lucide-react";
 import { toast } from "sonner";
 import { partnersService } from "@/services/partners.service";
@@ -12,7 +19,10 @@ import { PartnerDetailModal } from "@/components/partners/PartnerDetailModal";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
-import { PARTNER_CATEGORIES, type PartnerFormData } from "@/schemas/partner.schema";
+import {
+  PARTNER_CATEGORIES,
+  type PartnerFormData,
+} from "@/schemas/partner.schema";
 import type { Database } from "@/integrations/supabase/types";
 
 type Partner = Database["public"]["Tables"]["partners"]["Row"];
@@ -22,6 +32,7 @@ import { Header } from "@/components/layout/Header";
 
 export default function Partners() {
   const { currentWorkspace } = useWorkspace();
+  const { user } = useAuth(); // user.id é o id do usuário logado
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
   const isFirstMount = useRef(true);
@@ -133,13 +144,13 @@ export default function Partners() {
   };
 
   const handleSubmitForm = async (data: PartnerFormData) => {
-    if (!currentWorkspace) return;
+    if (!currentWorkspace || !user?.id) return;
 
     if (editingPartner) {
       // Atualizar no Supabase
       const { data: updated, error } = await partnersService.update(
         editingPartner.id,
-        data,
+        { ...data, created_by: user.id },
         currentWorkspace.id
       );
 
@@ -152,6 +163,7 @@ export default function Partners() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ...data,
+            created_by: user.id,
             workspace_id: currentWorkspace.id,
           }),
         });
@@ -180,9 +192,10 @@ export default function Partners() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ...data,
-            id: created.id, 
+            id: created.id,
             workspace_id: currentWorkspace.id,
             status: "ativo",
+            created_by: user.id,
           }),
         });
 
@@ -225,99 +238,108 @@ export default function Partners() {
         />
         <main className="flex-1 overflow-y-auto p-6">
           <div className="max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="mb-8">
+            {/* Header */}
+            <div className="mb-8">
+              {/* Filtros e Busca */}
+              <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar por nome ou categoria..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
 
-        {/* Filtros e Busca */}
-        <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por nome ou categoria..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
+                <Select
+                  value={selectedCategory}
+                  onValueChange={setSelectedCategory}
+                >
+                  <SelectTrigger className="w-full md:w-64">
+                    <SelectValue placeholder="Todas as categorias" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas as categorias</SelectItem>
+                    {PARTNER_CATEGORIES.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-full md:w-64">
-              <SelectValue placeholder="Todas as categorias" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas as categorias</SelectItem>
-              {PARTNER_CATEGORIES.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Button onClick={handleAddPartner} className="w-full md:w-auto">
-            <Plus className="w-4 h-4 mr-2" />
-            Adicionar Parceiro
-          </Button>
-        </div>
-      </div>
-
-      {/* Grid de Parceiros */}
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Skeleton key={i} className="h-64 rounded-xl" />
-          ))}
-        </div>
-      ) : filteredPartners.length === 0 ? (
-        <EmptyState
-          icon={Search}
-          title={searchQuery ? "Nenhum parceiro encontrado" : "Nenhum parceiro cadastrado"}
-          description={
-            searchQuery
-              ? "Tente buscar com outros termos"
-              : "Adicione parceiros e fornecedores para gerenciar seus contatos profissionais"
-          }
-          actionLabel={!searchQuery ? "Adicionar Parceiro" : undefined}
-          onAction={!searchQuery ? handleAddPartner : undefined}
-        />
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
-          {filteredPartners.map((partner, index) => (
-            <div
-              key={partner.id}
-              className="animate-fade-in"
-              style={{ animationDelay: `${index * 0.05}s` }}
-            >
-              <PartnerCard partner={partner} onViewDetails={handleViewDetails} />
+                <Button onClick={handleAddPartner} className="w-full md:w-auto">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Adicionar Parceiro
+                </Button>
+              </div>
             </div>
-          ))}
-        </div>
-      )}
 
-      {/* Modais */}
-      <PartnerFormDialog
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        onSubmit={handleSubmitForm}
-        partner={editingPartner}
-      />
+            {/* Grid de Parceiros */}
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <Skeleton key={i} className="h-64 rounded-xl" />
+                ))}
+              </div>
+            ) : filteredPartners.length === 0 ? (
+              <EmptyState
+                icon={Search}
+                title={
+                  searchQuery
+                    ? "Nenhum parceiro encontrado"
+                    : "Nenhum parceiro cadastrado"
+                }
+                description={
+                  searchQuery
+                    ? "Tente buscar com outros termos"
+                    : "Adicione parceiros e fornecedores para gerenciar seus contatos profissionais"
+                }
+                actionLabel={!searchQuery ? "Adicionar Parceiro" : undefined}
+                onAction={!searchQuery ? handleAddPartner : undefined}
+              />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
+                {filteredPartners.map((partner, index) => (
+                  <div
+                    key={partner.id}
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${index * 0.05}s` }}
+                  >
+                    <PartnerCard
+                      partner={partner}
+                      onViewDetails={handleViewDetails}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
 
-      <PartnerDetailModal
-        open={detailOpen}
-        onOpenChange={setDetailOpen}
-        partner={selectedPartner}
-        onEdit={handleEditPartner}
-        onDelete={handleDeletePartner}
-        onUpdateNotes={handleUpdateNotes}
-      />
+            {/* Modais */}
+            <PartnerFormDialog
+              open={formOpen}
+              onOpenChange={setFormOpen}
+              onSubmit={handleSubmitForm}
+              partner={editingPartner}
+            />
 
-      <DeleteConfirmDialog
-        open={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
-        onConfirm={confirmDelete}
-        title="Excluir Parceiro"
-        description={`Tem certeza que deseja excluir ${partnerToDelete?.name}? Esta ação não pode ser desfeita.`}
-      />
+            <PartnerDetailModal
+              open={detailOpen}
+              onOpenChange={setDetailOpen}
+              partner={selectedPartner}
+              onEdit={handleEditPartner}
+              onDelete={handleDeletePartner}
+              onUpdateNotes={handleUpdateNotes}
+            />
+
+            <DeleteConfirmDialog
+              open={deleteOpen}
+              onClose={() => setDeleteOpen(false)}
+              onConfirm={confirmDelete}
+              title="Excluir Parceiro"
+              description={`Tem certeza que deseja excluir ${partnerToDelete?.name}? Esta ação não pode ser desfeita.`}
+            />
           </div>
         </main>
       </div>

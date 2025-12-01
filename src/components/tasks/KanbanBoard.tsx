@@ -130,8 +130,26 @@ export function KanbanBoard({ projectId }: KanbanBoardProps) {
 
     try {
       setDeleting(true);
+
       const { error } = await tasksService.delete(selectedTask.id, currentWorkspace.id);
       if (error) throw error;
+
+      const response = await fetch(`https://archestra-backend.onrender.com/tasks/${selectedTask.id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      let result;
+      try {
+        result = await response.json();
+      } catch {
+        result = {};
+      }
+
+      if (!response.ok) {
+        toast.error(result.detail || "Erro ao excluir tarefa no backend");
+        return;
+      }
 
       toast.success("Tarefa excluída com sucesso!");
       fetchTasks();

@@ -154,9 +154,7 @@ export function TaskFormDialog({
     try {
       setSubmitting(true);
 
-      // Obter user_id diretamente aqui para evitar race condition
       const { data: { user } } = await supabase.auth.getUser();
-      
       if (!user?.id) {
         toast.error("Usuário não autenticado. Por favor, faça login novamente.");
         return;
@@ -172,15 +170,37 @@ export function TaskFormDialog({
         area_id: data.area_id || null,
         assigned_to: data.assigned_to || null,
         due_date: data.due_date || null,
+        workspace_id: currentWorkspace.id,
       };
 
       if (taskId) {
+        // Atualizar no Supabase
         const { error } = await tasksService.update(taskId, taskData, currentWorkspace.id);
         if (error) throw error;
+
+        // Atualizar no DynamoDB
+        await fetch(`https://archestra-backend.onrender.com/tasks/${taskId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(taskData),
+        });
+
         toast.success("Tarefa atualizada com sucesso!");
       } else {
-        const { error } = await tasksService.create(taskData, currentWorkspace.id);
+        // Criar no Supabase
+        const { data: created, error } = await tasksService.create(taskData, currentWorkspace.id);
         if (error) throw error;
+
+        // Criar também no DynamoDB usando o mesmo id
+        await fetch("https://archestra-backend.onrender.com/tasks", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...taskData,
+            id: created.id,
+          }),
+        });
+
         toast.success("Tarefa criada com sucesso!");
       }
 
