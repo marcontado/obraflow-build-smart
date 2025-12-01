@@ -33,9 +33,9 @@ export function PlanCard({ plan, currentPlan, onSelect, billingCycle }: PlanCard
 
   // Recomendações por plano
   const recommendations: Record<SubscriptionPlan, string> = {
-    atelier: "Perfeito para testar a plataforma",
-    studio: "Ideal para autônomos e profissionais independentes",
-    domus: "Para escritórios ou equipes maiores",
+    atelier: "Perfeito para autônomos e profissionais independentes",
+    studio: "Pensado para pequenas equipes e profissionais com maior demanda",
+    domus: "Para escritórios e equipes completas que precisam de máxima capacidade",
   };
 
   return (

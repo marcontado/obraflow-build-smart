@@ -87,18 +87,22 @@ export const PLAN_NAMES: Record<SubscriptionPlan, string> = {
 };
 
 export const PLAN_PRICES: Record<SubscriptionPlan, { monthly: number; yearly: number }> = {
-  atelier: { monthly: 0, yearly: 0 },
-  studio: { monthly: 149, yearly: 1610 },
-  domus: { monthly: 399, yearly: 4310 },
+  atelier: { monthly: 39.90, yearly: 430.92 },
+  studio: { monthly: 149.90, yearly: 1618.92 },
+  domus: { monthly: 399.90, yearly: 4318.92 },
 };
 
-export const STRIPE_PRICE_IDS: Record<Exclude<SubscriptionPlan, 'atelier'>, { monthly: string; yearly: string }> = {
+export const STRIPE_PRICE_IDS: Record<SubscriptionPlan, { monthly: string; yearly: string }> = {
+  atelier: {
+    monthly: "price_1SYeZ4R2sSXsKMlDyDN7wd9Y",
+    yearly: "price_1SYf24R2sSXsKMlDcmpmY1Cr",
+  },
   studio: {
-    monthly: "price_1SJo9VR2sSXsKMlD3JF3b9ti",
-    yearly: "price_1SJoJpR2sSXsKMlDgwa3VuZ9",
+    monthly: "price_1SYf44R2sSXsKMlDglRTiK4z",
+    yearly: "price_1SYf4jR2sSXsKMlDvilJvlF3",
   },
   domus: {
-    monthly: "price_1SJo9VR2sSXsKMlDMXxkrEAE",
-    yearly: "price_1SJoKdR2sSXsKMlDb1Vu6m6F",
+    monthly: "price_1SYf6AR2sSXsKMlDd0MIxnK1",
+    yearly: "price_1SYf6XR2sSXsKMlDuvSJopzK",
   },
 };

@@ -29,6 +29,7 @@ export default function Onboarding() {
   const [submitting, setSubmitting] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string>("");
   const [step, setStep] = useState<"workspace" | "profile">("workspace");
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   // Guard: Se já tem workspace, redirecionar para /app (movido para useEffect)
   useEffect(() => {
@@ -79,12 +80,11 @@ export default function Onboarding() {
       description: "Seu workspace foi criado com sucesso.",
     });
 
-    // Verificar se há checkout pendente
+    // Verificar se há checkout pendente - TODOS os planos agora requerem checkout
     const pendingPlan = localStorage.getItem("pending_plan_selection");
-    const skipTrialStr = localStorage.getItem("pending_skip_trial");
-    const skipTrial = skipTrialStr === "true";
+    const billingCycle = localStorage.getItem("pending_billing_cycle") || "monthly";
     
-    if (pendingPlan && pendingPlan !== "atelier" && workspace) {
+    if (pendingPlan && workspace) {
       try {
         // Aguardar refresh completar
         await refreshWorkspaces();
@@ -94,28 +94,34 @@ export default function Onboarding() {
           description: "Vamos finalizar sua assinatura...",
         });
         
-        // Obter priceId correto (defaultando para mensal)
-        const priceId = STRIPE_PRICE_IDS[pendingPlan as keyof typeof STRIPE_PRICE_IDS].monthly;
+        // Obter priceId correto baseado no billing cycle
+        const priceId = STRIPE_PRICE_IDS[pendingPlan as keyof typeof STRIPE_PRICE_IDS][billingCycle as "monthly" | "yearly"];
         
-        // Criar checkout session com ou sem trial
-        const { url } = await subscriptionsService.createCheckout(workspace.id, priceId, skipTrial);
+        // Criar checkout session com 15 dias de trial
+        const { url } = await subscriptionsService.createCheckout(workspace.id, priceId, false);
         
         // Limpar localStorage
         localStorage.removeItem("pending_plan_selection");
-        localStorage.removeItem("pending_skip_trial");
+        localStorage.removeItem("pending_billing_cycle");
         
         if (url) {
           window.location.href = url;
           return;
+        } else {
+          setCheckoutError("Não foi possível criar a sessão de checkout. Tente novamente.");
+          setSubmitting(false);
+          return;
         }
       } catch (error: any) {
         console.error('Error creating checkout:', error);
+        setCheckoutError(error.message || "Erro ao processar pagamento. Tente novamente.");
         toast({
           title: "Erro ao criar checkout",
           description: error.message || "Tente novamente mais tarde",
           variant: "destructive",
         });
-        // Continuar para dashboard mesmo com erro
+        setSubmitting(false);
+        return;
       }
     }
 
@@ -136,11 +142,11 @@ export default function Onboarding() {
             </div>
           </div>
           <div>
-            <CardTitle className="text-3xl">Bem-vindo ao Archestra!</CardTitle>
+            <CardTitle className="text-3xl">Bem-vindo ao Archestra! 🎉</CardTitle>
             <CardDescription className="text-base mt-2">
               {step === "profile" 
                 ? "Personalize seu perfil (opcional)"
-                : "Vamos criar seu primeiro workspace"}
+                : "Estamos felizes em ter você conosco. Vamos configurar seu espaço de trabalho"}
             </CardDescription>
           </div>
         </CardHeader>
@@ -204,14 +210,33 @@ export default function Onboarding() {
                   <Button type="submit" disabled={submitting} className="w-full h-11">
                     {submitting ? "Criando seu workspace..." : "Criar Workspace e Começar"}
                   </Button>
+
+                  {checkoutError && (
+                    <div className="mt-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                      <p className="text-sm text-destructive text-center mb-3">{checkoutError}</p>
+                      <Button 
+                        type="button" 
+                        onClick={() => {
+                          setCheckoutError(null);
+                          form.handleSubmit(onSubmit)();
+                        }} 
+                        className="w-full"
+                        variant="destructive"
+                      >
+                        Tentar Novamente
+                      </Button>
+                    </div>
+                  )}
                 </form>
               </Form>
 
-              <div className="mt-6 p-4 bg-accent/50 rounded-lg">
-                <p className="text-sm text-muted-foreground text-center">
-                  Após criar seu workspace, você será direcionado para finalizar a configuração da sua conta
-                </p>
-              </div>
+              {!checkoutError && (
+                <div className="mt-6 p-4 bg-accent/50 rounded-lg">
+                  <p className="text-sm text-muted-foreground text-center">
+                    Após criar seu workspace, você será direcionado para finalizar a configuração da sua conta
+                  </p>
+                </div>
+              )}
             </>
           )}
         </CardContent>

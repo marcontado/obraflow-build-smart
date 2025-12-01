@@ -14,23 +14,21 @@ import designerMan from "@/assets/designer-man.jpg";
 import workspaceModern from "@/assets/workspace-modern.jpg";
 import teamCollaboration from "@/assets/team-collaboration.jpg";
 import { useEffect, useState } from "react";
-
 export default function Landing() {
   const [showWhatsappLabel, setShowWhatsappLabel] = useState(true);
-  
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
+
   // Forçar tema claro na Landing Page
   useEffect(() => {
     const htmlElement = document.documentElement;
-    const hadDarkClass = htmlElement.classList.contains('dark');
-    htmlElement.classList.remove('dark');
-    
+    const hadDarkClass = htmlElement.classList.contains("dark");
+    htmlElement.classList.remove("dark");
     return () => {
       if (hadDarkClass) {
-        htmlElement.classList.add('dark');
+        htmlElement.classList.add("dark");
       }
     };
   }, []);
-
   useEffect(() => {
     const timer = setTimeout(() => setShowWhatsappLabel(false), 10000);
     // Scroll suave se houver intenção salva
@@ -39,10 +37,17 @@ export default function Landing() {
       if (scrollToSection) {
         const section = document.getElementById(scrollToSection);
         if (section) {
-          section.scrollIntoView({ behavior: "smooth", block: "start" });
+          section.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
           setTimeout(() => {
             // Ajuste de offset para header fixo (ex: 64px)
-            window.scrollBy({ top: -64, left: 0, behavior: "smooth" });
+            window.scrollBy({
+              top: -64,
+              left: 0,
+              behavior: "smooth"
+            });
           }, 400); // tempo para scrollIntoView terminar
           localStorage.removeItem("scrollToSection");
         } else {
@@ -53,35 +58,32 @@ export default function Landing() {
     tryScroll();
     return () => clearTimeout(timer);
   }, []);
-  return (
-  <div className="min-h-screen bg-gradient-to-b from-background via-background to-card relative">
-  <LandingNavbar />
-  {/* âncora invisível para scroll do botão Início */}
-  <div id="hero" style={{ position: "relative", top: "-96px", height: 0 }} aria-hidden="true" />
-  <GlassSidebar />
+  return <div className="min-h-screen bg-gradient-to-b from-background via-background to-card relative">
+      <LandingNavbar />
+      {/* âncora invisível para scroll do botão Início */}
+      <div id="hero" style={{
+      position: "relative",
+      top: "-96px",
+      height: 0
+    }} aria-hidden="true" />
+      <GlassSidebar />
 
       {/* Botão flutuante WhatsApp com label temporária */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
-        {showWhatsappLabel && (
-          <div className="px-4 py-2 rounded-lg bg-white text-green-700 font-semibold shadow-lg animate-fade-in whitespace-nowrap">
+        {showWhatsappLabel && <div className="px-4 py-2 rounded-lg bg-white text-green-700 font-semibold shadow-lg animate-fade-in whitespace-nowrap">
             Fale com um dos nossos consultores
-          </div>
-        )}
-        <a
-          href="https://wa.me/5511979594378"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="shadow-lg rounded-full bg-green-500 hover:bg-green-600 transition w-16 h-16 flex items-center justify-center"
-          aria-label="Fale com um dos nossos consultores pelo WhatsApp"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="white" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 1.657.336 3.236.956 4.684L2 22l5.455-1.797A9.956 9.956 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-1.528 0-3.018-.437-4.29-1.262l-.306-.192-3.237 1.067 1.07-3.155-.198-.324A7.963 7.963 0 0 1 4 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8zm4.406-5.845c-.242-.121-1.432-.707-1.653-.788-.221-.081-.382-.121-.543.121-.161.242-.623.788-.763.95-.14.161-.282.181-.523.06-.242-.121-1.022-.377-1.947-1.201-.72-.642-1.207-1.435-1.35-1.677-.141-.242-.015-.373.106-.494.109-.108.242-.282.363-.423.121-.141.161-.242.242-.403.081-.161.04-.302-.02-.423-.06-.121-.543-1.312-.744-1.797-.196-.471-.396-.406-.543-.414l-.462-.008c-.161 0-.423.06-.646.282-.221.221-.86.841-.86 2.049 0 1.208.88 2.377 1.002 2.54.121.161 1.73 2.646 4.187 3.601.586.201 1.042.321 1.399.411.587.149 1.122.128 1.545.078.471-.057 1.432-.586 1.634-1.152.202-.566.202-1.051.141-1.152-.06-.101-.221-.161-.463-.282z"/></svg>
+          </div>}
+        <a href="https://wa.me/5511979594378" target="_blank" rel="noopener noreferrer" className="shadow-lg rounded-full bg-green-500 hover:bg-green-600 transition w-16 h-16 flex items-center justify-center" aria-label="Fale com um dos nossos consultores pelo WhatsApp">
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="white" viewBox="0 0 24 24">
+            <path d="M12 2C6.477 2 2 6.477 2 12c0 1.657.336 3.236.956 4.684L2 22l5.455-1.797A9.956 9.956 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-1.528 0-3.018-.437-4.29-1.262l-.306-.192-3.237 1.067 1.07-3.155-.198-.324A7.963 7.963 0 0 1 4 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8zm4.406-5.845c-.242-.121-1.432-.707-1.653-.788-.221-.081-.382-.121-.543.121-.161.242-.623.788-.763.95-.14.161-.282.181-.523.06-.242-.121-1.022-.377-1.947-1.201-.72-.642-1.207-1.435-1.35-1.677-.141-.242-.015-.373.106-.494.109-.108.242-.282.363-.423.121-.141.161-.242.242-.403.081-.161.04-.302-.02-.423-.06-.121-.543-1.312-.744-1.797-.196-.471-.396-.406-.543-.414l-.462-.008c-.161 0-.423.06-.646.282-.221.221-.86.841-.86 2.049 0 1.208.88 2.377 1.002 2.54.121.161 1.73 2.646 4.187 3.601.586.201 1.042.321 1.399.411.587.149 1.122.128 1.545.078.471-.057 1.432-.586 1.634-1.152.202-.566.202-1.051.141-1.152-.06-.101-.221-.161-.463-.282z" />
+          </svg>
         </a>
       </div>
       <section className="relative pt-32 pb-24 px-4 overflow-hidden">
         {/* Subtle gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
-        
-  <div className="container mx-auto px-4 relative z-10">
+
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-5xl mx-auto text-center space-y-8 animate-fade-in">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 dark:bg-card/60 backdrop-blur-glass border border-white/20 shadow-glass">
@@ -91,18 +93,15 @@ export default function Landing() {
 
             {/* Main heading */}
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-heading font-bold leading-tight">
-              <span className="text-foreground">
-                Projete o Futuro
-              </span>
+              <span className="text-foreground">Projete o Futuro</span>
               <br />
-              <span className="text-primary animate-shimmer">
-                da sua Arquitetura
-              </span>
+              <span className="text-primary animate-shimmer">da sua Arquitetura</span>
             </h1>
 
             {/* Description */}
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              A plataforma completa que transforma a gestão de projetos arquitetônicos em uma experiência fluida, visual e colaborativa
+              A plataforma completa que transforma a gestão de projetos arquitetônicos em uma experiência fluida, visual
+              e colaborativa
             </p>
 
             {/* CTA Buttons */}
@@ -151,50 +150,28 @@ export default function Landing() {
             </p>
           </div>
 
-          <StorySection
-            step="1"
-            title="Visualize Cada Detalhe"
-            description="Gantt interativo que transforma cronogramas complexos em visualizações claras e intuitivas. Acompanhe cada fase do projeto com precisão arquitetônica, ajuste prazos com facilidade e identifique dependências instantaneamente."
-            image={workspaceModern}
-            imageAlt="Workspace moderno de arquitetura com múltiplas telas mostrando projetos"
-          />
+          <StorySection step="1" title="Visualize Cada Detalhe" description="Gantt interativo que transforma cronogramas complexos em visualizações claras e intuitivas. Acompanhe cada fase do projeto com precisão arquitetônica, ajuste prazos com facilidade e identifique dependências instantaneamente." image={workspaceModern} imageAlt="Workspace moderno de arquitetura com múltiplas telas mostrando projetos" />
 
-          <StorySection
-            step="2"
-            title="Colabore em Tempo Real"
-            description="Sua equipe, seus clientes e fornecedores conectados em uma única plataforma. Compartilhe progresso, receba feedback instantâneo e mantenha todos alinhados com o conceito do projeto, do primeiro esboço à entrega final."
-            image={teamCollaboration}
-            imageAlt="Equipe de arquitetos colaborando em projeto"
-            reverse
-          />
+          <StorySection step="2" title="Colabore em Tempo Real" description="Sua equipe, seus clientes e fornecedores conectados em uma única plataforma. Compartilhe progresso, receba feedback instantâneo e mantenha todos alinhados com o conceito do projeto, do primeiro esboço à entrega final." image={teamCollaboration} imageAlt="Equipe de arquitetos colaborando em projeto" reverse />
 
-          <StorySection
-            step="3"
-            title="Controle Financeiro Preciso"
-            description="Orçamentos detalhados por área do projeto, acompanhamento de gastos em tempo real e relatórios visuais que simplificam decisões complexas. Mantenha a rentabilidade sem perder a criatividade."
-            image={architectWoman}
-            imageAlt="Arquiteta trabalhando com plantas e orçamentos"
-          />
+          <StorySection step="3" title="Controle Financeiro Preciso" description="Orçamentos detalhados por área do projeto, acompanhamento de gastos em tempo real e relatórios visuais que simplificam decisões complexas. Mantenha a rentabilidade sem perder a criatividade." image={architectWoman} imageAlt="Arquiteta trabalhando com plantas e orçamentos" />
 
-          <StorySection
-            step="4"
-            title="Gestão Profissional"
-            description="De briefings a entregas finais, organize cada etapa com elegância. Cadastre clientes, gerencie múltiplos projetos simultaneamente e acesse relatórios detalhados que impressionam e informam."
-            image={designerMan}
-            imageAlt="Designer de interiores apresentando projeto para cliente"
-            reverse
-          />
+          <StorySection step="4" title="Gestão Profissional" description="De briefings a entregas finais, organize cada etapa com elegância. Cadastre clientes, gerencie múltiplos projetos simultaneamente e acesse relatórios detalhados que impressionam e informam." image={designerMan} imageAlt="Designer de interiores apresentando projeto para cliente" reverse />
         </div>
       </section>
 
       {/* Features Section */}
       <section className="py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-accent/5" />
-        
+
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-16 space-y-4">
             {/* âncora invisível para scroll com offset */}
-            <div id="ferramentas" style={{ position: "relative", top: "-96px", height: 0 }} aria-hidden="true" />
+            <div id="ferramentas" style={{
+            position: "relative",
+            top: "-96px",
+            height: 0
+          }} aria-hidden="true" />
             <div className="inline-block px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4">
               Recursos Completos
             </div>
@@ -204,36 +181,12 @@ export default function Landing() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-            <FeatureCard
-              icon={Calendar}
-              title="Gantt Interativo"
-              description="Cronogramas visuais que se adaptam ao seu fluxo de trabalho. Arraste, ajuste e visualize dependências com facilidade."
-            />
-            <FeatureCard
-              icon={Users}
-              title="Gestão de Equipes"
-              description="Atribua tarefas, defina permissões e acompanhe o progresso de cada membro em tempo real."
-            />
-            <FeatureCard
-              icon={BarChart3}
-              title="Relatórios Visuais"
-              description="Dashboards elegantes que transformam dados em insights acionáveis para seus projetos."
-            />
-            <FeatureCard
-              icon={FileText}
-              title="Documentação Organizada"
-              description="Centralize briefings, contratos e documentos técnicos em um único lugar acessível."
-            />
-            <FeatureCard
-              icon={Palette}
-              title="Interface Refinada"
-              description="Design pensado para arquitetos. Interface limpa, moderna e intuitiva como seus projetos."
-            />
-            <FeatureCard
-              icon={Ruler}
-              title="Controle de Orçamento"
-              description="Gerencie custos por área, acompanhe despesas e mantenha a rentabilidade dos projetos."
-            />
+            <FeatureCard icon={Calendar} title="Gantt Interativo" description="Cronogramas visuais que se adaptam ao seu fluxo de trabalho. Arraste, ajuste e visualize dependências com facilidade." />
+            <FeatureCard icon={Users} title="Gestão de Equipes" description="Atribua tarefas, defina permissões e acompanhe o progresso de cada membro em tempo real." />
+            <FeatureCard icon={BarChart3} title="Relatórios Visuais" description="Dashboards elegantes que transformam dados em insights acionáveis para seus projetos." />
+            <FeatureCard icon={FileText} title="Documentação Organizada" description="Centralize briefings, contratos e documentos técnicos em um único lugar acessível." />
+            <FeatureCard icon={Palette} title="Interface Refinada" description="Design pensado para arquitetos. Interface limpa, moderna e intuitiva como seus projetos." />
+            <FeatureCard icon={Ruler} title="Controle de Orçamento" description="Gerencie custos por área, acompanhe despesas e mantenha a rentabilidade dos projetos." />
           </div>
         </div>
       </section>
@@ -242,66 +195,32 @@ export default function Landing() {
       <section id="planos" className="py-20 bg-primary/5">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16 space-y-4">
-            <h2 className="text-4xl md:text-5xl font-heading font-bold text-foreground">
-              Planos para Cada Ateliê
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <h2 className="text-4xl md:text-5xl font-heading font-bold text-foreground">Planos para Cada Ateliê</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
               Do freelancer ao grande escritório, temos o plano perfeito para você
             </p>
+
+            <div className="inline-flex items-center gap-4 bg-white p-1 rounded-lg shadow-sm">
+              <Button variant={billingCycle === "monthly" ? "default" : "ghost"} size="sm" onClick={() => setBillingCycle("monthly")}>
+                Mensal
+              </Button>
+              <Button variant={billingCycle === "yearly" ? "default" : "ghost"} size="sm" onClick={() => setBillingCycle("yearly")}>
+                Anual
+                <span className="ml-2 text-xs text-accent-foreground px-2 py-0.5 rounded-full bg-secondary">-10%</span>
+              </Button>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <PlanCardPublic
-              name="Atelier"
-              price={0}
-              description="Perfeito para arquitetos iniciantes"
-              recommendation="Ideal para testar a plataforma"
-              features={[
-                "1 projeto simultâneo",
-                "3 membros da equipe",
-                "Gantt básico",
-                "5GB de armazenamento"
-              ]}
-              planId="atelier"
-              highlighted={false}
-            />
-            <PlanCardPublic
-              name="Studio"
-              price={149}
-              description="Para escritórios em crescimento"
-              recommendation="Ideal para autônomos e profissionais independentes"
-              features={[
-                "10 projetos simultâneos",
-                "10 membros da equipe",
-                "Gantt avançado com dependências",
-                "50GB de armazenamento",
-                "Relatórios personalizados"
-              ]}
-              planId="studio"
-              highlighted={true}
-            />
-            <PlanCardPublic
-              name="Domus"
-              price={399}
-              description="Solução empresarial completa"
-              recommendation="Para escritórios ou equipes maiores"
-              features={[
-                "Projetos ilimitados",
-                "Membros ilimitados",
-                "Todas as funcionalidades",
-                "200GB de armazenamento",
-                "Suporte prioritário",
-                "API de integração"
-              ]}
-              planId="domus"
-              highlighted={false}
-            />
+            <PlanCardPublic name="Atelier" price={billingCycle === "monthly" ? 39.9 : 430.92} description="Perfeito para arquitetos iniciantes" recommendation="Perfeito para autônomos e profissionais independentes" features={["1 projeto simultâneo", "3 membros da equipe", "Gantt básico", "5GB de armazenamento"]} planId="atelier" billingCycle={billingCycle} highlighted={false} />
+            <PlanCardPublic name="Studio" price={billingCycle === "monthly" ? 149.9 : 1618.92} description="Para escritórios em crescimento" recommendation="Pensado para pequenas equipes e profissionais com maior demanda" features={["10 projetos simultâneos", "10 membros da equipe", "Gantt avançado com dependências", "50GB de armazenamento", "Relatórios personalizados"]} planId="studio" billingCycle={billingCycle} highlighted={true} />
+            <PlanCardPublic name="Domus" price={billingCycle === "monthly" ? 399.9 : 4318.92} description="Solução empresarial completa" recommendation="Para escritórios e equipes completas que precisam de máxima capacidade" features={["Projetos ilimitados", "Membros ilimitados", "Todas as funcionalidades", "200GB de armazenamento", "Suporte prioritário", "API de integração"]} planId="domus" billingCycle={billingCycle} highlighted={false} />
           </div>
         </div>
       </section>
 
-  {/* Plans Preview Section */}
-  <section id="planos" className="py-24 px-4">
+      {/* Plans Preview Section */}
+      <section id="planos" className="py-24 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-20 animate-fade-in">
             <h2 className="font-heading font-bold mb-6 text-foreground">Escolha o plano ideal</h2>
@@ -311,27 +230,9 @@ export default function Landing() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <TestimonialCard
-              testimonial="Revolucionou a forma como gerencio meus projetos. O Gantt interativo é simplesmente perfeito."
-              name="Marina Silva"
-              role="Arquiteta"
-              company="Studio MS"
-              initials="MS"
-            />
-            <TestimonialCard
-              testimonial="A colaboração com minha equipe ficou muito mais fluida. Todos sabem exatamente o que fazer."
-              name="Carlos Mendes"
-              role="Diretor"
-              company="Mendes Arquitetura"
-              initials="CM"
-            />
-            <TestimonialCard
-              testimonial="Os relatórios financeiros me ajudam a tomar decisões mais assertivas e manter os projetos rentáveis."
-              name="Ana Paula Costa"
-              role="Arquiteta e Urbanista"
-              company="APC Design"
-              initials="AC"
-            />
+            <TestimonialCard testimonial="Revolucionou a forma como gerencio meus projetos. O Gantt interativo é simplesmente perfeito." name="Marina Silva" role="Arquiteta" company="Studio MS" initials="MS" />
+            <TestimonialCard testimonial="A colaboração com minha equipe ficou muito mais fluida. Todos sabem exatamente o que fazer." name="Carlos Mendes" role="Diretor" company="Mendes Arquitetura" initials="CM" />
+            <TestimonialCard testimonial="Os relatórios financeiros me ajudam a tomar decisões mais assertivas e manter os projetos rentáveis." name="Ana Paula Costa" role="Arquiteta e Urbanista" company="APC Design" initials="AC" />
           </div>
         </div>
       </section>
@@ -342,17 +243,15 @@ export default function Landing() {
       {/* Final CTA Section */}
       <section id="contato" className="py-32 relative overflow-hidden">
         <div className="absolute inset-0 bg-primary/10" />
-        
+
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <h2 className="text-4xl md:text-6xl font-heading font-bold text-foreground leading-tight">
               Pronto para Transformar
               <br />
-              <span className="text-primary">
-                Sua Gestão Arquitetônica?
-              </span>
+              <span className="text-primary">Sua Gestão Arquitetônica?</span>
             </h2>
-            
+
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Junte-se a centenas de arquitetos que já elevaram sua produtividade
             </p>
@@ -388,6 +287,5 @@ export default function Landing() {
       </section>
 
       <LandingFooter />
-    </div>
-  );
+    </div>;
 }
