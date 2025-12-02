@@ -42,3 +42,5 @@ verify_jwt = false
 [functions.tasks-external]
 verify_jwt = false
 
+[functions.activities-external]
+verify_jwt = false
