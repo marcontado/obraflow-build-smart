@@ -25,6 +25,26 @@ import { BrainCircuit } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
+const BASE_URL = "https://archestra-backend.onrender.com";
+const API_GATEWAY_URL = "https://la1z6to0e7.execute-api.us-east-1.amazonaws.com/prod"; 
+
+async function getPresignedUrl(folder: string, fileExtension: string) {
+  const response = await fetch(`${BASE_URL}/generate-upload-url`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ folder, file_extension: fileExtension }),
+  });
+  return await response.json();
+}
+
+async function uploadToS3(uploadUrl: string, file: File, fileExtension: string) {
+  await fetch(uploadUrl, {
+    method: "PUT",
+    headers: { "Content-Type": `image/${fileExtension}` },
+    body: file,
+  });
+}
+
 function Reports() {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspace();
@@ -54,6 +74,13 @@ function Reports() {
   const [modalLoading, setModalLoading] = useState(false);
   const modalFileInputRef = useRef<HTMLInputElement>(null);
   const modalExpectedFileInputRef = useRef<HTMLInputElement>(null);
+  const [iaResult, setIaResult] = useState<any>(null);
+  const [progressUpdating, setProgressUpdating] = useState(false);
+  const [modalStep, setModalStep] = useState<1 | 2>(1);
+  const [selectedAreaId, setSelectedAreaId] = useState<string>("");
+  const [projectAreas, setProjectAreas] = useState<any[]>([]);
+  const [iaLoading, setIaLoading] = useState(false);
+  const [showProgressConfirmation, setShowProgressConfirmation] = useState(false);
 
   useEffect(() => {
     if (currentWorkspace) {
@@ -67,6 +94,21 @@ function Reports() {
     }
   }, [selectedProjectId, currentWorkspace]);
 
+  useEffect(() => {
+    async function fetchAreas() {
+      if (!modalProjectId) {
+        setProjectAreas([]);
+        return;
+      }
+      const { data } = await supabase
+        .from("project_areas")
+        .select("id, name")
+        .eq("project_id", modalProjectId);
+      setProjectAreas(data || []);
+    }
+    fetchAreas();
+  }, [modalProjectId]);
+
   const fetchProjectsList = async () => {
     if (isFirstMount.current) {
       setLoading(true);
@@ -75,7 +117,7 @@ function Reports() {
     try {
       const { data } = await supabase
         .from("projects")
-        .select("id, name")
+        .select("id, name, progress")
         .eq("workspace_id", currentWorkspace.id)
         .order("name");
       
@@ -295,11 +337,8 @@ function Reports() {
   async function handleModalPhotoUpload() {
     const file = modalFileInputRef.current?.files?.[0];
     const expectedFile = modalExpectedFileInputRef.current?.files?.[0];
-    const formData = new FormData();
-    formData.append("real_photo", file);
-    formData.append("expected_photo", expectedFile);
-    if (!file || !expectedFile || !modalProjectId) {
-      alert("Selecione uma obra e as fotos necessárias.");
+    if (!file || !expectedFile || !modalProjectId || !selectedAreaId) {
+      alert("Selecione uma obra, área e as fotos necessárias.");
       return;
     }
     const selectedProject = projects.find(p => p.id === modalProjectId);
@@ -309,27 +348,106 @@ function Reports() {
     }
     try {
       setModalLoading(true);
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("project_id", selectedProject.id);
-      formData.append("project_name", selectedProject.name);
-      formData.append("expected_file", expectedFile);
 
-      await fetch("https://matweber.app.n8n.cloud/webhook/a92b9f7b-7db6-4971-96b6-43e9b079fb10", {
-        method: "POST",
-        body: formData,
-      });
+      // 1. Upload da imagem real
+      const realExt = file.name.split('.').pop();
+      const realUrlData = await getPresignedUrl("real-images", realExt);
+      console.log("Presigned URL real:", realUrlData);
+      await uploadToS3(realUrlData.upload_url, file, realExt);
 
-      alert("Fotos enviadas para análise por IA!");
-      setIaModalOpen(false);
-      setModalProjectId("");
-      if (modalFileInputRef.current) modalFileInputRef.current.value = "";
-      if (modalExpectedFileInputRef.current) modalExpectedFileInputRef.current.value = "";
+      // 2. Upload do template
+      const templateExt = expectedFile.name.split('.').pop();
+      const templateUrlData = await getPresignedUrl("templates", templateExt);
+      console.log("Presigned URL template:", templateUrlData);
+      await uploadToS3(templateUrlData.upload_url, expectedFile, templateExt);
+
+      setModalStep(2);
+      setIaLoading(true);
+
+      let timeoutId: NodeJS.Timeout | null = null;
+      try {
+        timeoutId = setTimeout(() => {
+          setIaLoading(false);
+          alert("A análise está demorando mais que o esperado. Tente novamente ou aguarde.");
+        }, 60000);
+
+        // 3. Chamada da IA via API Gateway
+        const iaPayload = {
+          project_id: modalProjectId,
+          area_id: selectedAreaId,
+          current_progress: selectedProject.progress,
+          template_bucket: templateUrlData.bucket,
+          template_key: templateUrlData.file_key,
+          current_bucket: realUrlData.bucket,
+          current_key: realUrlData.file_key,
+        };
+        console.log("Payload enviado para IA:", iaPayload);
+
+        const iaResponse = await fetch(`${API_GATEWAY_URL}/analyze`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(iaPayload),
+        });
+        console.log("Status resposta IA:", iaResponse.status);
+        const iaJson = await iaResponse.json();
+        console.log("Resposta da IA:", iaJson);
+
+        setIaResult(JSON.parse(iaJson.body));
+      } catch (error) {
+        alert("Erro ao enviar as fotos ou analisar.");
+        console.error("Erro na chamada da IA:", error);
+      } finally {
+        setIaLoading(false);
+        if (timeoutId) clearTimeout(timeoutId);
+        setModalLoading(false);
+      }
     } catch (error) {
-      alert("Erro ao enviar as fotos.");
-      console.error(error);
+      alert("Erro ao enviar as fotos ou analisar.");
+      console.error("Erro no upload:", error);
     } finally {
       setModalLoading(false);
+      setIaLoading(false);
+    }
+  }
+
+  async function handleAcceptProgressUpdate() {
+    if (!iaResult?.progress_update || !modalProjectId) return;
+    setProgressUpdating(true);
+
+    try {
+      console.log("Atualizando progresso no Supabase:", iaResult.progress_update.new_progress);
+      const { error: supabaseError } = await supabase
+        .from("projects")
+        .update({ progress: iaResult.progress_update.new_progress })
+        .eq("id", modalProjectId);
+      if (supabaseError) {
+        console.error("Erro Supabase:", supabaseError);
+      }
+      console.log("Recebido modalProjectId:", modalProjectId);
+      // If you have a 'data' variable, log it; otherwise, remove or replace with a valid variable
+      // console.log("Recebido data:", data);
+      // The following line appears to be Python code and should be removed in TypeScript/React
+      // response = table.get_item(Key={'PK': project_id, 'SK': 'PROJECT'})
+      // If you have a 'response' variable, log it; otherwise, remove or replace with a valid variable
+      // console.log("Resposta get_item:", response);
+      console.log("Atualizando progresso no DynamoDB:", iaResult.progress_update.new_progress);
+      const response = await fetch(`${BASE_URL}/projects/${modalProjectId}/progress`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ progress: iaResult.progress_update.new_progress }),
+      });
+      console.log("Status resposta DynamoDB:", response.status);
+      const result = await response.json().catch(() => ({}));
+      console.log("Resposta DynamoDB:", result);
+
+      setShowProgressConfirmation(true);
+      setIaResult(null);
+      fetchProjectsList();
+    } catch (error) {
+      alert("Erro ao atualizar progresso.");
+      console.error("Erro ao atualizar progresso:", error);
+    } finally {
+      setProgressUpdating(false);
     }
   }
 
@@ -528,7 +646,15 @@ function Reports() {
           )}
         </main>
       </div>
-      <Dialog open={iaModalOpen} onOpenChange={setIaModalOpen}>
+      <Dialog open={iaModalOpen} onOpenChange={open => {
+        setIaModalOpen(open);
+        if (!open) {
+          setModalStep(1);
+          setIaResult(null);
+          setSelectedAreaId("");
+          setModalProjectId("");
+        }
+      }}>
         <DialogContent className="max-w-md w-full">
           <DialogHeader>
             <DialogTitle>
@@ -538,74 +664,166 @@ function Reports() {
               </div>
             </DialogTitle>
             <p className="text-muted-foreground text-sm mt-1">
-              Envie uma foto da obra para análise automática por IA. Escolha a obra e faça upload da imagem.
+              {modalStep === 1
+                ? "Selecione a obra, área e envie as fotos para análise automática por IA."
+                : "Resultado da análise da IA e sugestão de progresso."}
             </p>
           </DialogHeader>
-          <form
-            onSubmit={e => {
-              e.preventDefault();
-              handleModalPhotoUpload();
-            }}
-            className="space-y-6"
-          >
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-foreground" htmlFor="obra-select">
-                Obra
-              </label>
-              <Select
-                value={modalProjectId}
-                onValueChange={setModalProjectId}
-                required
-              >
-                <SelectTrigger id="obra-select" className="w-full">
-                  <SelectValue placeholder="Selecione a obra..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {projects.map((project) => (
-                    <SelectItem key={project.id} value={project.id}>
-                      {project.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-foreground" htmlFor="real-photo">
-                Foto real da obra
-              </label>
-              <input
-                id="real-photo"
-                ref={modalFileInputRef}
-                type="file"
-                accept="image/*"
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-foreground" htmlFor="expected-photo">
-                Template/Imagem esperada
-              </label>
-              <input
-                id="expected-photo"
-                ref={modalExpectedFileInputRef}
-                type="file"
-                accept="image/*"
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
-                required
-              />
-            </div>
-            <DialogFooter className="mt-4">
-              <Button
-                type="submit"
-                disabled={modalLoading}
-                className="gap-2 bg-purple-600 text-white hover:bg-purple-700"
-              >
-                <BrainCircuit className="h-4 w-4" />
-                {modalLoading ? "Enviando..." : "Enviar para IA"}
-              </Button>
-            </DialogFooter>
-          </form>
+          {showProgressConfirmation ? (
+  <div className="flex flex-col items-center justify-center py-8">
+    <div className="bg-green-100 rounded-full p-4 mb-4">
+      <CheckSquare className="h-10 w-10 text-green-600" />
+    </div>
+    <h3 className="font-semibold text-lg text-green-700 mb-2">Progresso atualizado!</h3>
+    <p className="text-muted-foreground text-center mb-4">
+      O progresso do projeto foi atualizado com sucesso.<br />
+      Você pode fechar esta janela ou continuar acompanhando a obra.
+    </p>
+    <Button
+      className="bg-green-600 text-white"
+      onClick={() => {
+        setShowProgressConfirmation(false);
+        setIaModalOpen(false);
+        setModalStep(1);
+        setIaResult(null);
+        setSelectedAreaId("");
+        setModalProjectId("");
+      }}
+    >
+      Fechar
+    </Button>
+  </div>
+) : (
+            <>
+              {modalStep === 1 && (
+                <form
+                  onSubmit={e => {
+                    e.preventDefault();
+                    handleModalPhotoUpload();
+                  }}
+                  className="space-y-6"
+                >
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-foreground" htmlFor="obra-select">
+                      Obra
+                    </label>
+                    <Select
+                      value={modalProjectId}
+                      onValueChange={setModalProjectId}
+                      required
+                    >
+                      <SelectTrigger id="obra-select" className="w-full">
+                        <SelectValue placeholder="Selecione a obra..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {projects.map((project) => (
+                          <SelectItem key={project.id} value={project.id}>
+                            {project.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-foreground" htmlFor="area-select">
+                      Área
+                    </label>
+                    <Select
+                      value={selectedAreaId}
+                      onValueChange={setSelectedAreaId}
+                      required
+                    >
+                      <SelectTrigger id="area-select" className="w-full">
+                        <SelectValue placeholder="Selecione a área..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {projectAreas.map((area: any) => (
+                          <SelectItem key={area.id} value={area.id}>
+                            {area.name} {/* Use o campo name */}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-foreground" htmlFor="real-photo">
+                      Foto real da obra
+                    </label>
+                    <input
+                      id="real-photo"
+                      ref={modalFileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-foreground" htmlFor="expected-photo">
+                      Template/Imagem esperada
+                    </label>
+                    <input
+                      id="expected-photo"
+                      ref={modalExpectedFileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+                      required
+                    />
+                  </div>
+                  <DialogFooter className="mt-4">
+                    <Button
+                      type="submit"
+                      disabled={modalLoading}
+                      className="gap-2 bg-purple-600 text-white hover:bg-purple-700"
+                    >
+                      <BrainCircuit className="h-4 w-4" />
+                      {modalLoading ? "Enviando..." : "Enviar para IA"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              )}
+              {modalStep === 2 && iaLoading && (
+                <div className="flex flex-col items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-600 mb-4"></div>
+                  <p className="text-muted-foreground text-center">
+                    A IA está analisando as imagens.<br />
+                    Isso pode levar até 1 minuto. Por favor, aguarde...
+                  </p>
+                </div>
+              )}
+              {modalStep === 2 && !iaLoading && iaResult && (
+                <div className="space-y-4 mt-4">
+                  <h3 className="font-semibold text-lg">Resumo Executivo</h3>
+                  <p>{iaResult.analysis.resumo_executivo}</p>
+                  <div>
+                    <strong>Progresso sugerido:</strong> {iaResult.progress_update.new_progress}%
+                    <br />
+                    <strong>Progresso anterior:</strong> {iaResult.progress_update.previous_progress}%
+                    <br />
+                    <strong>Alteração:</strong> {iaResult.progress_update.progress_change}%
+                  </div>
+                  <Button
+                    onClick={handleAcceptProgressUpdate}
+                    disabled={progressUpdating}
+                    className="bg-green-600 text-white mt-2"
+                  >
+                    {progressUpdating ? "Atualizando..." : "Aceitar e atualizar progresso"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIaResult(null);
+                      setModalStep(1);
+                    }}
+                    className="mt-2"
+                  >
+                    Voltar
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>
