@@ -5,6 +5,8 @@ type Activity = Database["public"]["Tables"]["project_activities"]["Row"];
 type ActivityInsert = Database["public"]["Tables"]["project_activities"]["Insert"];
 type ActivityUpdate = Database["public"]["Tables"]["project_activities"]["Update"];
 
+const BASE_URL = "https://archestra-backend.onrender.com";
+
 export const projectActivitiesService = {
   async getByProject(projectId: string, workspaceId: string) {
     const { data, error } = await supabase
@@ -30,16 +32,47 @@ export const projectActivitiesService = {
 
   async create(activity: ActivityInsert, workspaceId: string) {
     const { data: { user } } = await supabase.auth.getUser();
-    
+
+    // Gera um id se não existir
+    const id = activity.id || crypto.randomUUID();
+
+    const fullActivity = {
+      ...activity,
+      id,
+      created_by: user?.id,
+      workspace_id: workspaceId,
+    };
+
+    // Cadastro no Supabase
     const { data, error } = await supabase
       .from("project_activities")
-      .insert({ 
-        ...activity, 
-        created_by: user?.id, 
-        workspace_id: workspaceId 
-      })
+      .insert(fullActivity)
       .select()
       .single();
+
+    // Cadastro no DynamoDB via backend
+    try {
+      const response = await fetch(`${BASE_URL}/project_activities`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: fullActivity.id,
+          name: fullActivity.name,
+          description: fullActivity.description ?? "", 
+          start_date: fullActivity.start_date,
+          end_date: fullActivity.end_date,
+          progress: fullActivity.progress,
+          priority: fullActivity.priority,
+          project_id: fullActivity.project_id,
+          workspace_id: fullActivity.workspace_id,
+          created_by: fullActivity.created_by ?? "", 
+        }),
+      });
+      const result = await response.json();
+      console.log("DynamoDB activity create:", result);
+    } catch (err) {
+      console.error("Erro ao cadastrar atividade no DynamoDB:", err);
+    }
 
     return { data, error };
   },
