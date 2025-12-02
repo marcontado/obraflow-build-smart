@@ -43,6 +43,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Sparkles } from "lucide-react";
+import { jsPDF } from "jspdf";
 
 type Activity = Database["public"]["Tables"]["project_activities"]["Row"];
 
@@ -77,6 +85,9 @@ export function ProjectSchedule({
   );
   const [isDeleting, setIsDeleting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [aiInsightLoading, setAiInsightLoading] = useState(false);
+  const [aiInsight, setAiInsight] = useState<string | null>(null);
+  const [aiInsightOpen, setAiInsightOpen] = useState(false);
   const { currentWorkspace } = useWorkspace();
 
   useEffect(() => {
@@ -103,6 +114,24 @@ export function ProjectSchedule({
       setLoading(false);
     }
   };
+
+  async function fetchAiInsight() {
+    setAiInsightLoading(true);
+    setAiInsightOpen(true);
+    setAiInsight(null);
+    try {
+      const response = await fetch(
+        `https://archestra-backend.onrender.com/projects/${projectId}/ai-insight`,
+        { method: "POST" }
+      );
+      const data = await response.json();
+      setAiInsight(data.insight || "Não foi possível gerar o insight.");
+    } catch (err) {
+      setAiInsight("Erro ao gerar insight de IA.");
+    } finally {
+      setAiInsightLoading(false);
+    }
+  }
 
   const systemCalendar = useMemo(() => {
     const now = new Date();
@@ -416,6 +445,15 @@ export function ProjectSchedule({
                   Visualização completa
                 </>
               )}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={fetchAiInsight}
+              className="shadow-sm rounded-full px-4"
+            >
+              <Sparkles className="h-4 w-4 mr-2 text-purple-600" />
+              AI Insights
             </Button>
           </div>
         </div>
@@ -731,6 +769,42 @@ export function ProjectSchedule({
         description="Tem certeza que deseja excluir esta atividade? Esta ação não pode ser desfeita."
         isLoading={isDeleting}
       />
+
+      <Dialog open={aiInsightOpen} onOpenChange={setAiInsightOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="text-purple-600 h-5 w-5" />
+              AI Insights do Cronograma
+            </DialogTitle>
+          </DialogHeader>
+          {aiInsightLoading ? (
+            <div className="flex flex-col items-center py-8">
+              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-600 mb-4"></div>
+              <p className="text-muted-foreground text-center">
+                A IA está analisando o cronograma...<br />
+                Isso pode levar alguns segundos.
+              </p>
+            </div>
+          ) : (
+            <div className="prose max-w-full whitespace-pre-wrap text-sm">
+              {aiInsight}
+            </div>
+          )}
+          <Button
+            variant="outline"
+            className="mb-4"
+            onClick={() => {
+              const doc = new jsPDF();
+              doc.setFontSize(12);
+              doc.text(aiInsight || "", 10, 20);
+              doc.save("ai-insight-cronograma.pdf");
+            }}
+          >
+            Exportar PDF
+          </Button>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
