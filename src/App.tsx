@@ -50,6 +50,7 @@ import SubscriptionCancel from "./pages/SubscriptionCancel";
 import UserSettings from "./pages/UserSettings";
 import PendingPayment from "./pages/PendingPayment";
 import PaymentVerification from "./pages/PaymentVerification";
+import Chat from "@/pages/Chat";
 
 const queryClient = new QueryClient();
 
@@ -107,6 +108,7 @@ const App = () => (
                 <Route path="/app/plan-upgrade" element={<ProtectedRoute><PlanUpgrade /></ProtectedRoute>} />
                 <Route path="/app/settings" element={<ProtectedRoute><UserSettings /></ProtectedRoute>} />
                 <Route path="/app/pending-payment" element={<ProtectedRoute><PendingPayment /></ProtectedRoute>} />
+                <Route path="/app/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
                 
                 {/* Protected Routes - Subscription */}
                 <Route path="/subscription/success" element={<ProtectedRoute><SubscriptionSuccess /></ProtectedRoute>} />

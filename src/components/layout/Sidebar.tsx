@@ -17,6 +17,7 @@ const navigation = [
   { name: "Relatórios", href: "/app/reports", icon: BarChart3, feature: "reports" as const },
   { name: "Financeiro", href: "/app/financeiro", icon: DollarSign, alwaysLocked: true },
   { name: "Templates de Documentos", href: "/app/templates", icon: FileText, feature: "templates" as const },
+  { name: "Chat IA", href: "/app/chat", icon: Zap }, 
   { name: "Suporte", href: "/app/suporte", icon: MessageCircle },
 ];
 
