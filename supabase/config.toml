@@ -44,3 +44,6 @@ verify_jwt = false
 
 [functions.activities-external]
 verify_jwt = false
+
+[functions.project-areas-external]
+verify_jwt = false
