@@ -167,10 +167,26 @@ export function ProjectWizard({ open, onClose, onSuccess, projectId, initialData
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ...projectData,
-            budget: projectData.budget !== null ? projectData.budget.toString() : null, // <-- string para DynamoDB
+            budget: projectData.budget !== null ? projectData.budget.toString() : null,
             id: supabaseId,
           }),
         });
+
+        await fetch("https://archestra-backend.onrender.com/notifications", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: data.created_by,
+            type: "project_created",
+            message: `Projeto "${projectData.name}" criado com sucesso!`,
+            project_id: supabaseId,
+            read: false,
+            created_at: new Date().toISOString(),
+          }),
+        });
+
+        // Dispare um evento customizado
+        window.dispatchEvent(new Event("notification:new"));
 
         setCreatedProjectId(supabaseId);
         toast.success("Projeto criado! Continue preenchendo os detalhes.");
