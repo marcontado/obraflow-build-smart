@@ -47,3 +47,6 @@ verify_jwt = false
 
 [functions.project-areas-external]
 verify_jwt = false
+
+[functions.workspaces-external]
+verify_jwt = false
