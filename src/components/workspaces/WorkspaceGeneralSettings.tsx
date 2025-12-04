@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -42,6 +42,20 @@ export function WorkspaceGeneralSettings({ workspaceId }: WorkspaceGeneralSettin
     },
   });
 
+  useEffect(() => {
+    async function fetchLogo() {
+      if (!workspaceId) return;
+      try {
+        const response = await fetch(`https://archestra-backend.onrender.com/workspaces/${workspaceId}`);
+        const data = await response.json();
+        setLogoUrl(data.logo_url || "");
+      } catch {
+        setLogoUrl("");
+      }
+    }
+    fetchLogo();
+  }, [workspaceId]);
+
   const onSubmit = async (data: WorkspaceFormData) => {
     const { error } = await workspacesService.update(workspaceId, data);
 
@@ -63,6 +77,7 @@ export function WorkspaceGeneralSettings({ workspaceId }: WorkspaceGeneralSettin
         slug: data.slug,
         owner_id: currentWorkspace?.created_by || "",
         updated_at: new Date().toISOString(),
+        logo_url: logoUrl,
       }),
     });
 
@@ -127,40 +142,41 @@ export function WorkspaceGeneralSettings({ workspaceId }: WorkspaceGeneralSettin
     setUploading(true);
 
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${workspaceId}/logo.${fileExt}`;
+      const contentType = file.type;
+      const presignRes = await fetch(
+        `https://archestra-backend.onrender.com/upload/logo?user_id=${currentWorkspace?.created_by}&content_type=${contentType}`
+      );
+      const { upload_url, object_url } = await presignRes.json();
 
-      // Deletar logo anterior se existir
-      if (logoUrl) {
-        const oldPath = logoUrl.split("/workspace-logos/")[1];
-        if (oldPath) {
-          await supabase.storage.from("workspace-logos").remove([oldPath]);
-        }
-      }
-
-      // Upload novo logo
-      const { error: uploadError } = await supabase.storage
-        .from("workspace-logos")
-        .upload(fileName, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      // Obter URL pública
-      const { data: { publicUrl } } = supabase.storage
-        .from("workspace-logos")
-        .getPublicUrl(fileName);
-
-      // Atualizar workspace
-      const { error: updateError } = await workspacesService.update(workspaceId, {
-        logo_url: publicUrl,
+      await fetch(upload_url, {
+        method: "PUT",
+        headers: { "Content-Type": contentType },
+        body: file,
       });
 
-      if (updateError) throw updateError;
+      await fetch(`https://archestra-backend.onrender.com/users/${currentWorkspace?.created_by}/logo`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ logo_url: object_url }),
+      });
 
-      setLogoUrl(publicUrl);
+      await fetch(`https://archestra-backend.onrender.com/workspaces/${workspaceId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: workspaceId,
+          name: currentWorkspace?.name,
+          slug: currentWorkspace?.slug,
+          owner_id: currentWorkspace?.created_by || "",
+          updated_at: new Date().toISOString(),
+          logo_url: object_url,
+        }),
+      });
+
+      setLogoUrl(object_url);
       toast({
         title: "Logo atualizado!",
-        description: "O logo do workspace foi atualizado com sucesso.",
+        description: "O logo do workspace foi atualizado com sucesso. Recarregue a página para visualizar a mudança.",
       });
 
       refreshWorkspaces();

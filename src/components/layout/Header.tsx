@@ -55,6 +55,7 @@ export function Header({ title, subtitle }: HeaderProps) {
   const [loadingNotifications, setLoadingNotifications] = useState(true);
   const [previewNotification, setPreviewNotification] = useState<null | { message: string; type: string }>(null);
   const [selectedNotification, setSelectedNotification] = useState<null | typeof notifications[0]>(null);
+  const [workspaceLogoUrl, setWorkspaceLogoUrl] = useState<string | null>(null);
 
   const base_url = "https://archestra-backend.onrender.com";
 
@@ -137,6 +138,23 @@ export function Header({ title, subtitle }: HeaderProps) {
       toast.error("Erro ao excluir notificação");
     }
   };
+
+  useEffect(() => {
+    async function fetchLogo() {
+      if (!currentWorkspace?.id) {
+        setWorkspaceLogoUrl(null);
+        return;
+      }
+      try {
+        const response = await fetch(`https://archestra-backend.onrender.com/workspaces/${currentWorkspace.id}`);
+        const data = await response.json();
+        setWorkspaceLogoUrl(data.logo_url || null);
+      } catch {
+        setWorkspaceLogoUrl(null);
+      }
+    }
+    fetchLogo();
+  }, [currentWorkspace?.id]);
 
   return (
     <header className="border-b bg-card">
@@ -250,10 +268,13 @@ export function Header({ title, subtitle }: HeaderProps) {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                 <Avatar className="h-9 w-9">
-                  <AvatarImage src="" alt={user?.email || "User"} />
-                  <AvatarFallback className="bg-primary text-primary-foreground">
-                    {user?.email?.charAt(0).toUpperCase() || "U"}
-                  </AvatarFallback>
+                  {workspaceLogoUrl ? (
+                    <AvatarImage src={workspaceLogoUrl} alt="Logo do workspace" />
+                  ) : (
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                      {user?.email?.charAt(0).toUpperCase() || "A"}
+                    </AvatarFallback>
+                  )}
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
@@ -315,6 +336,7 @@ export function Header({ title, subtitle }: HeaderProps) {
                 {new Date(selectedNotification.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
               </div>
             )}
+
             <div className="flex justify-end">
               <Button variant="secondary" onClick={() => setSelectedNotification(null)}>
                 Fechar
@@ -329,5 +351,5 @@ export function Header({ title, subtitle }: HeaderProps) {
 
 toast(`Projeto criado!`, {
   description: "Sua notificação foi enviada.",
-  duration: 10000, // 10 segundos
+  duration: 10000, 
 });

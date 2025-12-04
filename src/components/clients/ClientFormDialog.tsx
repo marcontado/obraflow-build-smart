@@ -84,14 +84,13 @@ export function ClientFormDialog({
 
   const clientType = form.watch("client_type");
 
-  // Carregar representantes disponíveis (apenas clientes PF)
   useEffect(() => {
     if (open && currentWorkspace && clientType === "PJ") {
       fetchAvailableRepresentatives();
     }
   }, [open, currentWorkspace, clientType]);
 
-  // Carregar representantes vinculados ao editar
+
   useEffect(() => {
     if (open && clientId && currentWorkspace && clientType === "PJ") {
       fetchLinkedRepresentatives();
@@ -196,14 +195,12 @@ export function ClientFormDialog({
       return;
     }
 
-    // Validar PJ sem representante
     if (data.client_type === "PJ" && (!selectedRepresentatives || selectedRepresentatives.length === 0)) {
       toast.error("Pessoa Jurídica deve ter pelo menos um representante legal vinculado");
       return;
     }
 
     try {
-      // Validar limite de clientes apenas na criação
       if (!clientId) {
         const limits = getWorkspaceLimits();
         const { data: existingClients } = await supabase
@@ -232,7 +229,6 @@ export function ClientFormDialog({
         workspace_id: currentWorkspace.id,
         created_by: user.id,
         
-        // Campos PF
         ...(data.client_type === "PF" && {
           cpf: data.cpf || null,
           rg: data.rg || null,
@@ -241,7 +237,6 @@ export function ClientFormDialog({
           marital_status: data.marital_status || null,
         }),
 
-        // Campos PJ
         ...(data.client_type === "PJ" && {
           cnpj: data.cnpj || null,
           razao_social: data.razao_social || null,
@@ -253,11 +248,9 @@ export function ClientFormDialog({
       let savedClientId = clientId;
 
       if (clientId) {
-        // Atualizar no Supabase
         const { error: supabaseError } = await clientsService.update(clientId, cleanData, currentWorkspace.id);
         if (supabaseError) throw supabaseError;
 
-        // Atualizar no DynamoDB
         await fetch(`https://archestra-backend.onrender.com/clients/${clientId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -272,14 +265,14 @@ export function ClientFormDialog({
       } else {
         const { data: newClient, error } = await clientsService.create(cleanData, currentWorkspace.id);
         if (error) throw error;
-        const supabaseId = newClient.id; // ID gerado pelo Supabase
+        const supabaseId = newClient.id; 
 
         await fetch("https://archestra-backend.onrender.com/clients", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ...cleanData,
-            id: supabaseId, // Use o mesmo ID do Supabase como PK no DynamoDB
+            id: supabaseId, 
             representative_ids: selectedRepresentatives,
           }),
         });
