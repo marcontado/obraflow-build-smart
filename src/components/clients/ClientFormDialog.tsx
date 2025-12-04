@@ -270,12 +270,10 @@ export function ClientFormDialog({
 
         toast.success("Cliente atualizado com sucesso!");
       } else {
-        // 1. Criar no Supabase
         const { data: newClient, error } = await clientsService.create(cleanData, currentWorkspace.id);
         if (error) throw error;
         const supabaseId = newClient.id; // ID gerado pelo Supabase
 
-        // 2. Criar no DynamoDB usando o mesmo ID
         await fetch("https://archestra-backend.onrender.com/clients", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -285,6 +283,21 @@ export function ClientFormDialog({
             representative_ids: selectedRepresentatives,
           }),
         });
+
+        await fetch("https://archestra-backend.onrender.com/notifications", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: user.id,
+            type: "client_created",
+            message: `Parabéns! Cliente "${data.name}" cadastrado com sucesso!`,
+            client_id: supabaseId,
+            read: false,
+            created_at: new Date().toISOString(),
+          }),
+        });
+
+        window.dispatchEvent(new Event("notification:new"));
 
         // Vincular representantes se for PJ
         if (data.client_type === "PJ" && savedClientId) {

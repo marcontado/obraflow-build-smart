@@ -54,6 +54,18 @@ export function WorkspaceGeneralSettings({ workspaceId }: WorkspaceGeneralSettin
       return;
     }
 
+    await fetch(`https://archestra-backend.onrender.com/workspaces/${workspaceId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: workspaceId,
+        name: data.name,
+        slug: data.slug,
+        owner_id: currentWorkspace?.created_by || "",
+        updated_at: new Date().toISOString(),
+      }),
+    });
+
     toast({
       title: "Workspace atualizado!",
       description: "As alterações foram salvas com sucesso.",
@@ -76,6 +88,10 @@ export function WorkspaceGeneralSettings({ workspaceId }: WorkspaceGeneralSettin
       setDeleting(false);
       return;
     }
+
+    await fetch(`https://archestra-backend.onrender.com/workspaces/${workspaceId}`, {
+      method: "DELETE",
+    });
 
     toast({
       title: "Workspace deletado",

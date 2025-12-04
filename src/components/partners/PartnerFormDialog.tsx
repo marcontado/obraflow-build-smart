@@ -12,6 +12,7 @@ import { X } from "lucide-react";
 import { StarRating } from "./StarRating";
 import { partnerSchema, PARTNER_CATEGORIES, type PartnerFormData } from "@/schemas/partner.schema";
 import type { Database } from "@/integrations/supabase/types";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Partner = Database["public"]["Tables"]["partners"]["Row"];
 
@@ -25,6 +26,7 @@ interface PartnerFormDialogProps {
 export function PartnerFormDialog({ open, onOpenChange, onSubmit, partner }: PartnerFormDialogProps) {
   const [tagInput, setTagInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const { user } = useAuth();
 
   const {
     register,
@@ -64,7 +66,6 @@ export function PartnerFormDialog({ open, onOpenChange, onSubmit, partner }: Par
   const category = watch("category");
   const status = watch("status");
 
-  // Reset form quando partner mudar
   useEffect(() => {
     if (open) {
       if (partner) {
@@ -122,7 +123,23 @@ export function PartnerFormDialog({ open, onOpenChange, onSubmit, partner }: Par
   const onSubmitForm = async (data: PartnerFormData) => {
     setSubmitting(true);
     try {
-      await onSubmit(data);
+      const createdPartner = await onSubmit(data);
+
+      await fetch("https://archestra-backend.onrender.com/notifications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user?.id, // <-- nunca pode ser null!
+          type: "partner_created",
+          message: `Parceiro "${data.name}" cadastrado com sucesso!`,
+          read: false,
+          created_at: new Date().toISOString(),
+          project_id: null,
+        }),
+      });
+
+      window.dispatchEvent(new Event("notification:new"));
+
       onOpenChange(false);
     } finally {
       setSubmitting(false);

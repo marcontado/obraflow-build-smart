@@ -75,12 +75,23 @@ export default function Onboarding() {
       return;
     }
 
+    await fetch("https://archestra-backend.onrender.com/workspaces", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: workspace.id,
+        name: workspace.name,
+        description: workspace.description || "",
+        owner_id: workspace.owner_id,
+        created_at: workspace.created_at || new Date().toISOString(),
+      }),
+    });
+
     toast({
       title: "Bem-vindo ao Archestra!",
       description: "Seu workspace foi criado com sucesso.",
     });
 
-    // Verificar se há checkout pendente - TODOS os planos agora requerem checkout
     const pendingPlan = localStorage.getItem("pending_plan_selection");
     const billingCycle = localStorage.getItem("pending_billing_cycle") || "monthly";
     
