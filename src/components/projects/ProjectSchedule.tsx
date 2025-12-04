@@ -50,7 +50,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Sparkles } from "lucide-react";
-import { jsPDF } from "jspdf";
+import jsPDF from "jspdf";
 
 type Activity = Database["public"]["Tables"]["project_activities"]["Row"];
 
