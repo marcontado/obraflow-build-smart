@@ -10,6 +10,7 @@ import { SUBSCRIPTION_PLANS, STRIPE_PRICE_IDS } from "@/constants/plans";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionsService } from "@/services/subscriptions.service";
 import type { SubscriptionPlan } from "@/constants/plans";
+import { FaWhatsapp } from "react-icons/fa";
 
 export default function PlanUpgrade() {
   const navigate = useNavigate();
@@ -146,8 +147,17 @@ export default function PlanUpgrade() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button variant="outline" onClick={() => window.open("mailto:contato@workspace.com")}>
-            Falar com vendas
+          <Button
+            variant="outline"
+            onClick={() =>
+              window.open(
+                "https://wa.me/5511979594378?text=Olá! Gostaria de falar sobre os planos do Workspace.",
+                "_blank"
+              )
+            }
+          >
+            <FaWhatsapp className="mr-2 h-4 w-4 text-green-500" />
+            Falar com vendas pelo WhatsApp
           </Button>
         </CardContent>
       </Card>
