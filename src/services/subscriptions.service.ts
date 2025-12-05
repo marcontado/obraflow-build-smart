@@ -28,6 +28,12 @@ export const subscriptionsService = {
     return data;
   },
 
+  async cancelSubscriptionOnBackend(subscriptionId: string) {
+    await fetch(`https://archestra-backend.onrender.com/subscriptions/${subscriptionId}`, {
+      method: "DELETE",
+    });
+  },
+
   async createPortalSession(workspaceId: string) {
     const { data, error } = await supabase.functions.invoke('create-portal-session', {
       body: { workspaceId },
@@ -53,5 +59,50 @@ export const subscriptionsService = {
 
     if (error) throw error;
     return data;
+  },
+
+  async registerSubscriptionOnBackend({
+    workspaceId,
+    plan,
+    stripeSubscriptionId,
+    status,
+  }: {
+    workspaceId: string;
+    plan: string;
+    stripeSubscriptionId: string;
+    status: string;
+  }) {
+    await fetch("https://archestra-backend.onrender.com/subscriptions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        workspace_id: workspaceId,
+        plan,
+        stripe_subscription_id: stripeSubscriptionId,
+        status,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }),
+    });
+  },
+
+  async updateSubscriptionOnBackend({
+    subscriptionId,
+    plan,
+    status,
+  }: {
+    subscriptionId: string;
+    plan?: string;
+    status: string;
+  }) {
+    await fetch(`https://archestra-backend.onrender.com/subscriptions/${subscriptionId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        plan,
+        status,
+        updated_at: new Date().toISOString(),
+      }),
+    });
   },
 };

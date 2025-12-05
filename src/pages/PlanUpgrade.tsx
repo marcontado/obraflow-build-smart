@@ -15,7 +15,19 @@ import { FaWhatsapp } from "react-icons/fa";
 export default function PlanUpgrade() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { currentWorkspace } = useWorkspace();
+  type WorkspaceWithStripe = {
+    created_at: string;
+    created_by: string;
+    id: string;
+    logo_url: string;
+    name: string;
+    slug: string;
+    subscription_plan: "atelier" | "studio" | "domus";
+    updated_at: string;
+    stripe_subscription_id?: string;
+  };
+
+  const { currentWorkspace } = useWorkspace() as { currentWorkspace: WorkspaceWithStripe | null };
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const [searchParams] = useSearchParams();
   const selectedPlan = searchParams.get("selected");
@@ -47,25 +59,29 @@ export default function PlanUpgrade() {
 
     try {
       const priceId = STRIPE_PRICE_IDS[plan as Exclude<SubscriptionPlan, 'atelier'>][billingCycle];
-      
-      // Check if workspace already has a subscription
       const currentPlan = currentWorkspace.subscription_plan;
-      
+
       if (currentPlan !== SUBSCRIPTION_PLANS.ATELIER) {
-        // Update existing subscription
         toast({
           title: "Atualizando plano...",
           description: "Processando alteração do plano",
         });
 
         await subscriptionsService.updateSubscription(currentWorkspace.id, priceId);
-        
+
+        if (currentWorkspace?.stripe_subscription_id) {
+          await subscriptionsService.updateSubscriptionOnBackend({
+            subscriptionId: currentWorkspace.stripe_subscription_id,
+            plan,
+            status: "active",
+          });
+        }
+
         toast({
           title: "Plano atualizado!",
           description: "Seu plano foi atualizado com sucesso",
         });
-        
-        // Refresh page to show updated plan
+
         setTimeout(() => window.location.reload(), 1500);
       } else {
         // Create new subscription

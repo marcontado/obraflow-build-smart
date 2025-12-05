@@ -57,12 +57,16 @@ export function SubscriptionManager({ workspaceId }: SubscriptionManagerProps) {
     try {
       setCanceling(true);
       const result = await subscriptionsService.cancelSubscription(workspaceId);
-      
+
+      if (subscription?.stripe_subscription_id) {
+        await subscriptionsService.cancelSubscriptionOnBackend(subscription.stripe_subscription_id);
+      }
+
       toast({
         title: "Assinatura cancelada",
         description: `Sua assinatura será cancelada em ${format(new Date(result.cancel_at), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}`,
       });
-      
+
       await loadSubscription();
     } catch (error: any) {
       console.error('Error canceling subscription:', error);
@@ -80,12 +84,20 @@ export function SubscriptionManager({ workspaceId }: SubscriptionManagerProps) {
     try {
       setCanceling(true);
       await subscriptionsService.reactivateSubscription(workspaceId);
-      
+
+      if (subscription?.stripe_subscription_id) {
+        await subscriptionsService.updateSubscriptionOnBackend({
+          subscriptionId: subscription.stripe_subscription_id,
+          plan: subscription.plan,
+          status: "active",
+        });
+      }
+
       toast({
         title: "Assinatura reativada",
         description: "Sua assinatura continuará ativa no próximo período",
       });
-      
+
       await loadSubscription();
     } catch (error: any) {
       console.error('Error reactivating subscription:', error);

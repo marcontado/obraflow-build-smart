@@ -109,7 +109,15 @@ export default function Onboarding() {
         const priceId = STRIPE_PRICE_IDS[pendingPlan as keyof typeof STRIPE_PRICE_IDS][billingCycle as "monthly" | "yearly"];
         
         // Criar checkout session com 15 dias de trial
-        const { url } = await subscriptionsService.createCheckout(workspace.id, priceId, false);
+        const { url, stripeSubscriptionId } = await subscriptionsService.createCheckout(workspace.id, priceId, false);
+        
+        // Registrar assinatura no backend
+        await subscriptionsService.registerSubscriptionOnBackend({
+          workspaceId: workspace.id,
+          plan: pendingPlan,
+          stripeSubscriptionId: stripeSubscriptionId, 
+          status: "active", 
+        });
         
         // Limpar localStorage
         localStorage.removeItem("pending_plan_selection");
