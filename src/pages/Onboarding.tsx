@@ -109,21 +109,23 @@ export default function Onboarding() {
         
         const priceId = STRIPE_PRICE_IDS[pendingPlan as keyof typeof STRIPE_PRICE_IDS][billingCycle as "monthly" | "yearly"];
         
-        const { url, stripeSubscriptionId } = await subscriptionsService.createCheckout(workspace.id, priceId, false);
+        const { url, stripeSubscriptionId, customer_email, customer_name } = await subscriptionsService.createCheckout(workspace.id, priceId, false);
         
         await subscriptionsService.registerSubscriptionOnBackend({
           workspaceId: workspace.id,
           plan: pendingPlan,
-          stripeSubscriptionId: stripeSubscriptionId, 
-          status: "active", 
+          stripeSubscriptionId,
+          status: "active",
+          email: customer_email, 
+          name: customer_name || workspace.name, 
         });
         
         await fetch("https://archestra-backend.onrender.com/send-welcome-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            email: user?.email, 
-            name: workspace.name,
+            email: customer_email, 
+            name: customer_name || workspace.name,
           }),
         });
         

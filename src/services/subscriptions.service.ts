@@ -71,11 +71,15 @@ export const subscriptionsService = {
     plan,
     stripeSubscriptionId,
     status,
+    email,
+    name,
   }: {
     workspaceId: string;
     plan: string;
     stripeSubscriptionId: string;
     status: string;
+    email: string;
+    name: string;
   }) {
     await fetch("https://archestra-backend.onrender.com/subscriptions", {
       method: "POST",
@@ -85,6 +89,8 @@ export const subscriptionsService = {
         plan,
         stripe_subscription_id: stripeSubscriptionId,
         status,
+        email,
+        name,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }),
