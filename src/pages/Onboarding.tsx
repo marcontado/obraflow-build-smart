@@ -122,8 +122,8 @@ export default function Onboarding() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            email: workspace.owner_email,
-            name:workspace.name,
+            email: user?.email, 
+            name: workspace.name,
           }),
         });
         

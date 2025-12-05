@@ -62,6 +62,15 @@ export function SubscriptionManager({ workspaceId }: SubscriptionManagerProps) {
         await subscriptionsService.cancelSubscriptionOnBackend(subscription.stripe_subscription_id);
       }
 
+      await fetch("https://archestra-backend.onrender.com/send-cancel-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: subscription?.customer_email,
+          name: subscription?.customer_name || "Cliente",
+        }),
+      });
+
       toast({
         title: "Assinatura cancelada",
         description: `Sua assinatura será cancelada em ${format(new Date(result.cancel_at), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}`,
