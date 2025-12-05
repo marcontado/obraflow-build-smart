@@ -30,7 +30,12 @@ export const subscriptionsService = {
 
   async cancelSubscriptionOnBackend(subscriptionId: string) {
     await fetch(`https://archestra-backend.onrender.com/subscriptions/${subscriptionId}`, {
-      method: "DELETE",
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        status: "canceled",
+        updated_at: new Date().toISOString(),
+      }),
     });
   },
 
