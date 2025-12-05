@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Sparkles, Upload } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { STRIPE_PRICE_IDS } from "@/constants/plans";
+import { useAuth } from "@/contexts/AuthContext";
 
 const workspaceSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório").max(100, "Nome muito longo"),
@@ -26,6 +27,7 @@ export default function Onboarding() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { refreshWorkspaces, hasWorkspaces } = useWorkspace();
+  const { user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string>("");
   const [step, setStep] = useState<"workspace" | "profile">("workspace");
@@ -105,18 +107,24 @@ export default function Onboarding() {
           description: "Vamos finalizar sua assinatura...",
         });
         
-        // Obter priceId correto baseado no billing cycle
         const priceId = STRIPE_PRICE_IDS[pendingPlan as keyof typeof STRIPE_PRICE_IDS][billingCycle as "monthly" | "yearly"];
         
-        // Criar checkout session com 15 dias de trial
         const { url, stripeSubscriptionId } = await subscriptionsService.createCheckout(workspace.id, priceId, false);
         
-        // Registrar assinatura no backend
         await subscriptionsService.registerSubscriptionOnBackend({
           workspaceId: workspace.id,
           plan: pendingPlan,
           stripeSubscriptionId: stripeSubscriptionId, 
           status: "active", 
+        });
+        
+        await fetch("https://archestra-backend.onrender.com/send-welcome-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: workspace.owner_email,
+            name:workspace.name,
+          }),
         });
         
         // Limpar localStorage
