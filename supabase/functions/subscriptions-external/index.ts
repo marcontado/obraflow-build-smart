@@ -38,26 +38,33 @@ serve(async (req) => {
 
     switch (action) {
       case 'create': {
-        if (!data || !data.workspace_id || !data.stripe_customer_id) {
+        if (!data || !data.workspace_id) {
           return new Response(
-            JSON.stringify({ error: 'Missing required fields: workspace_id, stripe_customer_id' }),
+            JSON.stringify({ error: 'Missing required field: workspace_id' }),
             { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         }
 
+        // Build insert object with only provided fields
+        const insertObject: Record<string, unknown> = {
+          workspace_id: data.workspace_id,
+          status: data.status || 'incomplete',
+          cancel_at_period_end: data.cancel_at_period_end || false,
+        };
+
+        // Add optional fields if provided
+        if (data.id) insertObject.id = data.id;
+        if (data.stripe_customer_id) insertObject.stripe_customer_id = data.stripe_customer_id;
+        if (data.stripe_subscription_id) insertObject.stripe_subscription_id = data.stripe_subscription_id;
+        if (data.stripe_price_id) insertObject.stripe_price_id = data.stripe_price_id;
+        if (data.current_period_start) insertObject.current_period_start = data.current_period_start;
+        if (data.current_period_end) insertObject.current_period_end = data.current_period_end;
+
+        console.log('Creating subscription with data:', insertObject);
+
         const { data: insertedData, error: insertError } = await supabase
           .from('subscriptions')
-          .insert({
-            id: data.id,
-            workspace_id: data.workspace_id,
-            stripe_customer_id: data.stripe_customer_id,
-            stripe_subscription_id: data.stripe_subscription_id,
-            stripe_price_id: data.stripe_price_id,
-            status: data.status || 'incomplete',
-            current_period_start: data.current_period_start,
-            current_period_end: data.current_period_end,
-            cancel_at_period_end: data.cancel_at_period_end || false,
-          })
+          .insert(insertObject)
           .select()
           .single();
 
