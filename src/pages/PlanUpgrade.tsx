@@ -40,14 +40,6 @@ export default function PlanUpgrade() {
   }, [selectedPlan, currentWorkspace]);
 
   const handleSelectPlan = async (plan: SubscriptionPlan) => {
-    if (plan === SUBSCRIPTION_PLANS.ATELIER) {
-      toast({
-        title: "Plano Gratuito",
-        description: "Você já está no plano gratuito!",
-      });
-      return;
-    }
-
     if (!currentWorkspace) {
       toast({
         title: "Erro",
@@ -58,8 +50,17 @@ export default function PlanUpgrade() {
     }
 
     try {
-      const priceId = STRIPE_PRICE_IDS[plan as Exclude<SubscriptionPlan, 'atelier'>][billingCycle];
+      const priceId = STRIPE_PRICE_IDS[plan][billingCycle];
       const currentPlan = currentWorkspace.subscription_plan;
+
+      // Se o usuário já está no mesmo plano, informar
+      if (currentPlan === plan) {
+        toast({
+          title: "Plano atual",
+          description: `Você já está no plano ${plan.charAt(0).toUpperCase() + plan.slice(1)}!`,
+        });
+        return;
+      }
 
       if (currentPlan !== SUBSCRIPTION_PLANS.ATELIER) {
         toast({
