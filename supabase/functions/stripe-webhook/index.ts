@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { getPlanFromPriceId } from "../_shared/plan-mapping.ts";
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
   apiVersion: '2023-10-16',
@@ -52,15 +53,16 @@ serve(async (req) => {
         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
         const priceId = subscription.items.data[0]?.price.id;
 
-        // Determine plan from price ID
-        let plan = 'atelier';
-        if (priceId?.includes('Studio') || priceId === 'price_1SJo9VR2sSXsKMlD3JF3b9ti' || priceId === 'price_1SJoJpR2sSXsKMlDgwa3VuZ9') {
-          plan = 'studio';
-        } else if (priceId?.includes('Domus') || priceId === 'price_1SJo9VR2sSXsKMlDMXxkrEAE' || priceId === 'price_1SJoKdR2sSXsKMlDb1Vu6m6F') {
-          plan = 'domus';
+        // Determine plan from price ID using centralized mapping
+        const plan = getPlanFromPriceId(priceId);
+        
+        if (!plan) {
+          console.error(`❌ CRITICAL: Cannot determine plan for price_id: ${priceId}`);
+          console.error('This checkout will NOT update the workspace plan. Manual intervention required.');
+          // Still update subscription record but don't update workspace plan
         }
 
-        console.log('Determined plan:', plan);
+        console.log('Mapped price_id to plan:', { priceId, plan });
 
         // Update subscription with onConflict to handle existing records
         const { data: subData, error: subError } = await supabaseClient.from('subscriptions').upsert({
@@ -82,16 +84,18 @@ serve(async (req) => {
           console.log('✅ Subscription updated successfully:', subData);
         }
 
-        // Update workspace plan
-        const { data: workspaceData, error: workspaceError } = await supabaseClient
-          .from('workspaces')
-          .update({ subscription_plan: plan })
-          .eq('id', workspaceId);
+        // Update workspace plan ONLY if we successfully mapped the price_id
+        if (plan) {
+          const { data: workspaceData, error: workspaceError } = await supabaseClient
+            .from('workspaces')
+            .update({ subscription_plan: plan })
+            .eq('id', workspaceId);
 
-        if (workspaceError) {
-          console.error('Error updating workspace:', workspaceError);
-        } else {
-          console.log('✅ Workspace plan updated to:', plan);
+          if (workspaceError) {
+            console.error('Error updating workspace:', workspaceError);
+          } else {
+            console.log('✅ Workspace plan updated to:', plan);
+          }
         }
         break;
       }
@@ -101,7 +105,7 @@ serve(async (req) => {
         const customerId = subscription.customer as string;
         const priceId = subscription.items.data[0]?.price.id;
 
-        console.log('Subscription updated:', { customerId, status: subscription.status });
+        console.log('Subscription updated:', { customerId, status: subscription.status, priceId });
 
         // Find workspace by customer ID
         const { data: existingSub } = await supabaseClient
@@ -115,6 +119,9 @@ serve(async (req) => {
           break;
         }
 
+        // Determine plan from price ID
+        const plan = getPlanFromPriceId(priceId);
+        
         // Update subscription status
         await supabaseClient
           .from('subscriptions')
@@ -127,6 +134,16 @@ serve(async (req) => {
             cancel_at_period_end: subscription.cancel_at_period_end,
           })
           .eq('workspace_id', existingSub.workspace_id);
+
+        // Update workspace plan if price changed and we can map it
+        if (plan) {
+          await supabaseClient
+            .from('workspaces')
+            .update({ subscription_plan: plan })
+            .eq('id', existingSub.workspace_id);
+          
+          console.log('✅ Workspace plan updated to:', plan);
+        }
 
         console.log('Subscription status updated');
         break;
@@ -150,13 +167,11 @@ serve(async (req) => {
           break;
         }
 
-        // Update to free plan
-        await supabaseClient
-          .from('workspaces')
-          .update({ subscription_plan: 'atelier' })
-          .eq('id', existingSub.workspace_id);
-
-        // Update subscription status
+        // IMPORTANT: NÃO alteramos o subscription_plan aqui
+        // O plano continua sendo o que foi comprado originalmente
+        // O acesso será bloqueado via ProtectedRoute baseado no status 'canceled'
+        
+        // Apenas atualizar o status da assinatura para 'canceled'
         await supabaseClient
           .from('subscriptions')
           .update({
@@ -165,7 +180,7 @@ serve(async (req) => {
           })
           .eq('workspace_id', existingSub.workspace_id);
 
-        console.log('Downgraded to free plan');
+        console.log('✅ Subscription marked as canceled (workspace plan NOT changed)');
         break;
       }
 
