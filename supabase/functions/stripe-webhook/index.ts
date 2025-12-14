@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { getPlanFromPriceId } from "../_shared/plan-mapping.ts";
+import { getPlanFromProductId, getPlanFromPriceId } from "../_shared/plan-mapping.ts";
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
   apiVersion: '2023-10-16',
@@ -28,7 +28,7 @@ serve(async (req) => {
       cryptoProvider
     );
 
-    console.log('Webhook event received:', event.type);
+    console.log('📩 Webhook event received:', event.type, 'ID:', event.id);
 
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -47,22 +47,28 @@ serve(async (req) => {
           break;
         }
 
-        console.log('Checkout completed:', { workspaceId, subscriptionId });
+        console.log('🛒 Checkout completed:', { workspaceId, subscriptionId, customerId });
 
         // Get subscription details
         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
         const priceId = subscription.items.data[0]?.price.id;
+        const productId = subscription.items.data[0]?.price.product as string;
 
-        // Determine plan from price ID using centralized mapping
-        const plan = getPlanFromPriceId(priceId);
+        console.log('📦 Subscription details:', { priceId, productId, status: subscription.status });
+
+        // Determine plan from Product ID (primary) or Price ID (fallback)
+        let plan = getPlanFromProductId(productId);
+        if (!plan) {
+          plan = getPlanFromPriceId(priceId);
+        }
         
         if (!plan) {
-          console.error(`❌ CRITICAL: Cannot determine plan for price_id: ${priceId}`);
+          console.error(`❌ CRITICAL: Cannot determine plan for product_id: ${productId}, price_id: ${priceId}`);
           console.error('This checkout will NOT update the workspace plan. Manual intervention required.');
           // Still update subscription record but don't update workspace plan
+        } else {
+          console.log('✅ Mapped to plan:', plan);
         }
-
-        console.log('Mapped price_id to plan:', { priceId, plan });
 
         // Update subscription with onConflict to handle existing records
         const { data: subData, error: subError } = await supabaseClient.from('subscriptions').upsert({
@@ -81,12 +87,12 @@ serve(async (req) => {
         if (subError) {
           console.error('Error updating subscription:', subError);
         } else {
-          console.log('✅ Subscription updated successfully:', subData);
+          console.log('✅ Subscription record updated successfully');
         }
 
-        // Update workspace plan ONLY if we successfully mapped the price_id
+        // Update workspace plan ONLY if we successfully mapped the product_id
         if (plan) {
-          const { data: workspaceData, error: workspaceError } = await supabaseClient
+          const { error: workspaceError } = await supabaseClient
             .from('workspaces')
             .update({ subscription_plan: plan })
             .eq('id', workspaceId);
@@ -104,8 +110,9 @@ serve(async (req) => {
         const subscription = event.data.object as Stripe.Subscription;
         const customerId = subscription.customer as string;
         const priceId = subscription.items.data[0]?.price.id;
+        const productId = subscription.items.data[0]?.price.product as string;
 
-        console.log('Subscription updated:', { customerId, status: subscription.status, priceId });
+        console.log('🔄 Subscription updated:', { customerId, status: subscription.status, productId, priceId });
 
         // Find workspace by customer ID
         const { data: existingSub } = await supabaseClient
@@ -119,11 +126,14 @@ serve(async (req) => {
           break;
         }
 
-        // Determine plan from price ID
-        const plan = getPlanFromPriceId(priceId);
+        // Determine plan from Product ID (primary) or Price ID (fallback)
+        let plan = getPlanFromProductId(productId);
+        if (!plan) {
+          plan = getPlanFromPriceId(priceId);
+        }
         
         // Update subscription status
-        await supabaseClient
+        const { error: updateError } = await supabaseClient
           .from('subscriptions')
           .update({
             stripe_subscription_id: subscription.id,
@@ -135,7 +145,11 @@ serve(async (req) => {
           })
           .eq('workspace_id', existingSub.workspace_id);
 
-        // Update workspace plan if price changed and we can map it
+        if (updateError) {
+          console.error('Error updating subscription:', updateError);
+        }
+
+        // Update workspace plan if we can map it
         if (plan) {
           await supabaseClient
             .from('workspaces')
@@ -145,7 +159,7 @@ serve(async (req) => {
           console.log('✅ Workspace plan updated to:', plan);
         }
 
-        console.log('Subscription status updated');
+        console.log('✅ Subscription status updated');
         break;
       }
 
@@ -153,7 +167,7 @@ serve(async (req) => {
         const subscription = event.data.object as Stripe.Subscription;
         const customerId = subscription.customer as string;
 
-        console.log('Subscription deleted:', customerId);
+        console.log('🗑️ Subscription deleted:', customerId);
 
         // Find workspace
         const { data: existingSub } = await supabaseClient
@@ -186,7 +200,7 @@ serve(async (req) => {
 
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object as Stripe.Invoice;
-        console.log('Payment succeeded for:', invoice.customer);
+        console.log('💰 Payment succeeded for:', invoice.customer);
         
         // Get workspace and user info
         const { data: sub } = await supabaseClient
@@ -229,7 +243,7 @@ serve(async (req) => {
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice;
-        console.error('Payment failed for:', invoice.customer);
+        console.error('❌ Payment failed for:', invoice.customer);
         
         // Get workspace and user info
         const { data: sub } = await supabaseClient
@@ -270,7 +284,7 @@ serve(async (req) => {
       }
 
       default:
-        console.log('Unhandled event type:', event.type);
+        console.log('ℹ️ Unhandled event type:', event.type);
     }
 
     return new Response(JSON.stringify({ received: true }), {
@@ -278,7 +292,7 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    console.error('Webhook error details:', error);
+    console.error('❌ Webhook error:', error);
     return new Response(
       JSON.stringify({ error: 'Webhook processing failed. Please contact support.' }),
       {

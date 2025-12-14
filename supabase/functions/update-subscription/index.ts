@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { getPlanFromPriceId } from "../_shared/plan-mapping.ts";
+import { getPlanFromProductId } from "../_shared/plan-mapping.ts";
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
   apiVersion: '2023-10-16',
@@ -39,6 +39,8 @@ serve(async (req) => {
     if (!workspaceId || !priceId) {
       throw new Error('workspaceId and priceId are required');
     }
+
+    console.log('📝 Update subscription request:', { workspaceId, priceId });
 
     // Verify user is workspace owner or admin
     const { data: membership } = await supabaseClient
@@ -80,24 +82,32 @@ serve(async (req) => {
       }
     );
 
-    // Determine new plan using centralized mapping
-    const plan = getPlanFromPriceId(priceId);
+    // Get product ID from the updated subscription
+    const productId = updatedSubscription.items.data[0]?.price.product as string;
+    
+    // Determine new plan using Product ID (primary method)
+    const plan = getPlanFromProductId(productId);
     
     if (!plan) {
-      console.error(`❌ CRITICAL: Unknown price_id: ${priceId} - Cannot determine plan`);
-      throw new Error(`Unknown price ID: ${priceId}. Please contact support.`);
+      console.error(`❌ CRITICAL: Unknown product_id: ${productId} - Cannot determine plan`);
+      throw new Error(`Unknown product ID: ${productId}. Please contact support.`);
     }
 
-    console.log('Updating subscription:', { priceId, plan });
+    console.log('✅ Updating subscription:', { priceId, productId, plan });
 
-    // Update workspace plan
-    await supabaseClient
+    // Update workspace plan using service role for reliable updates
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+    );
+
+    await supabaseAdmin
       .from('workspaces')
       .update({ subscription_plan: plan })
       .eq('id', workspaceId);
 
     // Update subscription record
-    await supabaseClient
+    await supabaseAdmin
       .from('subscriptions')
       .update({
         stripe_price_id: priceId,
@@ -106,6 +116,8 @@ serve(async (req) => {
         current_period_end: new Date(updatedSubscription.current_period_end * 1000).toISOString(),
       })
       .eq('workspace_id', workspaceId);
+
+    console.log('✅ Subscription and workspace updated successfully');
 
     return new Response(
       JSON.stringify({ 
@@ -119,7 +131,7 @@ serve(async (req) => {
       }
     );
   } catch (error: any) {
-    console.error('Error updating subscription:', error);
+    console.error('❌ Error updating subscription:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       {
