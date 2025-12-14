@@ -1,25 +1,63 @@
-// Mapeamento centralizado de Stripe Price IDs para planos internos
+// Mapeamento centralizado de Stripe Product/Price IDs para planos internos
 // Este arquivo é a ÚNICA fonte de verdade para o mapeamento de planos
+// ATUALIZADO para nova conta Stripe - Dezembro 2024
 
 export type InternalPlan = 'atelier' | 'studio' | 'domus';
 
-// Mapeamento explícito de todos os price IDs do Stripe para planos internos
-export const STRIPE_PRICE_TO_PLAN: Record<string, InternalPlan> = {
+// Mapeamento explícito de todos os Product IDs do Stripe para planos internos
+export const STRIPE_PRODUCT_TO_PLAN: Record<string, InternalPlan> = {
   // Atelier
-  'price_1SYeZ4R2sSXsKMlDyDN7wd9Y': 'atelier', // mensal
-  'price_1SYf24R2sSXsKMlDcmpmY1Cr': 'atelier', // anual
+  'prod_TbHT7KF5Vmj9PQ': 'atelier', // mensal
+  'prod_TbHSnM4aIpyBdR': 'atelier', // anual (10% desconto)
   
   // Studio  
-  'price_1SYf44R2sSXsKMlDglRTiK4z': 'studio', // mensal
-  'price_1SYf4jR2sSXsKMlDvilJvlF3': 'studio', // anual
+  'prod_TbHSShzylGhbxH': 'studio', // mensal
+  'prod_TbHRLj1Vdr0Wsm': 'studio', // anual (10% desconto)
   
   // Domus
-  'price_1SYf6AR2sSXsKMlDd0MIxnK1': 'domus', // mensal
-  'price_1SYf6XR2sSXsKMlDuvSJopzK': 'domus', // anual
+  'prod_TbHRHEWYlIyBNL': 'domus', // mensal
+  'prod_TbHRTAmP6Q96ed': 'domus', // anual (10% desconto)
+};
+
+// Mapeamento explícito de todos os Price IDs do Stripe para planos internos
+export const STRIPE_PRICE_TO_PLAN: Record<string, InternalPlan> = {
+  // Atelier
+  'price_1Se4u8PESLaxCOeJhmCOQUZs': 'atelier', // mensal
+  'price_1Se4ttPESLaxCOeJFdqXi9eV': 'atelier', // anual
+  
+  // Studio  
+  'price_1Se4tXPESLaxCOeJeHGYgphJ': 'studio', // mensal
+  'price_1Se4szPESLaxCOeJV4Vx173X': 'studio', // anual
+  
+  // Domus
+  'price_1Se4saPESLaxCOeJThrqRZR3': 'domus', // mensal
+  'price_1Se4sJPESLaxCOeJBaJigynl': 'domus', // anual
 };
 
 /**
- * Retorna o plano interno baseado no Stripe price_id
+ * Retorna o plano interno baseado no Stripe Product ID
+ * @param productId - O product_id do Stripe
+ * @returns O plano interno ou null se não encontrado
+ */
+export function getPlanFromProductId(productId: string | null | undefined): InternalPlan | null {
+  if (!productId) {
+    console.warn('getPlanFromProductId: productId is null or undefined');
+    return null;
+  }
+  
+  const plan = STRIPE_PRODUCT_TO_PLAN[productId];
+  
+  if (!plan) {
+    console.error(`⚠️ UNKNOWN STRIPE PRODUCT ID: ${productId} - This product ID is not mapped to any internal plan`);
+    return null;
+  }
+  
+  console.log(`✅ Mapped product ${productId} to plan: ${plan}`);
+  return plan;
+}
+
+/**
+ * Retorna o plano interno baseado no Stripe Price ID
  * @param priceId - O price_id do Stripe
  * @returns O plano interno ou null se não encontrado
  */
@@ -36,7 +74,16 @@ export function getPlanFromPriceId(priceId: string | null | undefined): Internal
     return null;
   }
   
+  console.log(`✅ Mapped price ${priceId} to plan: ${plan}`);
   return plan;
+}
+
+/**
+ * Verifica se um productId é válido (existe no mapeamento)
+ */
+export function isValidProductId(productId: string | null | undefined): boolean {
+  if (!productId) return false;
+  return productId in STRIPE_PRODUCT_TO_PLAN;
 }
 
 /**
